@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+        .register-container {
+            width: 300px;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 500px) {
+            .register-container {
+                width: 95vw;
+                margin: 10vw auto;
+                padding: 10px;
+            }
+            .form-group input, .register-button {
+                height: 36px;
+                font-size: 14px;
+            }
+            h2 {
+                font-size: 22px;
+            }
+        }
+        .register-header {
+            text-align: center;
+            margin-bottom: 20px;
+
+        }
+        .register-form {
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            width: 100%;
+            height: 40px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .register-button {
+            width: 100%;
+            height: 40px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .register-button:hover {
+            background-color: #0056b3;
+        }
+        footer {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #fff;
+            border-top: 1px solid #ddd;
+            padding: 10px 0;
+        }
+        .footer-icons {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+        .footer-icon {
+            text-align: center;
+        }
+        .footer-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+        .footer-img {
+            width: 24px;
+            height: 24px;
+        }
+        .footer-active {
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="register-header">
+            <h2>Register</h2>
+        </div>
+    <form class="register-form" id="registerForm">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Phone number:</label>
+                <input type="tel" id="phone" name="phone" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div class="form-group">
+                <label for="confirm-password">Confirm Password:</label>
+                <input type="password" id="confirm-password" name="confirm-password" required>
+            </div>
+            <button class="register-button" type="submit">Register</button>
+        </form>
+    </div>
+<script>
+document.getElementById('registerForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const username = document.getElementById('username').value;
+    const phone = document.getElementById('phone').value;
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirm-password').value;
+    if (password !== confirmPassword) {
+        alert('Passwords do not match!');
+        return;
+    }
+    fetch('http://localhost:3300/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password, phone })
+    })
+        .then(async response => {
+            const data = await response.json();
+            if (response.status === 409) {
+                alert('Username already exists!');
+            } else if (response.status === 400) {
+                alert(data.message);
+            } else if (data.message === 'Registration successful.') {
+                alert(data.message);
+                window.location.href = 'login-page.html';
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            alert('Error: ' + error);
+        });
+});
+</script>
+</body>
+</html>
