@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task List</title>
+  <link rel="stylesheet" href="getcash.css">
+  <!-- Removed internal <style> for consistency -->
+</head>
+<body>
+  <div class="task-list-container">
+    <h2>Task List</h2>
+    <div id="task-list" class="task-list-grid">
+      <!-- Tasks will be loaded here -->
+    </div>
+  </div>
+  <script>
+    // Load tasks from localStorage (admin uploads), fallback to default
+    let tasks = JSON.parse(localStorage.getItem('adminTasks') || 'null');
+    if (!tasks || !Array.isArray(tasks) || tasks.length === 0) {
+      tasks = [
+        { id: 1, title: 'Upload Product Image', price: 5000, img: 'image/Currency.jpg' },
+        { id: 2, title: 'Share Promo Banner', price: 3000, img: 'image/Currency2.jpg' },
+        { id: 3, title: 'Post Offer Screenshot', price: 7000, img: 'image/icon/profit.png' }
+      ];
+    }
+    const completedTasks = JSON.parse(localStorage.getItem('completedTasks') || '[]');
+    function renderTasks() {
+      const list = document.getElementById('task-list');
+      list.innerHTML = '';
+      // If exactly 5 tasks are completed, show message and hide grid
+      if (completedTasks.length === 5) {
+        list.style.display = 'none';
+        if (!document.getElementById('all-complete-msg')) {
+          const msg = document.createElement('div');
+          msg.id = 'all-complete-msg';
+          msg.style = 'text-align:center;margin:40px auto;font-size:1.2em;color:#007bff;font-weight:bold;';
+          msg.innerText = "Thank you for your participation. Please wait for tomorrow's tasks.";
+          list.parentNode.appendChild(msg);
+        }
+        return;
+      } else {
+        list.style.display = 'grid';
+        const oldMsg = document.getElementById('all-complete-msg');
+        if (oldMsg) oldMsg.remove();
+      }
+      tasks.forEach(task => {
+        const div = document.createElement('div');
+        div.className = 'task-item';
+        div.innerHTML = `
+          <img class="task-img" src="${task.img}" alt="Task Image">
+          <div class="task-info">
+            <div class="task-title">${task.title}</div>
+            <div class="task-price">UGX ${task.price.toLocaleString()}</div>
+          </div>
+          <button class="task-complete-btn" data-id="${task.id}">Complete</button>
+          <span class="task-complete-msg" style="display:none;">Task Complete!</span>
+          <button class="task-delete-btn" style="display:none;margin-top:8px;background:#dc3545;" data-id="${task.id}">Delete</button>
+        `;
+        list.appendChild(div);
+        const completeBtn = div.querySelector('.task-complete-btn');
+        const completeMsg = div.querySelector('.task-complete-msg');
+        const deleteBtn = div.querySelector('.task-delete-btn');
+        // If already completed, show message and delete button
+        if (completedTasks.includes(task.id)) {
+          completeBtn.style.display = 'none';
+          completeMsg.style.display = 'inline';
+          deleteBtn.style.display = 'inline-block';
+        }
+        // Complete button click
+        completeBtn.onclick = function() {
+          if (!completedTasks.includes(task.id)) {
+            completedTasks.push(task.id);
+            localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
+            completeBtn.style.display = 'none';
+            completeMsg.style.display = 'inline';
+            deleteBtn.style.display = 'inline-block';
+            // Check if exactly 5 completed
+            if (completedTasks.length === 5) {
+              setTimeout(renderTasks, 300);
+            }
+          }
+        };
+        // Delete button click
+        deleteBtn.onclick = function() {
+          // Remove from completedTasks
+          const idx = completedTasks.indexOf(task.id);
+          if (idx !== -1) completedTasks.splice(idx, 1);
+          localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
+          renderTasks();
+        };
+      });
+    }
+    renderTasks();
+  </script>
+
+  <footer class="footer">
+    <div class="footer-icon" onclick="location.href='index.html'">
+      <img src="image/icon/index.png" alt="Home">
+      <span>Home</span>
+    </div>
+    <div class="footer-icon footer-active" onclick="location.href='task-list.html'">
+      <img src="image/icon/grab.png" alt="Task">
+      <span>Task</span>
+    </div>
+    <div class="footer-icon" onclick="location.href='profit.html'">
+      <img src="image/icon/profit.png" alt="Profit">
+      <span>Profit</span>
+    </div>
+    <div class="footer-icon" onclick="location.href='wallet-interface.html'">
+      <img src="image/icon/user.png" alt="Profile">
+      <span>Profile</span>
+    </div>
+  </footer>
+    </main>
+    <script src="getcash.js"></script>
+    <script>
+      // Footer icon active state
+      const footerIcons = document.querySelectorAll('.footer-icon');
+      footerIcons.forEach(icon => {
+        icon.addEventListener('click', function() {
+          footerIcons.forEach(i => i.classList.remove('footer-active'));
+          this.classList.add('footer-active');
+        });
+      });
+      // Set first as active by default
+      if (footerIcons.length) footerIcons[0].classList.add('footer-active');
+    </script>
+</body>
+</html>
