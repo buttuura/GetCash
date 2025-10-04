@@ -14,7 +14,8 @@
               <img class="top-intro-image" src="image/Currency2.jpg">
             </div>
             <div class="top-intro-text">
-              <p>WE SHOULD NEVER SETTLE FOR LESS</p>
+              <p id="welcome-message">WE SHOULD NEVER SETTLE FOR LESS</p>
+              <p id="user-greeting" style="font-size: 0.9em; color: #667eea; margin-top: 10px; display: none;"></p>
             </div>
           </div>
         </section>
@@ -87,19 +88,71 @@
           </div>
         </footer>
     </main>
+    <script src="client-storage.js"></script>
+    <script src="notifications.js"></script>
+    <script src="storage-manager.js"></script>
+    <script src="demo-mode.js"></script>
     <script src="getcash.js"></script>
     <script>
-    // Show admin button only if logged in as admin
-    // Assume token and username are stored in localStorage after login
-    const adminUsername = '0776944';
-    const loggedInUser = localStorage.getItem('username');
-    if (loggedInUser === adminUsername) {
-      const adminBtn = document.createElement('button');
-      adminBtn.textContent = 'Admin Tasks';
-      adminBtn.style = 'display:block;margin:20px auto;padding:10px 20px;font-size:1.1em;background:#007bff;color:#fff;border:none;border-radius:5px;cursor:pointer;';
-      adminBtn.onclick = function() { window.location.href = 'admin-tasks.html'; };
-      document.body.insertBefore(adminBtn, document.body.firstChild.nextSibling);
-    }
+    // Check if user is logged in
+    document.addEventListener('DOMContentLoaded', function() {
+        const loggedInUser = localStorage.getItem('username');
+        const userId = localStorage.getItem('userId');
+        
+        if (!loggedInUser || !userId) {
+            // Redirect to login if not authenticated
+            showNotification('⚠️ Please login to access GetCash!', 'warning');
+            setTimeout(() => {
+                window.location.href = 'login-page.html';
+            }, 2000);
+            return;
+        }
+        
+        // Welcome the user
+        setTimeout(() => {
+            showNotification(`🎉 Welcome to GetCash, ${loggedInUser}!`, 'success');
+            
+            // Update the greeting on the page
+            const greetingElement = document.getElementById('user-greeting');
+            if (greetingElement) {
+                greetingElement.textContent = `Welcome back, ${loggedInUser}! 🚀`;
+                greetingElement.style.display = 'block';
+            }
+            
+            // Show balance if available
+            const userBalance = localStorage.getItem('userBalance') || '0';
+            setTimeout(() => {
+                showNotification(`💰 Your current balance: $${userBalance}`, 'info');
+            }, 2000);
+        }, 1000);
+        
+        // Show admin button only if logged in as admin
+        const adminUsername = '0776944';
+        if (loggedInUser === adminUsername) {
+            const adminBtn = document.createElement('button');
+            adminBtn.textContent = 'Admin Dashboard';
+            adminBtn.style = 'display:block;margin:20px auto;padding:12px 25px;font-size:1.1em;background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);color:#fff;border:none;border-radius:25px;cursor:pointer;box-shadow:0 4px 15px rgba(102, 126, 234, 0.3);transition:all 0.3s ease;';
+            adminBtn.onmouseover = function() { 
+                this.style.transform = 'translateY(-2px)';
+                this.style.boxShadow = '0 8px 25px rgba(102, 126, 234, 0.4)';
+            };
+            adminBtn.onmouseout = function() { 
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.3)';
+            };
+            adminBtn.onclick = function() { window.location.href = 'admin-users.html'; };
+            
+            // Insert after the top intro section
+            const topSection = document.querySelector('.top_intro_wrapper').parentElement;
+            topSection.parentNode.insertBefore(adminBtn, topSection.nextSibling);
+        }
+        
+        // Update footer home link to stay on getcash page
+        const homeFooterIcon = document.querySelector('.footer-icon[onclick*="index.html"]');
+        if (homeFooterIcon) {
+            homeFooterIcon.setAttribute('onclick', "location.href='getcash.html'");
+        }
+    });
     </script>
 </body>
 </html>

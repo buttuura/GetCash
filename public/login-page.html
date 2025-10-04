@@ -300,10 +300,10 @@
                 showNotification('🔐 Authenticating your credentials...', 'info', 2000);
                 const data = await apiClient.login(username, password);
                 
-                showNotification('🎉 Login successful! Welcome back, ' + username + '!', 'success', 2000);
+                showNotification('🎉 Login successful! Welcome to GetCash, ' + username + '!', 'success', 2000);
                 
                 setTimeout(() => {
-                    window.location.href = 'index.html';
+                    window.location.href = 'getcash.html';
                 }, 1500);
                 
             } catch (error) {
