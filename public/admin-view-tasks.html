@@ -55,6 +55,131 @@
       margin-top: 24px;
       font-size: 1.1em;
     }
+    .bulk-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 16px 0;
+      padding: 12px;
+      background: #f8faff;
+      border-radius: 6px;
+      border: 1px solid #e0eaff;
+    }
+    .bulk-actions button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9em;
+      margin-left: 8px;
+    }
+    .select-all-btn {
+      background: #007bff;
+      color: white;
+    }
+    .select-none-btn {
+      background: #6c757d;
+      color: white;
+    }
+    .delete-selected-btn {
+      background: #dc3545;
+      color: white;
+    }
+    .delete-btn {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8em;
+    }
+    .delete-btn:hover {
+      background: #c82333;
+    }
+    .task-checkbox {
+      transform: scale(1.2);
+      margin-right: 8px;
+    }
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 16px 24px;
+      border-radius: 8px;
+      color: white;
+      font-weight: bold;
+      z-index: 1000;
+      min-width: 300px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      transform: translateX(400px);
+      transition: transform 0.3s ease-in-out;
+    }
+    .notification.show {
+      transform: translateX(0);
+    }
+    .notification.success {
+      background: #28a745;
+    }
+    .notification.error {
+      background: #dc3545;
+    }
+    .notification.warning {
+      background: #ffc107;
+      color: #212529;
+    }
+    .notification.info {
+      background: #17a2b8;
+    }
+    .notification-close {
+      float: right;
+      margin-left: 12px;
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+    }
+    .confirm-dialog {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+    .confirm-dialog-content {
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+    .confirm-dialog-buttons {
+      margin-top: 20px;
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+    .confirm-btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    .confirm-btn.primary {
+      background: #dc3545;
+      color: white;
+    }
+    .confirm-btn.secondary {
+      background: #6c757d;
+      color: white;
+    }
   </style>
 </head>
 <body>
@@ -64,62 +189,229 @@
       <label for="dateInput">Select Date:</label>
       <input type="date" id="dateInput">
     </div>
+    
+    <!-- Bulk Actions Panel -->
+    <div class="bulk-actions" id="bulkActions" style="display:none;">
+      <div>
+        <span id="selectedCount">0</span> task(s) selected
+      </div>
+      <div>
+        <button class="select-all-btn" onclick="selectAllTasks()">Select All</button>
+        <button class="select-none-btn" onclick="selectNoneTasks()">Select None</button>
+        <button class="delete-selected-btn" onclick="deleteSelectedTasks()">Delete Selected</button>
+      </div>
+    </div>
+    
     <table class="tasks-table" id="tasksTable" style="display:none;">
       <thead>
         <tr>
+          <th>Select</th>
           <th>Image</th>
           <th>Title</th>
           <th>Price (UGX)</th>
           <th>Upload Date</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody id="tasksTableBody"></tbody>
     </table>
     <div class="no-tasks" id="noTasksMsg" style="display:none;">No tasks uploaded for this date.</div>
   </div>
+  
+  <!-- Notification Container -->
+  <div id="notificationContainer"></div>
+  
+  <!-- Confirmation Dialog -->
+  <div id="confirmDialog" class="confirm-dialog" style="display:none;">
+    <div class="confirm-dialog-content">
+      <h3 id="confirmTitle">Confirm Action</h3>
+      <p id="confirmMessage">Are you sure?</p>
+      <div class="confirm-dialog-buttons">
+        <button class="confirm-btn primary" id="confirmYes">Yes</button>
+        <button class="confirm-btn secondary" id="confirmNo">Cancel</button>
+      </div>
+    </div>
+  </div>
+  <script src="notifications.js"></script>
+  <script src="storage-manager.js"></script>
   <script>
+    // Use shared notification system from notifications.js
+    
     // Helper to format date as yyyy-mm-dd
     function formatDate(date) {
       return date.toISOString().split('T')[0];
     }
-    // Load all admin tasks
-    let allTasks = JSON.parse(localStorage.getItem('adminTasks') || '[]');
-    // Add uploadDate to old tasks if missing
-    allTasks.forEach(task => {
-      if (!task.uploadDate) {
-        task.uploadDate = formatDate(new Date(task.id));
+    
+    // Load all admin tasks from database
+    let allTasks = [];
+    
+    // Initialize tasks
+    async function loadTasks() {
+      try {
+        allTasks = await storageManager.getTasks();
+        console.log('Loaded tasks from database:', allTasks.length);
+      } catch (error) {
+        console.warn('Failed to load tasks from database, using localStorage fallback:', error);
+        allTasks = JSON.parse(localStorage.getItem('adminTasks') || '[]');
       }
-    });
-    localStorage.setItem('adminTasks', JSON.stringify(allTasks));
+      
+      // Add uploadDate to old tasks if missing
+      allTasks.forEach(task => {
+        if (!task.uploadDate) {
+          task.uploadDate = formatDate(new Date(task.id));
+        }
+      });
+      
+      // Show tasks for today by default
+      const today = formatDate(new Date());
+      document.getElementById('dateInput').value = today;
+      showTasksForDate(today);
+    }
+    
+    // Load tasks when page loads
+    loadTasks();
 
+    let selectedTasks = new Set();
+    
     function showTasksForDate(dateStr) {
       const table = document.getElementById('tasksTable');
       const tbody = document.getElementById('tasksTableBody');
       const noMsg = document.getElementById('noTasksMsg');
+      const bulkActions = document.getElementById('bulkActions');
+      
       tbody.innerHTML = '';
+      selectedTasks.clear();
+      updateSelectedCount();
+      
       const filtered = allTasks.filter(t => t.uploadDate === dateStr);
       if (filtered.length === 0) {
         table.style.display = 'none';
+        bulkActions.style.display = 'none';
         noMsg.style.display = 'block';
       } else {
         table.style.display = 'table';
+        bulkActions.style.display = 'flex';
         noMsg.style.display = 'none';
+        
         filtered.forEach(task => {
           const tr = document.createElement('tr');
           tr.innerHTML = `
+            <td>
+              <input type="checkbox" class="task-checkbox" data-task-id="${task.id}" 
+                     onchange="toggleTaskSelection(${task.id})">
+            </td>
             <td><img src="${task.img}" alt="Task Image"></td>
             <td>${task.title}</td>
             <td>UGX ${task.price.toLocaleString()}</td>
             <td>${task.uploadDate}</td>
+            <td>
+              <button class="delete-btn" onclick="deleteTask(${task.id})">Delete</button>
+            </td>
           `;
           tbody.appendChild(tr);
         });
       }
     }
-    // Set default date to today
+    
+    function toggleTaskSelection(taskId) {
+      const checkbox = document.querySelector(`input[data-task-id="${taskId}"]`);
+      if (checkbox.checked) {
+        selectedTasks.add(taskId);
+      } else {
+        selectedTasks.delete(taskId);
+      }
+      updateSelectedCount();
+    }
+    
+    function updateSelectedCount() {
+      document.getElementById('selectedCount').textContent = selectedTasks.size;
+    }
+    
+    function selectAllTasks() {
+      const checkboxes = document.querySelectorAll('.task-checkbox');
+      checkboxes.forEach(checkbox => {
+        checkbox.checked = true;
+        selectedTasks.add(parseInt(checkbox.dataset.taskId));
+      });
+      updateSelectedCount();
+    }
+    
+    function selectNoneTasks() {
+      const checkboxes = document.querySelectorAll('.task-checkbox');
+      checkboxes.forEach(checkbox => {
+        checkbox.checked = false;
+      });
+      selectedTasks.clear();
+      updateSelectedCount();
+    }
+    
+    async function deleteTask(taskId) {
+      const taskToDelete = allTasks.find(task => task.id === taskId);
+      const taskTitle = taskToDelete ? taskToDelete.title : 'this task';
+      
+      const confirmed = await showConfirmDialog(
+        'Delete Task',
+        `Are you sure you want to delete "${taskTitle}"? This action cannot be undone.`
+      );
+      
+      if (!confirmed) {
+        return;
+      }
+      
+      try {
+        // Delete from database
+        await storageManager.deleteTask(taskId);
+        
+        // Remove from allTasks array
+        allTasks = allTasks.filter(task => task.id !== taskId);
+        
+        // Refresh display
+        showTasksForDate(document.getElementById('dateInput').value);
+        showNotification(`Task "${taskTitle}" deleted successfully!`, 'success');
+      } catch (error) {
+        console.error('Error deleting task:', error);
+        showNotification(`Failed to delete task: ${error.message}`, 'error');
+      }
+    }
+    
+    async function deleteSelectedTasks() {
+      if (selectedTasks.size === 0) {
+        showNotification('Please select tasks to delete.', 'warning');
+        return;
+      }
+      
+      const confirmed = await showConfirmDialog(
+        'Delete Multiple Tasks',
+        `Are you sure you want to delete ${selectedTasks.size} selected task(s)? This action cannot be undone.`
+      );
+      
+      if (!confirmed) {
+        return;
+      }
+      
+      try {
+        showNotification(`Deleting ${selectedTasks.size} tasks...`, 'info', 2000);
+        
+        // Delete each selected task from database
+        for (const taskId of selectedTasks) {
+          await storageManager.deleteTask(taskId);
+        }
+        
+        // Remove selected tasks from allTasks array
+        allTasks = allTasks.filter(task => !selectedTasks.has(task.id));
+        
+        // Clear selection and refresh display
+        const deletedCount = selectedTasks.size;
+        selectedTasks.clear();
+        showTasksForDate(document.getElementById('dateInput').value);
+        showNotification(`${deletedCount} tasks deleted successfully!`, 'success');
+      } catch (error) {
+        console.error('Error deleting selected tasks:', error);
+        showNotification(`Failed to delete selected tasks: ${error.message}`, 'error');
+      }
+    }
+    // Set up date input listener
     const dateInput = document.getElementById('dateInput');
-    dateInput.value = formatDate(new Date());
-    showTasksForDate(dateInput.value);
     dateInput.addEventListener('change', function() {
       showTasksForDate(this.value);
     });

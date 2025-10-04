@@ -4,140 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wallet Interface</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            margin: 0;
-            padding: 20px;
-        }
-        .wallet-container {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            max-width: 400px;
-            margin: auto;
-        }
-        @media (max-width: 600px) {
-            .wallet-container {
-                padding: 8px;
-                max-width: 98vw;
-            }
-            .wallet-info, .earnings-info, .other-info {
-                grid-template-columns: 1fr;
-                gap: 5px;
-            }
-            .header {
-                flex-direction: column;
-                gap: 8px;
-            }
-            .actions {
-                flex-direction: column;
-                gap: 8px;
-            }
-            .bottom-nav {
-                flex-direction: column;
-                font-size: 14px;
-            }
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .header .job-bond {
-            display: flex;
-            align-items: center;
-        }
-        .job-bond .icon {
-            background-color: orange;
-            border-radius: 50%;
-            padding: 5px 10px;
-            color: #fff;
-            margin-right: 10px;
-        }
-        .wallet-info {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .wallet-info div {
-            background-color: #e9e9e9;
-            padding: 10px;
-            border-radius: 5px;
-        }
-        .earnings-info {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .earnings-info div {
-            background-color: #e9e9e9;
-            padding: 10px;
-            border-radius: 5px;
-        }
-        .other-info {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .other-info div {
-            background-color: #e9e9e9;
-            padding: 10px;
-            border-radius: 5px;
-        }
-        .total-withdrawal {
-            background-color: #e9e9e9;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-        .actions {
-            display: flex;
-            justify-content: space-between;
-        }
-        .actions div {
-            text-align: center;
-        }
-        .actions div img {
-            width: 20px;
-            height: 20px;
-        }
-        .bottom-nav {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 20px;
-        }
-        footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background-color: #fff;
-            box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
-            padding: 10px 0;
-        }
-        .footer-icons {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-        }
-        .footer-icon {
-            text-align: center;
-        }
-        .footer-img {
-            width: 24px;
-            height: 24px;
-        }
-        .footer-active {
-            color: blue;
-        }
-    </style>
+    <link rel="stylesheet" href="getcash.css">
 </head>
 <body>
     <div class="wallet-container">
@@ -146,7 +13,10 @@
                 <span class="icon">Trainee</span>
                 <span>Job bond 0.00</span>
             </div>
-            <span>0776944322</span>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span>0776944322</span>
+                <button onclick="logout()" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 12px; cursor: pointer;" title="Logout">🚪 Logout</button>
+            </div>
         </div>
         <div>Effective date: 2025-09-28 ~ 2025-10-01</div>
         <div class="wallet-info">
@@ -166,10 +36,10 @@
         </div>
         <div class="total-withdrawal">Total withdrawal<br>0.00</div>
         <div class="actions">
-            <div><img src="personal-info-icon.png" alt=""><br>Personal information</div>
-            <div><img src="recharge-icon.png" alt=""><br>Recharge</div>
-            <div><img src="withdrawal-icon.png" alt=""><br>Withdrawal</div>
-            <div><img src="financial-records-icon.png" alt=""><br>Financial Records</div>
+            <div onclick="location.href='settings.html'"><img src="image/icon/user.png" alt=""><br>Personal information</div>
+            <div onclick="location.href='recharge.html'"><img src="image/icon/Recharge.png" alt=""><br>Recharge</div>
+            <div onclick="location.href='withdraw.html'" style="cursor: pointer;"><img src="image/icon/Wallet.png" alt=""><br>Withdrawal</div>
+            <div onclick="logout()" style="cursor: pointer;"><img src="image/icon/profit.png" alt="" style="filter: hue-rotate(180deg);"><br>Logout</div>
         </div>
     </div>
         <footer class="footer">
@@ -181,16 +51,102 @@
                 <img src="image/icon/grab.png" alt="Task">
                 <span>Task</span>
             </div>
-            <div class="footer-icon" onclick="location.href='profit.html'">
-                <img src="image/icon/profit.png" alt="Profit">
-                <span>Profit</span>
+            <div class="footer-icon" onclick="location.href='withdraw.html'">
+                <img src="image/icon/profit.png" alt="Withdraw">
+                <span>Withdraw</span>
             </div>
             <div class="footer-icon footer-active" onclick="location.href='wallet-interface.html'">
                 <img src="image/icon/user.png" alt="Profile">
                 <span>Profile</span>
             </div>
         </footer>
+    <script src="notifications.js"></script>
+    <script src="storage-manager.js"></script>
     <script>
+      let userData = null;
+      
+      // Load user wallet data
+      async function loadWalletData() {
+        try {
+          const username = localStorage.getItem('username');
+          if (!username) {
+            window.location.href = 'login-page.html';
+            return;
+          }
+
+          // Get user data from API
+          const response = await apiClient.request('/api/user/data');
+          if (response.ok) {
+            userData = await response.json();
+            updateWalletDisplay();
+          }
+        } catch (error) {
+          console.error('Error loading wallet data:', error);
+          // Use fallback data
+          userData = {
+            job_level: 'trainee',
+            personal_wallet: 3500,
+            income_wallet: 0,
+            total_earnings: 3500,
+            total_withdrawals: 0
+          };
+          updateWalletDisplay();
+        }
+      }
+
+      function updateWalletDisplay() {
+        if (!userData) return;
+
+        const jobLevel = (userData.job_level || 'trainee').toUpperCase();
+        const personalWallet = userData.personal_wallet || 0;
+        const incomeWallet = userData.income_wallet || 0;
+        const totalEarnings = userData.total_earnings || 0;
+        const totalWithdrawals = userData.total_withdrawals || 0;
+
+        // Update job level
+        document.querySelector('.job-bond .icon').textContent = jobLevel;
+        
+        // Update phone number
+        const users = JSON.parse(localStorage.getItem('users') || '[]');
+        const currentUser = users.find(u => u.username === localStorage.getItem('username'));
+        if (currentUser && currentUser.phone) {
+          document.querySelector('.header span:last-child').textContent = currentUser.phone;
+        }
+
+        // Update wallet info
+        const walletInfo = document.querySelector('.wallet-info');
+        walletInfo.innerHTML = `
+          <div>Income Wallet<br>UGX ${incomeWallet.toLocaleString()}</div>
+          <div>Personal Wallet<br>UGX ${personalWallet.toLocaleString()}</div>
+        `;
+
+        // Calculate daily/weekly/monthly earnings (simplified)
+        const todaysEarnings = Math.floor(totalEarnings * 0.3); // 30% as today's
+        const weeklyEarnings = Math.floor(totalEarnings * 0.7); // 70% as weekly
+        const monthlyEarnings = totalEarnings;
+
+        // Update earnings info
+        const earningsInfo = document.querySelector('.earnings-info');
+        earningsInfo.innerHTML = `
+          <div>Yesterday's earnings<br>UGX ${Math.floor(todaysEarnings * 0.8).toLocaleString()}</div>
+          <div>Today's earnings<br>UGX ${todaysEarnings.toLocaleString()}</div>
+          <div>This month's earnings<br>UGX ${monthlyEarnings.toLocaleString()}</div>
+          <div>This week's earnings<br>UGX ${weeklyEarnings.toLocaleString()}</div>
+        `;
+
+        // Update other info
+        const otherInfo = document.querySelector('.other-info');
+        otherInfo.innerHTML = `
+          <div>Total revenue<br>UGX ${totalEarnings.toLocaleString()}</div>
+          <div>Subordinate task commission<br>UGX 0.00</div>
+          <div>Referral rebate<br>UGX 0.00</div>
+        `;
+
+        // Update total withdrawal
+        const totalWithdrawal = document.querySelector('.total-withdrawal');
+        totalWithdrawal.innerHTML = `Total withdrawal<br>UGX ${totalWithdrawals.toLocaleString()}`;
+      }
+
       // Footer icon active state
       const footerIcons = document.querySelectorAll('.footer-icon');
       footerIcons.forEach(icon => {
@@ -199,8 +155,37 @@
           this.classList.add('footer-active');
         });
       });
-      // Set first as active by default
-      if (footerIcons.length) footerIcons[0].classList.add('footer-active');
+
+      // Logout function
+      function logout() {
+        // Show confirmation dialog
+        if (confirm('Are you sure you want to logout?')) {
+          try {
+            // Clear authentication data
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('username');
+            localStorage.removeItem('userData');
+            
+            // Show logout message
+            showNotification('Logged out successfully!', 'success', 2000);
+            
+            // Redirect to login page after a short delay
+            setTimeout(() => {
+              window.location.href = 'login-page.html';
+            }, 1000);
+          } catch (error) {
+            console.error('Logout error:', error);
+            showNotification('Error during logout', 'error');
+            // Still redirect to login page
+            setTimeout(() => {
+              window.location.href = 'login-page.html';
+            }, 1000);
+          }
+        }
+      }
+
+      // Load data when page loads
+      document.addEventListener('DOMContentLoaded', loadWalletData);
     </script>
 </body>
 </html>

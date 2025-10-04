@@ -1,0 +1,335 @@
+// API helper functions for communicating with the backend
+class ApiClient {
+  constructor() {
+    this.baseUrl = 'http://localhost:3300/api';
+    this.token = localStorage.getItem('authToken');
+  }
+
+  // Set authentication token
+  setToken(token) {
+    this.token = token;
+    localStorage.setItem('authToken', token);
+  }
+
+  // Get authentication headers
+  getAuthHeaders() {
+    const headers = {
+      'Content-Type': 'application/json'
+    };
+    if (this.token) {
+      headers['Authorization'] = `Bearer ${this.token}`;
+    }
+    return headers;
+  }
+
+  // Generic API request handler
+  async request(endpoint, options = {}) {
+    const url = `${this.baseUrl}${endpoint}`;
+    const config = {
+      headers: this.getAuthHeaders(),
+      ...options
+    };
+
+    try {
+      const response = await fetch(url, config);
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'API request failed');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('API request error:', error);
+      throw error;
+    }
+  }
+
+  // Authentication methods
+  async register(username, password, phone) {
+    return this.request('/register', {
+      method: 'POST',
+      body: JSON.stringify({ username, password, phone })
+    });
+  }
+
+  async login(username, password) {
+    const data = await this.request('/login', {
+      method: 'POST',
+      body: JSON.stringify({ username, password })
+    });
+    
+    if (data.token) {
+      this.setToken(data.token);
+      localStorage.setItem('userId', data.userId);
+      localStorage.setItem('username', username);
+    }
+    
+    return data;
+  }
+
+  // Task management methods
+  async createTask(title, price, imageData) {
+    return this.request('/tasks', {
+      method: 'POST',
+      body: JSON.stringify({ title, price, imageData })
+    });
+  }
+
+  async getAllTasks() {
+    return this.request('/tasks');
+  }
+
+  async getTasksByDate(date) {
+    return this.request(`/tasks/date/${date}`);
+  }
+
+  async deleteTask(taskId) {
+    return this.request(`/tasks/${taskId}`, {
+      method: 'DELETE'
+    });
+  }
+
+  async deleteAllTasks() {
+    return this.request('/api/tasks', {
+      method: 'DELETE'
+    });
+  }
+
+  // Completed tasks methods
+  async markTaskCompleted(taskId) {
+    return this.request(`/tasks/${taskId}/complete`, {
+      method: 'POST'
+    });
+  }
+
+  async getCompletedTasks() {
+    return this.request('/tasks/completed');
+  }
+
+  async removeCompletedTask(taskId) {
+    return this.request(`/tasks/${taskId}/complete`, {
+      method: 'DELETE'
+    });
+  }
+
+  // User data methods
+  async getUserData() {
+    return this.request('/user/data');
+  }
+
+  async updateWallet(incomeWallet, personalWallet, totalEarnings) {
+    return this.request('/user/wallet', {
+      method: 'PUT',
+      body: JSON.stringify({ incomeWallet, personalWallet, totalEarnings })
+    });
+  }
+}
+
+// Create a global instance
+const apiClient = new ApiClient();
+
+// Data migration helper - migrates localStorage data to database
+class DataMigration {
+  static async migrateLocalStorageToDatabase() {
+    try {
+      // Check if migration is needed
+      const migrationComplete = localStorage.getItem('migration_complete');
+      if (migrationComplete) {
+        console.log('Data already migrated to database');
+        return;
+      }
+
+      console.log('Starting data migration from localStorage to database...');
+      
+      // Migrate admin tasks
+      const adminTasks = JSON.parse(localStorage.getItem('adminTasks') || '[]');
+      if (adminTasks.length > 0) {
+        console.log(`Migrating ${adminTasks.length} admin tasks...`);
+        for (const task of adminTasks) {
+          try {
+            await apiClient.createTask(task.title, task.price, task.img);
+          } catch (error) {
+            console.warn('Failed to migrate task:', task.title, error);
+          }
+        }
+        console.log('Admin tasks migrated successfully');
+      }
+
+      // Mark migration as complete
+      localStorage.setItem('migration_complete', 'true');
+      console.log('Data migration completed successfully');
+      
+      // Optionally clear old localStorage data (uncomment if you want to clean up)
+      // localStorage.removeItem('adminTasks');
+      // localStorage.removeItem('completedTasks');
+      
+    } catch (error) {
+      console.error('Data migration failed:', error);
+    }
+  }
+
+  // Force re-migration (useful for testing)
+  static resetMigration() {
+    localStorage.removeItem('migration_complete');
+  }
+}
+
+// Storage Manager - provides unified interface for data access
+class StorageManager {
+  constructor() {
+    this.useDatabase = true; // Set to false to fall back to localStorage
+  }
+
+  // Task methods
+  async getTasks() {
+    if (this.useDatabase) {
+      try {
+        return await apiClient.getAllTasks();
+      } catch (error) {
+        console.warn('Database unavailable, falling back to localStorage:', error);
+        return JSON.parse(localStorage.getItem('adminTasks') || '[]');
+      }
+    } else {
+      return JSON.parse(localStorage.getItem('adminTasks') || '[]');
+    }
+  }
+
+  async createTask(title, price, imageData) {
+    if (this.useDatabase) {
+      try {
+        return await apiClient.createTask(title, price, imageData);
+      } catch (error) {
+        console.warn('Database unavailable, saving to localStorage:', error);
+        // Fallback to localStorage
+        const tasks = JSON.parse(localStorage.getItem('adminTasks') || '[]');
+        const newTask = {
+          id: Date.now(),
+          title,
+          price: parseInt(price),
+          img: imageData,
+          uploadDate: new Date().toISOString().split('T')[0]
+        };
+        tasks.push(newTask);
+        localStorage.setItem('adminTasks', JSON.stringify(tasks));
+        return { task: newTask };
+      }
+    } else {
+      // localStorage implementation
+      const tasks = JSON.parse(localStorage.getItem('adminTasks') || '[]');
+      const newTask = {
+        id: Date.now(),
+        title,
+        price: parseInt(price),
+        img: imageData,
+        uploadDate: new Date().toISOString().split('T')[0]
+      };
+      tasks.push(newTask);
+      localStorage.setItem('adminTasks', JSON.stringify(tasks));
+      return { task: newTask };
+    }
+  }
+
+  async deleteTask(taskId) {
+    if (this.useDatabase) {
+      try {
+        await apiClient.deleteTask(taskId);
+        return;
+      } catch (error) {
+        console.warn('Database unavailable, using localStorage fallback:', error);
+      }
+    }
+    // Fallback to localStorage
+    const tasks = JSON.parse(localStorage.getItem('adminTasks') || '[]');
+    const updatedTasks = tasks.filter(task => task.id !== taskId);
+    localStorage.setItem('adminTasks', JSON.stringify(updatedTasks));
+  }
+
+  async clearAllTasks() {
+    if (this.useDatabase) {
+      try {
+        await apiClient.deleteAllTasks();
+        return;
+      } catch (error) {
+        console.warn('Database unavailable, clearing localStorage:', error);
+      }
+    }
+    // Fallback to localStorage
+    localStorage.removeItem('adminTasks');
+    localStorage.removeItem('completedTasks');
+  }
+
+  // Completed tasks methods
+  async getCompletedTasks() {
+    if (this.useDatabase && apiClient.token) {
+      try {
+        return await apiClient.getCompletedTasks();
+      } catch (error) {
+        console.warn('Database unavailable, using localStorage:', error);
+        return JSON.parse(localStorage.getItem('completedTasks') || '[]');
+      }
+    } else {
+      return JSON.parse(localStorage.getItem('completedTasks') || '[]');
+    }
+  }
+
+  async markTaskCompleted(taskId) {
+    if (this.useDatabase && apiClient.token) {
+      try {
+        const response = await apiClient.markTaskCompleted(taskId);
+        return response; // Return the full response with earnings data
+      } catch (error) {
+        console.warn('Database unavailable, using localStorage:', error);
+      }
+    }
+    // Fallback to localStorage
+    const completed = JSON.parse(localStorage.getItem('completedTasks') || '[]');
+    if (!completed.includes(taskId)) {
+      completed.push(taskId);
+      localStorage.setItem('completedTasks', JSON.stringify(completed));
+    }
+    return { message: 'Task completed (offline)', offline: true };
+  }
+
+  async getUserData() {
+    if (this.useDatabase && apiClient.token) {
+      try {
+        return await apiClient.getUserData();
+      } catch (error) {
+        console.warn('Database unavailable, using localStorage:', error);
+      }
+    }
+    // Fallback to localStorage
+    const userData = localStorage.getItem('userData');
+    return userData ? JSON.parse(userData) : null;
+  }
+
+  async removeCompletedTask(taskId) {
+    if (this.useDatabase && apiClient.token) {
+      try {
+        await apiClient.removeCompletedTask(taskId);
+        return;
+      } catch (error) {
+        console.warn('Database unavailable, using localStorage:', error);
+      }
+    }
+    // Fallback to localStorage
+    const completed = JSON.parse(localStorage.getItem('completedTasks') || '[]');
+    const index = completed.indexOf(taskId);
+    if (index !== -1) {
+      completed.splice(index, 1);
+      localStorage.setItem('completedTasks', JSON.stringify(completed));
+    }
+  }
+}
+
+// Create global instances
+const storageManager = new StorageManager();
+
+// Auto-migrate data on page load (run once)
+document.addEventListener('DOMContentLoaded', () => {
+  // Only migrate if user is logged in (to avoid errors)
+  if (localStorage.getItem('authToken') || localStorage.getItem('username')) {
+    DataMigration.migrateLocalStorageToDatabase();
+  }
+});

@@ -27,6 +27,29 @@ Thumbs.db
 public/image/
 public/loginfiles/
 
-# Exclude user data
+# Database files (exclude user data for security)
+app_data.db
 users.json
 settings.json
+
+# Environment variables (contains secrets)
+.env
+.env.local
+.env.production
+
+# Runtime files
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# Dependency directories
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache

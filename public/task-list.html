@@ -14,17 +14,48 @@
       <!-- Tasks will be loaded here -->
     </div>
   </div>
+  <script src="storage-manager.js"></script>
   <script>
-    // Load tasks from localStorage (admin uploads), fallback to default
-    let tasks = JSON.parse(localStorage.getItem('adminTasks') || 'null');
-    if (!tasks || !Array.isArray(tasks) || tasks.length === 0) {
-      tasks = [
-        { id: 1, title: 'Upload Product Image', price: 5000, img: 'image/Currency.jpg' },
-        { id: 2, title: 'Share Promo Banner', price: 3000, img: 'image/Currency2.jpg' },
-        { id: 3, title: 'Post Offer Screenshot', price: 7000, img: 'image/icon/profit.png' }
-      ];
+    // Load tasks from database (with fallback)
+    let tasks = [];
+    let completedTasks = [];
+    
+    // Initialize data
+    async function loadTaskData() {
+      try {
+        // Load tasks from database
+        tasks = await storageManager.getTasks();
+        if (!tasks || tasks.length === 0) {
+          // Fallback to default tasks
+          tasks = [
+            { id: 1, title: 'Upload Product Image', price: 5000, img: 'image/Currency.jpg' },
+            { id: 2, title: 'Share Promo Banner', price: 3000, img: 'image/Currency2.jpg' },
+            { id: 3, title: 'Post Offer Screenshot', price: 7000, img: 'image/icon/profit.png' }
+          ];
+        }
+        
+        // Load completed tasks
+        completedTasks = await storageManager.getCompletedTasks();
+        
+        // Render tasks
+        renderTasks();
+      } catch (error) {
+        console.warn('Failed to load task data, using localStorage fallback:', error);
+        tasks = JSON.parse(localStorage.getItem('adminTasks') || 'null');
+        if (!tasks || !Array.isArray(tasks) || tasks.length === 0) {
+          tasks = [
+            { id: 1, title: 'Upload Product Image', price: 5000, img: 'image/Currency.jpg' },
+            { id: 2, title: 'Share Promo Banner', price: 3000, img: 'image/Currency2.jpg' },
+            { id: 3, title: 'Post Offer Screenshot', price: 7000, img: 'image/icon/profit.png' }
+          ];
+        }
+        completedTasks = JSON.parse(localStorage.getItem('completedTasks') || '[]');
+        renderTasks();
+      }
     }
-    const completedTasks = JSON.parse(localStorage.getItem('completedTasks') || '[]');
+    
+    // Load data when page loads
+    loadTaskData();
     function renderTasks() {
       const list = document.getElementById('task-list');
       list.innerHTML = '';
@@ -68,30 +99,65 @@
           deleteBtn.style.display = 'inline-block';
         }
         // Complete button click
-        completeBtn.onclick = function() {
+        completeBtn.onclick = async function() {
           if (!completedTasks.includes(task.id)) {
-            completedTasks.push(task.id);
-            localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
-            completeBtn.style.display = 'none';
-            completeMsg.style.display = 'inline';
-            deleteBtn.style.display = 'inline-block';
-            // Check if exactly 5 completed
-            if (completedTasks.length === 5) {
-              setTimeout(renderTasks, 300);
+            try {
+              const result = await storageManager.markTaskCompleted(task.id);
+              
+              if (result) {
+                completedTasks.push(task.id);
+                completeBtn.style.display = 'none';
+                completeMsg.style.display = 'inline';
+                deleteBtn.style.display = 'inline-block';
+                
+                // Show earnings notification
+                if (result.earnings) {
+                  showNotification(
+                    `🎉 Task completed!\n\nEarned: UGX ${result.earnings.toLocaleString()}\nNew Balance: UGX ${result.newBalance.toLocaleString()}\nJob Level: ${result.jobLevel.toUpperCase()}`,
+                    'success',
+                    5000
+                  );
+                } else {
+                  showNotification('Task completed successfully!', 'success', 3000);
+                }
+                
+                // Check if daily limit reached
+                if (completedTasks.length === 5) {
+                  setTimeout(renderTasks, 300);
+                }
+              } else {
+                showNotification('Failed to complete task', 'error');
+              }
+            } catch (error) {
+              console.warn('Failed to mark task as completed in database:', error);
+              // Fallback to localStorage
+              completedTasks.push(task.id);
+              localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
+              completeBtn.style.display = 'none';
+              completeMsg.style.display = 'inline';
+              deleteBtn.style.display = 'inline-block';
+              showNotification('Task completed (offline mode)', 'info');
             }
           }
         };
         // Delete button click
-        deleteBtn.onclick = function() {
-          // Remove from completedTasks
-          const idx = completedTasks.indexOf(task.id);
-          if (idx !== -1) completedTasks.splice(idx, 1);
-          localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
-          renderTasks();
+        deleteBtn.onclick = async function() {
+          try {
+            await storageManager.removeCompletedTask(task.id);
+            const idx = completedTasks.indexOf(task.id);
+            if (idx !== -1) completedTasks.splice(idx, 1);
+            renderTasks();
+          } catch (error) {
+            console.warn('Failed to remove completed task from database:', error);
+            // Fallback to localStorage
+            const idx = completedTasks.indexOf(task.id);
+            if (idx !== -1) completedTasks.splice(idx, 1);
+            localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
+            renderTasks();
+          }
         };
       });
     }
-    renderTasks();
   </script>
 
   <footer class="footer">
@@ -103,9 +169,9 @@
       <img src="image/icon/grab.png" alt="Task">
       <span>Task</span>
     </div>
-    <div class="footer-icon" onclick="location.href='profit.html'">
-      <img src="image/icon/profit.png" alt="Profit">
-      <span>Profit</span>
+    <div class="footer-icon" onclick="location.href='withdraw.html'">
+      <img src="image/icon/profit.png" alt="Withdraw">
+      <span>Withdraw</span>
     </div>
     <div class="footer-icon" onclick="location.href='wallet-interface.html'">
       <img src="image/icon/user.png" alt="Profile">
@@ -113,6 +179,7 @@
     </div>
   </footer>
     </main>
+    <script src="notifications.js"></script>
     <script src="getcash.js"></script>
     <script>
       // Footer icon active state

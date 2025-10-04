@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Withdraw Money</title>
+  <link rel="stylesheet" href="getcash.css">
+  <style>
+    .withdraw-container {
+      max-width: 450px;
+      margin: 40px auto 100px auto;
+      padding: 24px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    }
+    .withdraw-container h2 {
+      text-align: center;
+      margin-bottom: 24px;
+      color: #333;
+    }
+    .user-info {
+      background: #f8faff;
+      border: 1px solid #e0eaff;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 24px;
+    }
+    .user-info h3 {
+      margin: 0 0 12px 0;
+      color: #007bff;
+      font-size: 1.1em;
+    }
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 0.95em;
+    }
+    .info-label {
+      font-weight: bold;
+      color: #555;
+    }
+    .info-value {
+      color: #333;
+    }
+    .balance-info {
+      background: #e8f5e8;
+      border: 1px solid #28a745;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    .balance-amount {
+      font-size: 1.8em;
+      font-weight: bold;
+      color: #28a745;
+      margin: 8px 0;
+    }
+    .withdraw-form label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+      color: #333;
+    }
+    .withdraw-form input, .withdraw-form select {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1em;
+      box-sizing: border-box;
+    }
+    .withdraw-form input:focus {
+      border-color: #007bff;
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+    }
+    .amount-suggestions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .amount-btn {
+      padding: 8px 12px;
+      border: 1px solid #007bff;
+      background: #fff;
+      color: #007bff;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9em;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .amount-btn:hover, .amount-btn.active {
+      background: #007bff;
+      color: #fff;
+    }
+    .withdraw-btn {
+      background: #28a745;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 12px 24px;
+      font-size: 1.1em;
+      cursor: pointer;
+      transition: background 0.2s;
+      width: 100%;
+      font-weight: bold;
+    }
+    .withdraw-btn:hover {
+      background: #218838;
+    }
+    .withdraw-btn:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+    }
+    .withdrawal-fees {
+      background: #fff3cd;
+      border: 1px solid #ffeaa7;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 16px;
+      font-size: 0.9em;
+    }
+    .fee-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+    .final-amount {
+      font-weight: bold;
+      border-top: 1px solid #ddd;
+      padding-top: 8px;
+      margin-top: 8px;
+      color: #28a745;
+    }
+    .min-withdraw-note {
+      background: #d1ecf1;
+      border: 1px solid #bee5eb;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 16px;
+      font-size: 0.9em;
+      color: #0c5460;
+    }
+    @media (max-width: 500px) {
+      .withdraw-container {
+        margin: 20px 10px 100px 10px;
+        padding: 16px;
+      }
+      .amount-suggestions {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="withdraw-container">
+    <h2>💰 Withdraw Money</h2>
+    
+    <!-- User Information Display -->
+    <div class="user-info">
+      <h3>👤 Account Information</h3>
+      <div class="info-row">
+        <span class="info-label">Username:</span>
+        <span class="info-value" id="userNameDisplay">Loading...</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Phone Number:</span>
+        <span class="info-value" id="userPhoneDisplay">Loading...</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Account Status:</span>
+        <span class="info-value" style="color: #28a745;">✅ Verified</span>
+      </div>
+    </div>
+    
+    <!-- Balance Information -->
+    <div class="balance-info">
+      <h4 style="margin: 0; color: #28a745;">💳 Available Balance</h4>
+      <div class="balance-amount" id="availableBalance">UGX 0</div>
+      <small style="color: #666;">Ready for withdrawal</small>
+    </div>
+    
+    <!-- Minimum Withdrawal Notice -->
+    <div class="min-withdraw-note">
+      ℹ️ <strong>Minimum withdrawal:</strong> UGX 10,000 • Processing time: 5-15 minutes
+    </div>
+    
+    <!-- Withdrawal Form -->
+    <form class="withdraw-form" id="withdrawForm">
+      <label for="withdrawAmount">💸 Withdrawal Amount (UGX)</label>
+      
+      <!-- Quick Amount Suggestions -->
+      <div class="amount-suggestions">
+        <div class="amount-btn" onclick="setAmount(10000)">10,000</div>
+        <div class="amount-btn" onclick="setAmount(25000)">25,000</div>
+        <div class="amount-btn" onclick="setAmount(50000)">50,000</div>
+        <div class="amount-btn" onclick="setAmount(100000)">100,000</div>
+        <div class="amount-btn" onclick="setAmount(200000)">200,000</div>
+        <div class="amount-btn" onclick="setAllBalance()">All</div>
+      </div>
+      
+      <input type="number" id="withdrawAmount" name="withdrawAmount" 
+             min="10000" placeholder="Enter amount (minimum UGX 10,000)" required>
+      
+      <label for="withdrawPhone">📱 Phone Number (Where to send money)</label>
+      <input type="tel" id="withdrawPhone" name="withdrawPhone" 
+             placeholder="e.g. 0776944322" required>
+      
+      <label for="recipientName">👤 Name on Mobile Money Account</label>
+      <input type="text" id="recipientName" name="recipientName" 
+             placeholder="Enter the name registered on this number" required>
+      
+      <label for="networkProvider">📡 Network Provider</label>
+      <select id="networkProvider" name="networkProvider" required>
+        <option value="">Select Network Provider</option>
+        <option value="MTN">MTN Mobile Money</option>
+        <option value="Airtel">Airtel Money</option>
+      </select>
+      
+      <!-- Withdrawal Fees Breakdown -->
+      <div class="withdrawal-fees" id="feesBreakdown" style="display:none;">
+        <h4 style="margin: 0 0 8px 0;">💰 Transaction Summary</h4>
+        <div class="fee-row">
+          <span>Withdrawal Amount:</span>
+          <span id="requestedAmount">UGX 0</span>
+        </div>
+        <div class="fee-row">
+          <span>Processing Fee (2%):</span>
+          <span id="processingFee">UGX 0</span>
+        </div>
+        <div class="fee-row final-amount">
+          <span>You will receive:</span>
+          <span id="finalAmount">UGX 0</span>
+        </div>
+      </div>
+      
+      <button type="submit" class="withdraw-btn" id="withdrawButton">
+        🚀 Request Withdrawal
+      </button>
+    </form>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-icon" onclick="location.href='index.html'">
+      <img src="image/icon/index.png" alt="Home">
+      <span>Home</span>
+    </div>
+    <div class="footer-icon" onclick="location.href='task-list.html'">
+      <img src="image/icon/grab.png" alt="Task">
+      <span>Task</span>
+    </div>
+    <div class="footer-icon footer-active" onclick="location.href='withdraw.html'">
+      <img src="image/icon/profit.png" alt="Withdraw">
+      <span>Withdraw</span>
+    </div>
+    <div class="footer-icon footer-active" onclick="location.href='wallet-interface.html'">
+      <img src="image/icon/user.png" alt="Profile">
+      <span>Profile</span>
+    </div>
+  </footer>
+
+  <script src="notifications.js"></script>
+  <script src="storage-manager.js"></script>
+  <script>
+    let currentUser = null;
+    let userBalance = 0;
+
+    // Load user information when page loads
+    async function loadUserInfo() {
+      try {
+        const username = localStorage.getItem('username');
+        if (!username) {
+          showNotification('Please log in to access withdrawal', 'error');
+          setTimeout(() => {
+            window.location.href = 'login-page.html';
+          }, 2000);
+          return;
+        }
+
+        // Display username
+        document.getElementById('userNameDisplay').textContent = username;
+        
+        // Get user data from database
+        try {
+          const userData = await storageManager.getUserData();
+          if (userData) {
+            userBalance = userData.personal_wallet || 0;
+            document.getElementById('availableBalance').textContent = `UGX ${userBalance.toLocaleString()}`;
+            
+            // Try to get phone from user registration data
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const user = users.find(u => u.username === username);
+            if (user && user.phone) {
+              document.getElementById('userPhoneDisplay').textContent = user.phone;
+              document.getElementById('withdrawPhone').value = user.phone;
+            } else {
+              document.getElementById('userPhoneDisplay').textContent = 'Not available';
+            }
+          } else {
+            throw new Error('No user data found');
+          }
+        } catch (error) {
+          console.warn('Could not load user data:', error);
+          // Start with 0 balance instead of demo balance
+          userBalance = 0;
+          document.getElementById('availableBalance').textContent = `UGX ${userBalance.toLocaleString()}`;
+          document.getElementById('userPhoneDisplay').textContent = 'Not available';
+          document.getElementById('withdrawPhone').value = '';
+          
+          // Show a notification to the user
+          showNotification('Unable to load balance. Please try refreshing the page.', 'error');
+        }
+        
+        currentUser = username;
+      } catch (error) {
+        showNotification('Error loading user information: ' + error.message, 'error');
+      }
+    }
+
+    // Set withdrawal amount from quick buttons
+    function setAmount(amount) {
+      document.getElementById('withdrawAmount').value = amount;
+      updateFeesBreakdown();
+      
+      // Update active button
+      document.querySelectorAll('.amount-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+
+    // Set all available balance
+    function setAllBalance() {
+      document.getElementById('withdrawAmount').value = userBalance;
+      updateFeesBreakdown();
+      
+      // Update active button
+      document.querySelectorAll('.amount-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+
+    // Update fees breakdown when amount changes
+    function updateFeesBreakdown() {
+      const amount = parseInt(document.getElementById('withdrawAmount').value) || 0;
+      const feesDiv = document.getElementById('feesBreakdown');
+      
+      if (amount >= 10000) {
+        const processingFee = Math.round(amount * 0.02); // 2% fee
+        const finalAmount = amount - processingFee;
+        
+        document.getElementById('requestedAmount').textContent = `UGX ${amount.toLocaleString()}`;
+        document.getElementById('processingFee').textContent = `UGX ${processingFee.toLocaleString()}`;
+        document.getElementById('finalAmount').textContent = `UGX ${finalAmount.toLocaleString()}`;
+        
+        feesDiv.style.display = 'block';
+      } else {
+        feesDiv.style.display = 'none';
+      }
+    }
+
+    // Validate phone number format
+    function validatePhone(phone) {
+      // Uganda phone number format: 07XXXXXXXX or 256XXXXXXXXX
+      const ugandaFormat1 = /^07\d{8}$/; // 0701234567
+      const ugandaFormat2 = /^256\d{9}$/; // 256701234567
+      return ugandaFormat1.test(phone) || ugandaFormat2.test(phone);
+    }
+
+    // Handle withdrawal form submission
+    document.getElementById('withdrawForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const amount = parseInt(document.getElementById('withdrawAmount').value);
+      const phone = document.getElementById('withdrawPhone').value.trim();
+      const recipientName = document.getElementById('recipientName').value.trim();
+      const network = document.getElementById('networkProvider').value;
+      
+      // Validation
+      if (!amount || amount < 10000) {
+        showNotification('Minimum withdrawal amount is UGX 10,000', 'warning');
+        return;
+      }
+      
+      if (amount > userBalance) {
+        showNotification(`Insufficient balance. Available: UGX ${userBalance.toLocaleString()}`, 'error');
+        return;
+      }
+      
+      if (!validatePhone(phone)) {
+        showNotification('Please enter a valid Uganda phone number (e.g., 0776944322)', 'warning');
+        return;
+      }
+      
+      if (!recipientName) {
+        showNotification('Please enter the name registered on the mobile money account', 'warning');
+        return;
+      }
+      
+      if (recipientName.length < 2) {
+        showNotification('Please enter a valid name (at least 2 characters)', 'warning');
+        return;
+      }
+      
+      if (!network) {
+        showNotification('Please select your network provider', 'warning');
+        return;
+      }
+      
+      // Show confirmation dialog
+      const processingFee = Math.round(amount * 0.02);
+      const finalAmount = amount - processingFee;
+      
+      const confirmed = await showConfirmDialog(
+        'Confirm Withdrawal',
+        `Withdraw UGX ${amount.toLocaleString()} to:\n\nName: ${recipientName}\nPhone: ${phone} (${network})\n\nProcessing fee: UGX ${processingFee.toLocaleString()}\nYou will receive: UGX ${finalAmount.toLocaleString()}`
+      );
+      
+      if (!confirmed) return;
+      
+      try {
+        showNotification('Processing withdrawal request...', 'info', 3000);
+        
+        // Send withdrawal request to API
+        const response = await apiClient.request('/api/withdrawal/request', {
+          method: 'POST',
+          body: JSON.stringify({
+            amount: amount,
+            phone: phone,
+            recipientName: recipientName,
+            network: network
+          })
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          
+          // Update displayed balance
+          userBalance = result.newBalance;
+          document.getElementById('availableBalance').textContent = `UGX ${userBalance.toLocaleString()}`;
+          
+          // Clear form
+          document.getElementById('withdrawForm').reset();
+          document.getElementById('feesBreakdown').style.display = 'none';
+          document.querySelectorAll('.amount-btn').forEach(btn => btn.classList.remove('active'));
+          
+          // Success notification with withdrawal details
+          showNotification(
+            `✅ Withdrawal request submitted successfully!\n\n` +
+            `Amount: UGX ${finalAmount.toLocaleString()}\n` +
+            `Recipient: ${recipientName}\n` +
+            `Phone: ${phone} (${network})\n` +
+            `Processing time: 5-15 minutes`, 
+            'success', 
+            8000
+          );
+          
+        } else {
+          const error = await response.json();
+          showNotification(error.message || 'Withdrawal request failed', 'error');
+        }
+        
+      } catch (error) {
+        console.error('Withdrawal error:', error);
+        showNotification('Withdrawal request failed: ' + error.message, 'error');
+      }
+    });
+
+    // Update fees when amount changes
+    document.getElementById('withdrawAmount').addEventListener('input', updateFeesBreakdown);
+
+    // Auto-format phone number
+    document.getElementById('withdrawPhone').addEventListener('input', function(e) {
+      let value = e.target.value.replace(/\D/g, ''); // Remove non-digits
+      
+      // Auto-format Uganda numbers
+      if (value.startsWith('256')) {
+        // Already has country code
+      } else if (value.startsWith('07')) {
+        // Local format
+      } else if (value.startsWith('7') && value.length <= 9) {
+        // Add leading zero
+        value = '0' + value;
+      }
+      
+      e.target.value = value;
+    });
+
+    // Load user info when page loads
+    loadUserInfo();
+  </script>
+</body>
+</html>

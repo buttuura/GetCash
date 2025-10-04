@@ -20,26 +20,26 @@
         </section>
         <section>
           <div class="main-page-icons">
-            <div class="icon-img-cotainer">
+            <div class="icon-img-cotainer" onclick="location.href='jobs.html'" style="cursor: pointer;">
               <img class="icon-img" src="image/icon/Job.png">
               <span>
                 Job
               </span>
             </div>
-             <div class="icon-img-cotainer">
+             <div class="icon-img-cotainer" onclick="location.href='task-list.html'" style="cursor: pointer;">
               <img  class="icon-img"src="image/icon/Task.png">
               <span>
                 Task
               </span>
             </div>
-             <div class="icon-img-cotainer">
+             <div class="icon-img-cotainer" onclick="location.href='recharge.html'" style="cursor: pointer;">
               <img class="icon-img"src="image/icon/Recharge.png">
               <span>
                 Recharge
               </span>
             </div>
 
-             <div class="icon-img-cotainer">
+             <div class="icon-img-cotainer" onclick="location.href='wallet-interface.html'" style="cursor: pointer;">
               <img class="icon-img" class="icon-img" src="image/icon/Wallet.png">
               <span>
                 wallet
@@ -77,9 +77,9 @@
             <img src="image/icon/grab.png" alt="Task">
             <span>Task</span>
           </div>
-          <div class="footer-icon" onclick="location.href='profit.html'">
-            <img src="image/icon/profit.png" alt="Profit">
-            <span>Profit</span>
+          <div class="footer-icon" onclick="location.href='withdraw.html'">
+            <img src="image/icon/profit.png" alt="Withdraw">
+            <span>Withdraw</span>
           </div>
           <div class="footer-icon" onclick="location.href='wallet-interface.html'">
             <img src="image/icon/user.png" alt="Profile">
@@ -88,5 +88,18 @@
         </footer>
     </main>
     <script src="getcash.js"></script>
+    <script>
+    // Show admin button only if logged in as admin
+    // Assume token and username are stored in localStorage after login
+    const adminUsername = '0776944';
+    const loggedInUser = localStorage.getItem('username');
+    if (loggedInUser === adminUsername) {
+      const adminBtn = document.createElement('button');
+      adminBtn.textContent = 'Admin Tasks';
+      adminBtn.style = 'display:block;margin:20px auto;padding:10px 20px;font-size:1.1em;background:#007bff;color:#fff;border:none;border-radius:5px;cursor:pointer;';
+      adminBtn.onclick = function() { window.location.href = 'admin-tasks.html'; };
+      document.body.insertBefore(adminBtn, document.body.firstChild.nextSibling);
+    }
+    </script>
 </body>
 </html>

@@ -3,150 +3,334 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Page</title>
+    <title>🚀 Login - GetCash Platform</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow-x: hidden;
         }
+        
+        /* Animated background particles */
+        .bg-animation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+        
         .login-container {
-            width: 300px;
-            margin: 50px auto;
-            background-color: #fff;
-            padding: 20px;
-            border: 1px solid #ddd;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px;
+            width: 400px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 10;
+            animation: slideUp 0.8s ease-out;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
         @media (max-width: 500px) {
             .login-container {
-                width: 95vw;
-                margin: 10vw auto;
-                padding: 10px;
-            }
-            .form-group input, .login-button {
-                height: 36px;
-                font-size: 14px;
-            }
-            h2 {
-                font-size: 22px;
+                width: 90%;
+                padding: 30px 20px;
+                margin: 20px;
             }
         }
+        
         .login-header {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
         }
-        .login-form {
-            margin-bottom: 20px;
+        
+        .login-header h2 {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
         }
+        
+        .login-header p {
+            color: #666;
+            font-weight: 300;
+        }
+        
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 25px;
+            position: relative;
         }
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-        }
+        
         .form-group input {
             width: 100%;
-            height: 40px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-
+            height: 55px;
+            padding: 0 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
         }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .form-group label {
+            position: absolute;
+            left: 20px;
+            top: 17px;
+            color: #666;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            pointer-events: none;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 0 5px;
+        }
+        
+        .form-group input:focus + label,
+        .form-group input:not(:placeholder-shown) + label {
+            top: -10px;
+            font-size: 12px;
+            color: #667eea;
+            font-weight: 600;
+        }
+        
         .login-button {
             width: 100%;
-            height: 40px;
-            background-color: #007bff;
-            color: #fff;
+            height: 55px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
         }
+        
         .login-button:hover {
-            background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
         }
-        footer {
-            position: fixed;
-            left: 0;
-            bottom: 0;
-            width: 100%;
-            background-color: #fff;
-            border-top: 1px solid #ddd;
-            padding: 10px 0;
+        
+        .login-button:active {
+            transform: translateY(0);
+        }
+        
+        .register-link {
             text-align: center;
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 12px;
+            border: 1px dashed #667eea;
         }
-        .footer-icons {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
+        
+        .register-link p {
+            color: #666;
+            margin-bottom: 10px;
         }
-        .footer-icon {
-            flex: 1;
-            text-align: center;
-        }
-        .footer-btn {
-            background: none;
-            border: none;
+        
+        .register-btn {
+            background: transparent;
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: 600;
             cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
         }
-        .footer-img {
-            width: 24px;
-            height: 24px;
+        
+        .register-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
         }
-        .footer-active {
-            font-weight: bold;
-            color: #007bff;
+        
+        .loading {
+            position: relative;
+            pointer-events: none;
+        }
+        
+        .loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            margin: auto;
+            border: 2px solid transparent;
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
+    <!-- Animated Background -->
+    <div class="bg-animation"></div>
+    
     <div class="login-container">
         <div class="login-header">
-            <h2>Login</h2>
+            <h2>🚀 Welcome Back!</h2>
+            <p>Login to continue your earning journey</p>
         </div>
-    <form class="login-form" id="loginForm">
+        
+        <form class="login-form" id="loginForm">
             <div class="form-group">
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username" required>
+                <input type="text" id="username" name="username" placeholder=" " required>
+                <label for="username">👤 Username</label>
             </div>
             <div class="form-group">
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
+                <input type="password" id="password" name="password" placeholder=" " required>
+                <label for="password">🔒 Password</label>
             </div>
-            <button class="login-button" type="submit">Login</button>
+            <button class="login-button" type="submit">Login Now</button>
         </form>
+        
+        <div class="register-link">
+            <p>🆕 Don't have an account yet?</p>
+            <a href="registration.html" class="register-btn">Create Account</a>
+        </div>
     </div>
-       <h2>New Members Joining</h2>
-            <p>Over 1,000 new members join us every day!</p>
-          </div>
-        </section>
 
-        <script>
-document.getElementById('loginForm').addEventListener('submit', function(e) {
-  e.preventDefault();
-  const username = document.getElementById('username').value;
-  const password = document.getElementById('password').value;
-
-    fetch('http://localhost:3300/api/login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username, password })
-  })
-    .then(async response => {
-        const data = await response.json();
-        if (response.status === 401) {
-            alert('Wrong password or username!');
-        } else if (data.message === 'Login successful.') {
-            alert(data.message);
-            window.location.href = 'index.html';
-        } else {
-            alert(data.message);
+    <script src="notifications.js"></script>
+    <script src="storage-manager.js"></script>
+    <script>
+        // Create animated background particles
+        function createParticles() {
+            const bgAnimation = document.querySelector('.bg-animation');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.width = (Math.random() * 6 + 2) + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 4) + 's';
+                bgAnimation.appendChild(particle);
+            }
         }
-    })
-  .catch(error => {
-    alert('Error: ' + error);
-  });
-});
-</script>
+        
+        // Enhanced login form submission
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const loginButton = document.querySelector('.login-button');
+            
+            if (!username || !password) {
+                showNotification('🚨 Please enter both username and password!', 'warning');
+                return;
+            }
+            
+            try {
+                // Add loading state
+                loginButton.classList.add('loading');
+                loginButton.textContent = 'Signing In...';
+                loginButton.disabled = true;
+                
+                showNotification('🔐 Authenticating your credentials...', 'info', 2000);
+                const data = await apiClient.login(username, password);
+                
+                showNotification('🎉 Login successful! Welcome back, ' + username + '!', 'success', 2000);
+                
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1500);
+                
+            } catch (error) {
+                // Remove loading state
+                loginButton.classList.remove('loading');
+                loginButton.textContent = 'Login Now';
+                loginButton.disabled = false;
+                
+                if (error.message.includes('Invalid credentials') || error.message.includes('User not found')) {
+                    showNotification('❌ Invalid username or password! Please check your credentials.', 'error');
+                    
+                    // Suggest registration for new users
+                    setTimeout(() => {
+                        const shouldRegister = confirm('🤔 Don\'t have an account yet?\n\nClick OK to create a new account, or Cancel to try logging in again.');
+                        if (shouldRegister) {
+                            window.location.href = 'registration.html';
+                        }
+                    }, 2000);
+                    
+                } else {
+                    showNotification('🚨 Login failed: ' + error.message, 'error');
+                }
+            }
+        });
+        
+        // Input animation effects
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'translateY(-2px)';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'translateY(0)';
+            });
+        });
+        
+        // Initialize particles when page loads
+        document.addEventListener('DOMContentLoaded', createParticles);
+    </script>
 </body>
 </html>

