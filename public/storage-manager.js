@@ -7,11 +7,10 @@ class ApiClient {
     if (isLocal) {
       this.baseUrl = 'http://localhost:3300/api';
     } else {
-      // Use the deployed Render.com backend
-      // Update this URL with your actual Render deployment URL
-      this.baseUrl = 'https://getcash-backend.onrender.com/api';
+      // For now, show a helpful message since backend isn't deployed yet
+      this.baseUrl = null;
       this.isDeployed = true;
-      console.log('🌐 Connecting to deployed server:', this.baseUrl);
+      console.log('⚠️ No backend server deployed yet. Please deploy to Render.com or test locally.');
     }
     
     this.token = localStorage.getItem('authToken');
@@ -36,7 +35,10 @@ class ApiClient {
 
   // Generic API request handler
   async request(endpoint, options = {}) {
-    // All configurations now have baseUrl, so no need for the deployed check
+    // Check if we have a valid baseUrl
+    if (!this.baseUrl) {
+      throw new Error('🚨 Backend server not available. Please run locally (npm start) or deploy to Render.com for online access.');
+    }
     
     const url = `${this.baseUrl}${endpoint}`;
     const config = {
