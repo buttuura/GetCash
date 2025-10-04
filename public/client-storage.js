@@ -14,7 +14,21 @@ class ClientStorage {
         // Initialize storage if it doesn't exist
         if (!localStorage.getItem(this.storageKey)) {
             const initialData = {
-                users: [],
+                users: [
+                    // Pre-configured admin user
+                    {
+                        id: 1,
+                        username: "0776944",
+                        phone: "0776944",
+                        password: "admin123",
+                        balance: 1000,
+                        level: 999,
+                        isAdmin: true,
+                        joinDate: new Date().toISOString(),
+                        tasks: [],
+                        deposits: []
+                    }
+                ],
                 tasks: [
                     {
                         id: 1,
@@ -121,6 +135,13 @@ class ClientStorage {
 
             this.currentUser = user;
             sessionStorage.setItem('currentUser', JSON.stringify(user));
+            
+            // Set admin flag if user is admin
+            if (user.isAdmin || user.username === '0776944') {
+                localStorage.setItem('isAdmin', 'true');
+            } else {
+                localStorage.setItem('isAdmin', 'false');
+            }
 
             return {
                 success: true,
@@ -130,7 +151,8 @@ class ClientStorage {
                     username: user.username,
                     phone: user.phone,
                     balance: user.balance,
-                    level: user.level
+                    level: user.level,
+                    isAdmin: user.isAdmin || user.username === '0776944'
                 }
             };
         } catch (error) {

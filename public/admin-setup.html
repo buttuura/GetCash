@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Setup - GetCash</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        h1 { text-align: center; margin-bottom: 30px; }
+        .admin-info {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background: #ff6b6b;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #ee5a24;
+            transform: translateY(-2px);
+        }
+        .success { color: #00ff88; }
+        .error { color: #ff6b6b; }
+        .user-list {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>👑 Admin Setup & Management</h1>
+        
+        <div class="admin-info">
+            <h3>🔑 Default Admin Credentials:</h3>
+            <p><strong>Username:</strong> 0776944</p>
+            <p><strong>Password:</strong> admin123</p>
+            <p><em>This admin account is automatically created when you use the app.</em></p>
+        </div>
+
+        <div class="form-group">
+            <h3>📊 Current Users:</h3>
+            <div id="userList" class="user-list">Loading...</div>
+        </div>
+
+        <div class="form-group">
+            <h3>➕ Create New Admin:</h3>
+            <label for="newUsername">Username:</label>
+            <input type="text" id="newUsername" placeholder="Enter admin username">
+            
+            <label for="newPassword">Password:</label>
+            <input type="password" id="newPassword" placeholder="Enter admin password">
+            
+            <label for="newPhone">Phone:</label>
+            <input type="text" id="newPhone" placeholder="Enter phone number">
+        </div>
+
+        <button onclick="createAdmin()">Create Admin</button>
+        <button onclick="resetStorage()">Reset All Data</button>
+        <button onclick="testLogin()">Test Admin Login</button>
+
+        <div id="result" style="margin-top: 20px;"></div>
+    </div>
+
+    <script src="client-storage.js"></script>
+    <script>
+        const clientStorage = new ClientStorage();
+        
+        function displayUsers() {
+            const users = clientStorage.getAllUsers();
+            const userList = document.getElementById('userList');
+            
+            if (users.length === 0) {
+                userList.innerHTML = '<p>No users found. Register some users first!</p>';
+                return;
+            }
+            
+            let html = '<table style="width:100%; color:white;">';
+            html += '<tr><th>Username</th><th>Phone</th><th>Balance</th><th>Admin</th><th>Join Date</th></tr>';
+            
+            users.forEach(user => {
+                const data = clientStorage.getData();
+                const fullUser = data.users.find(u => u.id === user.id);
+                const isAdmin = fullUser && (fullUser.isAdmin || fullUser.username === '0776944');
+                
+                html += `<tr style="border-bottom:1px solid rgba(255,255,255,0.3);">
+                    <td>${user.username}</td>
+                    <td>${user.phone}</td>
+                    <td>$${user.balance}</td>
+                    <td>${isAdmin ? '👑 Yes' : 'No'}</td>
+                    <td>${new Date(user.joinDate).toLocaleDateString()}</td>
+                </tr>`;
+            });
+            html += '</table>';
+            userList.innerHTML = html;
+        }
+        
+        async function createAdmin() {
+            const username = document.getElementById('newUsername').value;
+            const password = document.getElementById('newPassword').value;
+            const phone = document.getElementById('newPhone').value;
+            const result = document.getElementById('result');
+            
+            if (!username || !password || !phone) {
+                result.innerHTML = '<p class="error">❌ Please fill all fields!</p>';
+                return;
+            }
+            
+            try {
+                const data = clientStorage.getData();
+                
+                // Check if user already exists
+                if (data.users.find(user => user.username === username)) {
+                    result.innerHTML = '<p class="error">❌ Username already exists!</p>';
+                    return;
+                }
+                
+                // Create admin user
+                const newAdmin = {
+                    id: Date.now(),
+                    username: username,
+                    phone: phone,
+                    password: password,
+                    balance: 1000,
+                    level: 999,
+                    isAdmin: true,
+                    joinDate: new Date().toISOString(),
+                    tasks: [],
+                    deposits: []
+                };
+                
+                data.users.push(newAdmin);
+                clientStorage.saveData(data);
+                
+                result.innerHTML = '<p class="success">✅ Admin created successfully!</p>';
+                displayUsers();
+                
+                // Clear form
+                document.getElementById('newUsername').value = '';
+                document.getElementById('newPassword').value = '';
+                document.getElementById('newPhone').value = '';
+                
+            } catch (error) {
+                result.innerHTML = '<p class="error">❌ Error: ' + error.message + '</p>';
+            }
+        }
+        
+        async function testLogin() {
+            const result = document.getElementById('result');
+            
+            try {
+                const loginResult = await clientStorage.login({
+                    username: '0776944',
+                    password: 'admin123'
+                });
+                
+                if (loginResult.success) {
+                    result.innerHTML = `<p class="success">✅ Admin login successful!<br>
+                        Username: ${loginResult.user.username}<br>
+                        Balance: $${loginResult.user.balance}<br>
+                        Admin Status: ${loginResult.user.isAdmin ? 'Yes' : 'No'}</p>`;
+                } else {
+                    result.innerHTML = '<p class="error">❌ Login failed: ' + loginResult.message + '</p>';
+                }
+            } catch (error) {
+                result.innerHTML = '<p class="error">❌ Login error: ' + error.message + '</p>';
+            }
+        }
+        
+        function resetStorage() {
+            if (confirm('⚠️ This will delete ALL user data! Are you sure?')) {
+                localStorage.removeItem('getcash_data');
+                clientStorage.init(); // Reinitialize with default admin
+                result.innerHTML = '<p class="success">✅ Storage reset! Default admin account recreated.</p>';
+                displayUsers();
+            }
+        }
+        
+        // Load users on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            displayUsers();
+        });
+    </script>
+</body>
+</html>

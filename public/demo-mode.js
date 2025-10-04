@@ -64,6 +64,11 @@ if (typeof apiClient !== 'undefined') {
                     localStorage.setItem('username', result.user.username);
                     localStorage.setItem('userBalance', result.user.balance);
                     
+                    // Store admin status
+                    if (result.user.isAdmin) {
+                        localStorage.setItem('isAdmin', 'true');
+                    }
+                    
                     return {
                         message: result.message + ' (Local storage)',
                         userId: result.user.id,
