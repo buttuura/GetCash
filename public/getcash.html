@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>we promote our selves</title>
+     <link rel="stylesheet" href="getcash.css">
+</head>
+<body>
+    <main>
+        <section>
+          <div class="top_intro_wrapper">
+            <div class="top_introduction">
+              <img class="top-intro-image" src="image/Currency2.jpg">
+            </div>
+            <div class="top-intro-text">
+              <p>WE SHOULD NEVER SETTLE FOR LESS</p>
+            </div>
+          </div>
+        </section>
+        <section>
+          <div class="main-page-icons">
+            <div class="icon-img-cotainer" onclick="location.href='jobs.html'" style="cursor: pointer;">
+              <img class="icon-img" src="image/icon/Job.png">
+              <span>
+                Job
+              </span>
+            </div>
+             <div class="icon-img-cotainer" onclick="location.href='task-list.html'" style="cursor: pointer;">
+              <img  class="icon-img"src="image/icon/Task.png">
+              <span>
+                Task
+              </span>
+            </div>
+             <div class="icon-img-cotainer" onclick="location.href='recharge.html'" style="cursor: pointer;">
+              <img class="icon-img"src="image/icon/Recharge.png">
+              <span>
+                Recharge
+              </span>
+            </div>
+
+             <div class="icon-img-cotainer" onclick="location.href='wallet-interface.html'" style="cursor: pointer;">
+              <img class="icon-img" class="icon-img" src="image/icon/Wallet.png">
+              <span>
+                wallet
+              </span>
+            </div>
+             <div class="icon-img-cotainer">
+              <img class="icon-img" src="image/icon/Invite.png">
+              <span>
+                invite Friend
+              </span>
+            </div>
+            <div class="icon-img-cotainer">
+              <img class="icon-img" src="image/icon/selfTeach.png">
+              <span>
+                self teach
+              </span>
+            </div>
+          </div>
+        </section>
+        <section>
+          <div class="latest-news">
+            <h2>Latest News</h2>
+            <p style="text-align: center; font-size: clamp(14px,2.5vw,18px); color: #333;">New tasks and jobs are added daily. Check back often to find the latest opportunities to earn!</p>
+          <div class="new-members-joining">
+            <div class="member-activity-list" id="member-activity-list"></div>
+          </div>
+        </section>
+
+        <footer class="footer">
+          <div class="footer-icon footer-active" onclick="location.href='index.html'">
+            <img src="image/icon/index.png" alt="Home">
+            <span>Home</span>
+          </div>
+          <div class="footer-icon" onclick="location.href='task-list.html'">
+            <img src="image/icon/grab.png" alt="Task">
+            <span>Task</span>
+          </div>
+          <div class="footer-icon" onclick="location.href='withdraw.html'">
+            <img src="image/icon/profit.png" alt="Withdraw">
+            <span>Withdraw</span>
+          </div>
+          <div class="footer-icon" onclick="location.href='wallet-interface.html'">
+            <img src="image/icon/user.png" alt="Profile">
+            <span>Profile</span>
+          </div>
+        </footer>
+    </main>
+    <script src="getcash.js"></script>
+    <script>
+    // Show admin button only if logged in as admin
+    // Assume token and username are stored in localStorage after login
+    const adminUsername = '0776944';
+    const loggedInUser = localStorage.getItem('username');
+    if (loggedInUser === adminUsername) {
+      const adminBtn = document.createElement('button');
+      adminBtn.textContent = 'Admin Tasks';
+      adminBtn.style = 'display:block;margin:20px auto;padding:10px 20px;font-size:1.1em;background:#007bff;color:#fff;border:none;border-radius:5px;cursor:pointer;';
+      adminBtn.onclick = function() { window.location.href = 'admin-tasks.html'; };
+      document.body.insertBefore(adminBtn, document.body.firstChild.nextSibling);
+    }
+    </script>
+</body>
+</html>
