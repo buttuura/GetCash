@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: getcash-backend
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        value: bd5adcbf0e26a5711c43a9eef90fa395a872f153265e2af574e74e092e45da31ae15f1b163df8624c7cb437c6528d604fb70b010d4ace879dae4f8aa62181a4d
+      - key: CORS_ORIGIN
+        value: https://buttuura.github.io
+      - key: PORT
+        value: 10000
