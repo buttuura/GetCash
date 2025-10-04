@@ -7,13 +7,41 @@ class ApiClient {
     if (isLocal) {
       this.baseUrl = 'http://localhost:3300/api';
     } else {
-      // Try the deployed backend URL
-      this.baseUrl = 'https://getcash-backend.onrender.com/api';
+      // Try multiple possible Render URLs
+      this.possibleUrls = [
+        'https://getcash-backend.onrender.com/api',
+        'https://getcash.onrender.com/api',
+        'https://getcash-backend-latest.onrender.com/api'
+      ];
+      this.baseUrl = this.possibleUrls[0]; // Start with first URL
       this.isDeployed = true;
-      console.log('🌐 Using deployed server:', this.baseUrl);
+      console.log('🌐 Trying deployed server:', this.baseUrl);
     }
     
     this.token = localStorage.getItem('authToken');
+  }
+
+  // Test server connectivity
+  async testConnection() {
+    if (!this.isDeployed) return true;
+    
+    for (const url of this.possibleUrls) {
+      try {
+        console.log('🔍 Testing connection to:', url);
+        const response = await fetch(`${url.replace('/api', '')}/health`, { 
+          method: 'GET',
+          signal: AbortSignal.timeout(10000)
+        });
+        if (response.ok) {
+          console.log('✅ Connected to:', url);
+          this.baseUrl = url;
+          return true;
+        }
+      } catch (error) {
+        console.log('❌ Failed to connect to:', url);
+      }
+    }
+    return false;
   }
 
   // Set authentication token
@@ -46,7 +74,7 @@ class ApiClient {
       
       // Add timeout for deployed requests
       if (this.isDeployed) {
-        config.signal = AbortSignal.timeout(30000); // 30 second timeout
+        config.signal = AbortSignal.timeout(45000); // 45 second timeout for cold starts
       }
       
       const response = await fetch(url, config);
