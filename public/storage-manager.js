@@ -7,13 +7,13 @@ class ApiClient {
     if (isLocal) {
       this.baseUrl = 'http://localhost:3300/api';
     } else {
-      // Try multiple possible Render URLs
+      // Use your actual Render deployment URL
       this.possibleUrls = [
+        'https://getcash-d3goijjipnbc7383itk0.onrender.com/api',
         'https://getcash-backend.onrender.com/api',
-        'https://getcash.onrender.com/api',
-        'https://getcash-backend-latest.onrender.com/api'
+        'https://getcash.onrender.com/api'
       ];
-      this.baseUrl = this.possibleUrls[0]; // Start with first URL
+      this.baseUrl = this.possibleUrls[0]; // Start with your actual URL
       this.isDeployed = true;
       console.log('🌐 Trying deployed server:', this.baseUrl);
     }
