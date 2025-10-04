@@ -2,7 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=5.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#667eea">
     <title>🚀 Login - GetCash Platform</title>
     <style>
         * {
@@ -249,6 +253,7 @@
         </div>
     </div>
 
+    <script src="mobile-compatibility.js"></script>
     <script src="client-storage.js"></script>
     <script src="notifications.js"></script>
     <script src="storage-manager.js"></script>
@@ -306,9 +311,16 @@
                 localStorage.setItem('loginSuccess', 'true');
                 localStorage.setItem('loginTime', new Date().toISOString());
                 
+                // Universal redirect that works on all devices
                 setTimeout(() => {
                     console.log('Redirecting to GetCash page...');
-                    window.location.href = 'getcash.html';
+                    // Use universal redirect function for all devices
+                    if (typeof window.universalRedirect === 'function') {
+                        window.universalRedirect('getcash.html', 'Welcome to GetCash!');
+                    } else {
+                        // Fallback if mobile compatibility not loaded
+                        window.location.href = 'getcash.html';
+                    }
                 }, 1500);
                 
             } catch (error) {

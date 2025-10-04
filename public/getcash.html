@@ -2,8 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>we promote our selves</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=5.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#667eea">
+    <title>GetCash - Earn Money Online</title>
      <link rel="stylesheet" href="getcash.css">
 </head>
 <body>
@@ -87,6 +91,7 @@
           </div>
         </footer>
     </main>
+    <script src="mobile-compatibility.js"></script>
     <script src="client-storage.js"></script>
     <script src="notifications.js"></script>
     <script src="storage-manager.js"></script>
@@ -105,14 +110,46 @@
       document.body.insertBefore(adminBtn, document.body.firstChild.nextSibling);
     }
     
-    // Welcome notification for logged in users
+    // Cross-device compatibility and welcome notification
     document.addEventListener('DOMContentLoaded', function() {
+      // Check if user is properly logged in
       const username = localStorage.getItem('username');
-      if (username && typeof showNotification === 'function') {
+      const userId = localStorage.getItem('userId');
+      
+      if (!username || !userId) {
+        // Redirect to login if not authenticated (works on all devices)
+        console.log('User not authenticated, redirecting to login');
+        setTimeout(() => {
+          try {
+            window.location.href = 'login-page.html';
+          } catch (e) {
+            document.location = 'login-page.html';
+          }
+        }, 1000);
+        return;
+      }
+      
+      // Welcome notification for logged in users
+      if (typeof showNotification === 'function') {
         setTimeout(() => {
           showNotification('🎉 Welcome to GetCash, ' + username + '!', 'success');
+          
+          // Show device info for debugging
+          const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+          console.log('Device type:', isMobile ? 'Mobile' : 'Desktop');
+          console.log('User agent:', navigator.userAgent);
         }, 1000);
       }
+      
+      // Ensure all click handlers work on touch devices
+      const clickableElements = document.querySelectorAll('.icon-img-cotainer, .footer-icon');
+      clickableElements.forEach(element => {
+        // Add touch support for mobile devices
+        element.addEventListener('touchstart', function(e) {
+          e.preventDefault();
+          this.click();
+        }, { passive: false });
+      });
     });
     </script>
 </body>
