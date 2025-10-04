@@ -87,6 +87,10 @@
           </div>
         </footer>
     </main>
+    <script src="client-storage.js"></script>
+    <script src="notifications.js"></script>
+    <script src="storage-manager.js"></script>
+    <script src="demo-mode.js"></script>
     <script src="getcash.js"></script>
     <script>
     // Show admin button only if logged in as admin
@@ -100,6 +104,16 @@
       adminBtn.onclick = function() { window.location.href = 'admin-tasks.html'; };
       document.body.insertBefore(adminBtn, document.body.firstChild.nextSibling);
     }
+    
+    // Welcome notification for logged in users
+    document.addEventListener('DOMContentLoaded', function() {
+      const username = localStorage.getItem('username');
+      if (username && typeof showNotification === 'function') {
+        setTimeout(() => {
+          showNotification('🎉 Welcome to GetCash, ' + username + '!', 'success');
+        }, 1000);
+      }
+    });
     </script>
 </body>
 </html>

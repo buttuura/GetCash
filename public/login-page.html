@@ -300,9 +300,14 @@
                 showNotification('🔐 Authenticating your credentials...', 'info', 2000);
                 const data = await apiClient.login(username, password);
                 
-                showNotification('🎉 Login successful! Welcome to GetCash, ' + username + '!', 'success', 2000);
+                showNotification('🎉 Login successful! Redirecting to GetCash...', 'success', 2000);
+                
+                // Store user data for GetCash page
+                localStorage.setItem('loginSuccess', 'true');
+                localStorage.setItem('loginTime', new Date().toISOString());
                 
                 setTimeout(() => {
+                    console.log('Redirecting to GetCash page...');
                     window.location.href = 'getcash.html';
                 }, 1500);
                 
