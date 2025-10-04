@@ -4,7 +4,7 @@
   "description": "A full-stack task management web application with user authentication and database storage",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "node test-server.js",
     "dev": "nodemon server.js",
     "db:view": "node view-database.js",
     "db:stats": "node view-database.js --stats",
