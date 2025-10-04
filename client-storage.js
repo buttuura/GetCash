@@ -1,6 +1,24 @@
 /**
- * Client-Side Storage Manager for GetCash App
- * This provides a fallback when the server is unavailable
+ * Client-Side Storage Manager fo            ],
+            tasks: [
+                {
+                    id: 1,
+                    title: "Watch YouTube Video",
+                    description: "Watch a 5-minute video and get rewarded",
+                    reward: 0.5,
+                    status: "available",
+                    category: "entertainment"
+                },
+                {
+                    id: 2,
+                    title: "Share on Social Media",
+                    description: "Share our app on your social media",
+                    reward: 1.0,
+                    status: "available",
+                    category: "social"
+                },
+                {
+                    id: 3,is provides a fallback when the server is unavailable
  */
 
 class ClientStorage {
@@ -13,22 +31,30 @@ class ClientStorage {
     init() {
         // Initialize storage if it doesn't exist
         if (!localStorage.getItem(this.storageKey)) {
-            const initialData = {
-                users: [
-                    // Pre-configured admin user
-                    {
-                        id: 1,
-                        username: "0776944",
-                        phone: "0776944",
-                        password: "admin123",
-                        balance: 1000,
-                        level: 999,
-                        isAdmin: true,
-                        joinDate: new Date().toISOString(),
-                        tasks: [],
-                        deposits: []
-                    }
-                ],
+            this.createInitialData();
+        } else {
+            // Ensure admin user exists
+            this.ensureAdminUser();
+        }
+    }
+
+    createInitialData() {
+        const initialData = {
+            users: [
+                // Pre-configured admin user
+                {
+                    id: 1,
+                    username: "0776944",
+                    phone: "0776944",
+                    password: "admin123",
+                    balance: 1000,
+                    level: 999,
+                    isAdmin: true,
+                    joinDate: new Date().toISOString(),
+                    tasks: [],
+                    deposits: []
+                }
+            ],
                 tasks: [
                     {
                         id: 1,
@@ -59,8 +85,41 @@ class ClientStorage {
                     appVersion: "1.0.0",
                     lastUpdated: new Date().toISOString()
                 }
-            };
-            localStorage.setItem(this.storageKey, JSON.stringify(initialData));
+        };
+        localStorage.setItem(this.storageKey, JSON.stringify(initialData));
+    }
+
+    ensureAdminUser() {
+        const data = this.getData();
+        
+        // Check if admin user exists
+        const adminExists = data.users && data.users.some(user => 
+            user.username === "0776944" && user.isAdmin === true
+        );
+        
+        if (!adminExists) {
+            // Add or update admin user
+            if (!data.users) data.users = [];
+            
+            // Remove any existing user with username 0776944
+            data.users = data.users.filter(user => user.username !== "0776944");
+            
+            // Add fresh admin user
+            data.users.unshift({
+                id: 1,
+                username: "0776944",
+                phone: "0776944",
+                password: "admin123",
+                balance: 1000,
+                level: 999,
+                isAdmin: true,
+                joinDate: new Date().toISOString(),
+                tasks: [],
+                deposits: []
+            });
+            
+            this.saveData(data);
+            console.log('Admin user restored:', data.users[0]);
         }
     }
 
@@ -245,6 +304,38 @@ class ClientStorage {
             joinDate: user.joinDate,
             tasksCompleted: user.tasks ? user.tasks.length : 0
         }));
+    }
+
+    // Debug function to reset admin credentials
+    resetAdminCredentials() {
+        const data = this.getData();
+        if (!data.users) data.users = [];
+        
+        // Remove existing admin
+        data.users = data.users.filter(user => user.username !== "0776944");
+        
+        // Add fresh admin user
+        const adminUser = {
+            id: 1,
+            username: "0776944",
+            phone: "0776944",
+            password: "admin123",
+            balance: 1000,
+            level: 999,
+            isAdmin: true,
+            joinDate: new Date().toISOString(),
+            tasks: [],
+            deposits: []
+        };
+        
+        data.users.unshift(adminUser);
+        this.saveData(data);
+        
+        console.log('✅ Admin credentials reset successfully!');
+        console.log('👤 Username: 0776944');
+        console.log('🔑 Password: admin123');
+        
+        return adminUser;
     }
 }
 
