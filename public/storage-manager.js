@@ -7,10 +7,10 @@ class ApiClient {
     if (isLocal) {
       this.baseUrl = 'http://localhost:3300/api';
     } else {
-      // For now, show a helpful message since backend isn't deployed yet
-      this.baseUrl = null;
+      // Try the deployed backend URL
+      this.baseUrl = 'https://getcash-backend.onrender.com/api';
       this.isDeployed = true;
-      console.log('⚠️ No backend server deployed yet. Please deploy to Render.com or test locally.');
+      console.log('🌐 Using deployed server:', this.baseUrl);
     }
     
     this.token = localStorage.getItem('authToken');
@@ -35,11 +35,6 @@ class ApiClient {
 
   // Generic API request handler
   async request(endpoint, options = {}) {
-    // Check if we have a valid baseUrl
-    if (!this.baseUrl) {
-      throw new Error('🚨 Backend server not available. Please run locally (npm start) or deploy to Render.com for online access.');
-    }
-    
     const url = `${this.baseUrl}${endpoint}`;
     const config = {
       headers: this.getAuthHeaders(),
@@ -48,6 +43,12 @@ class ApiClient {
 
     try {
       console.log('🔄 Making API request to:', url);
+      
+      // Add timeout for deployed requests
+      if (this.isDeployed) {
+        config.signal = AbortSignal.timeout(30000); // 30 second timeout
+      }
+      
       const response = await fetch(url, config);
       
       if (!response.ok) {
@@ -72,7 +73,12 @@ class ApiClient {
       console.error('❌ API request failed:', error);
       
       if (error.name === 'TypeError' && error.message.includes('fetch')) {
-        throw new Error('🌐 Network error: Cannot reach server. Please check your internet connection or try again later.');
+        // Check if we're trying to connect to deployed server
+        if (this.isDeployed) {
+          throw new Error('🚀 Server is starting up (this can take 30-60 seconds on first request). Please wait and try again.');
+        } else {
+          throw new Error('🌐 Cannot connect to local server. Make sure to run "npm start" in your backend folder.');
+        }
       }
       
       throw error;
