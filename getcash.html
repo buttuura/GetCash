@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=5.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#667eea">
+    <title>GetCash - Earn Money Online</title>
+     <link rel="stylesheet" href="getcash.css">
+</head>
+<body>
+    <main>
+        <section>
+          <div class="top_intro_wrapper">
+            <div class="top_introduction">
+              <img class="top-intro-image" src="image/Currency2.jpg">
+            </div>
+            <div class="top-intro-text">
+              <p>WE SHOULD NEVER SETTLE FOR LESS</p>
+            </div>
+          </div>
+        </section>
+        <section>
+          <div class="main-page-icons">
+            <div class="icon-img-cotainer" onclick="location.href='jobs.html'" style="cursor: pointer;">
+              <img class="icon-img" src="image/icon/Job.png">
+              <span>
+                Job
+              </span>
+            </div>
+             <div class="icon-img-cotainer" onclick="location.href='task-list.html'" style="cursor: pointer;">
+              <img  class="icon-img"src="image/icon/Task.png">
+              <span>
+                Task
+              </span>
+            </div>
+             <div class="icon-img-cotainer" onclick="location.href='recharge.html'" style="cursor: pointer;">
+              <img class="icon-img"src="image/icon/Recharge.png">
+              <span>
+                Recharge
+              </span>
+            </div>
+
+             <div class="icon-img-cotainer" onclick="location.href='wallet-interface.html'" style="cursor: pointer;">
+              <img class="icon-img" class="icon-img" src="image/icon/Wallet.png">
+              <span>
+                wallet
+              </span>
+            </div>
+             <div class="icon-img-cotainer">
+              <img class="icon-img" src="image/icon/Invite.png">
+              <span>
+                invite Friend
+              </span>
+            </div>
+            <div class="icon-img-cotainer">
+              <img class="icon-img" src="image/icon/selfTeach.png">
+              <span>
+                self teach
+              </span>
+            </div>
+          </div>
+        </section>
+        <section>
+          <div class="latest-news">
+            <h2>Latest News</h2>
+            <p style="text-align: center; font-size: clamp(14px,2.5vw,18px); color: #333;">New tasks and jobs are added daily. Check back often to find the latest opportunities to earn!</p>
+          <div class="new-members-joining">
+            <div class="member-activity-list" id="member-activity-list"></div>
+          </div>
+        </section>
+
+        <footer class="footer">
+          <div class="footer-icon footer-active" onclick="location.href='index.html'">
+            <img src="image/icon/index.png" alt="Home">
+            <span>Home</span>
+          </div>
+          <div class="footer-icon" onclick="location.href='task-list.html'">
+            <img src="image/icon/grab.png" alt="Task">
+            <span>Task</span>
+          </div>
+          <div class="footer-icon" onclick="location.href='withdraw.html'">
+            <img src="image/icon/profit.png" alt="Withdraw">
+            <span>Withdraw</span>
+          </div>
+          <div class="footer-icon" onclick="location.href='wallet-interface.html'">
+            <img src="image/icon/user.png" alt="Profile">
+            <span>Profile</span>
+          </div>
+        </footer>
+    </main>
+    <script src="mobile-compatibility.js"></script>
+    <script src="client-storage.js"></script>
+    <script src="notifications.js"></script>
+    <script src="storage-manager.js"></script>
+    <script src="demo-mode.js"></script>
+    <script src="getcash.js"></script>
+    <script>
+    // Show admin button only if logged in as admin
+    // Check multiple ways to detect admin status
+    const adminUsername = '0776944';
+    const loggedInUser = localStorage.getItem('username');
+    const isAdmin = localStorage.getItem('isAdmin') === 'true' || loggedInUser === adminUsername;
+    
+    if (isAdmin) {
+      const adminBtn = document.createElement('button');
+      adminBtn.textContent = '👑 Admin Dashboard';
+      adminBtn.style = 'display:block;margin:20px auto;padding:12px 25px;font-size:1.1em;background:linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);color:#fff;border:none;border-radius:25px;cursor:pointer;box-shadow:0 4px 15px rgba(255, 107, 107, 0.3);transition:all 0.3s ease;';
+      adminBtn.onmouseover = function() { 
+        this.style.transform = 'translateY(-2px)';
+        this.style.boxShadow = '0 8px 25px rgba(255, 107, 107, 0.4)';
+      };
+      adminBtn.onmouseout = function() { 
+        this.style.transform = 'translateY(0)';
+        this.style.boxShadow = '0 4px 15px rgba(255, 107, 107, 0.3)';
+      };
+      adminBtn.onclick = function() { window.location.href = 'admin-users.html'; };
+      document.body.insertBefore(adminBtn, document.body.firstChild.nextSibling);
+    }
+    
+    // Cross-device compatibility and welcome notification
+    document.addEventListener('DOMContentLoaded', function() {
+      // Check if user is properly logged in
+      const username = localStorage.getItem('username');
+      const userId = localStorage.getItem('userId');
+      
+      if (!username || !userId) {
+        // Redirect to login if not authenticated (works on all devices)
+        console.log('User not authenticated, redirecting to login');
+        setTimeout(() => {
+          try {
+            window.location.href = 'login-page.html';
+          } catch (e) {
+            document.location = 'login-page.html';
+          }
+        }, 1000);
+        return;
+      }
+      
+      // Welcome notification for logged in users
+      if (typeof showNotification === 'function') {
+        setTimeout(() => {
+          showNotification('🎉 Welcome to GetCash, ' + username + '!', 'success');
+          
+          // Show device info for debugging
+          const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+          console.log('Device type:', isMobile ? 'Mobile' : 'Desktop');
+          console.log('User agent:', navigator.userAgent);
+        }, 1000);
+      }
+      
+      // Ensure all click handlers work on touch devices
+      const clickableElements = document.querySelectorAll('.icon-img-cotainer, .footer-icon');
+      clickableElements.forEach(element => {
+        // Add touch support for mobile devices
+        element.addEventListener('touchstart', function(e) {
+          e.preventDefault();
+          this.click();
+        }, { passive: false });
+      });
+    });
+    </script>
+</body>
+</html>

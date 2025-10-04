@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+        }
+        .test-btn {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 15px 30px;
+            margin: 10px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Login Redirect Test</h1>
+    <p>Current URL: <span id="current-url"></span></p>
+    <p>Hostname: <span id="hostname"></span></p>
+    
+    <button class="test-btn" onclick="testRedirect()">Test Redirect to GetCash</button>
+    <button class="test-btn" onclick="testStorage()">Test Local Storage</button>
+    
+    <div id="results" style="margin-top: 20px; text-align: left; background: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px;"></div>
+
+    <script>
+        document.getElementById('current-url').textContent = window.location.href;
+        document.getElementById('hostname').textContent = window.location.hostname;
+        
+        function testRedirect() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<h3>Testing Redirect...</h3>';
+            
+            // Set some test data
+            localStorage.setItem('username', 'TestUser');
+            localStorage.setItem('userId', '123');
+            
+            results.innerHTML += '<p>✅ Set test data in localStorage</p>';
+            results.innerHTML += '<p>📍 Attempting redirect to getcash.html...</p>';
+            
+            setTimeout(() => {
+                window.location.href = 'getcash.html';
+            }, 2000);
+        }
+        
+        function testStorage() {
+            const results = document.getElementById('results');
+            const username = localStorage.getItem('username');
+            const userId = localStorage.getItem('userId');
+            
+            results.innerHTML = '<h3>Local Storage Test:</h3>';
+            results.innerHTML += '<p>Username: ' + (username || 'Not set') + '</p>';
+            results.innerHTML += '<p>User ID: ' + (userId || 'Not set') + '</p>';
+        }
+    </script>
+</body>
+</html>
