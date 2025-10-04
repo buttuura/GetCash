@@ -8,8 +8,10 @@ class ApiClient {
       this.baseUrl = 'http://localhost:3300/api';
     } else {
       // Use the deployed Render.com backend
+      // Update this URL with your actual Render deployment URL
       this.baseUrl = 'https://getcash-backend.onrender.com/api';
       this.isDeployed = true;
+      console.log('🌐 Connecting to deployed server:', this.baseUrl);
     }
     
     this.token = localStorage.getItem('authToken');
@@ -43,16 +45,34 @@ class ApiClient {
     };
 
     try {
+      console.log('🔄 Making API request to:', url);
       const response = await fetch(url, config);
-      const data = await response.json();
       
       if (!response.ok) {
-        throw new Error(data.message || 'API request failed');
+        if (response.status === 0 || !response.status) {
+          throw new Error('🚨 Cannot connect to server. Make sure the backend is deployed and running.');
+        }
+        
+        let errorMessage;
+        try {
+          const data = await response.json();
+          errorMessage = data.message || `Server error: ${response.status}`;
+        } catch {
+          errorMessage = `Server error: ${response.status} ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
       }
       
+      const data = await response.json();
+      console.log('✅ API request successful');
       return data;
     } catch (error) {
-      console.error('API request error:', error);
+      console.error('❌ API request failed:', error);
+      
+      if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        throw new Error('🌐 Network error: Cannot reach server. Please check your internet connection or try again later.');
+      }
+      
       throw error;
     }
   }
