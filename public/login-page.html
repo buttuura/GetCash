@@ -252,6 +252,15 @@
     <script src="notifications.js"></script>
     <script src="storage-manager.js"></script>
     <script>
+        // Check if we're on GitHub Pages without a server
+        if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+            // Show deployment notice
+            setTimeout(() => {
+                showNotification('⚠️ Demo Mode: This site needs a server to function fully. For full functionality, please deploy the backend to Render.com or run locally.', 'warning');
+            }, 1000);
+        }
+    </script>
+    <script>
         // Create animated background particles
         function createParticles() {
             const bgAnimation = document.querySelector('.bg-animation');
