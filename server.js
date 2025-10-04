@@ -23,9 +23,10 @@ const db = new Database();
 // CORS configuration
 const corsOptions = {
   origin: NODE_ENV === 'production' 
-    ? process.env.CORS_ORIGIN || 'https://your-app-domain.com'
+    ? [process.env.CORS_ORIGIN || 'https://buttuura.github.io', 'https://buttuura.github.io/GetCash']
     : ['http://localhost:3300', 'http://127.0.0.1:3300'],
-  credentials: true
+  credentials: true,
+  optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions));
@@ -419,7 +420,11 @@ const server = app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`🌍 Environment: ${NODE_ENV}`);
   console.log(`💾 Database storage enabled - data persists on disk`);
-  if (NODE_ENV === 'development') {
+  
+  if (NODE_ENV === 'production') {
+    console.log('🌐 Production server ready for GetCash app!');
+    console.log('🔗 Accessible from: https://buttuura.github.io/GetCash');
+  } else {
     console.log(`🔗 Local URL: http://localhost:${PORT}`);
   }
 });

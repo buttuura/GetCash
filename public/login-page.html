@@ -252,11 +252,11 @@
     <script src="notifications.js"></script>
     <script src="storage-manager.js"></script>
     <script>
-        // Check if we're on GitHub Pages without a server
+        // Check if we're on GitHub Pages and show status
         if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-            // Show deployment notice
+            // Show connection status
             setTimeout(() => {
-                showNotification('⚠️ Demo Mode: This site needs a server to function fully. For full functionality, please deploy the backend to Render.com or run locally.', 'warning');
+                showNotification('🌐 Connecting to server... Please wait while we establish connection.', 'info');
             }, 1000);
         }
     </script>

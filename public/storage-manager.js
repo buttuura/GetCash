@@ -7,9 +7,8 @@ class ApiClient {
     if (isLocal) {
       this.baseUrl = 'http://localhost:3300/api';
     } else {
-      // For deployed version, we'll need a hosted server
-      // For now, show a helpful message
-      this.baseUrl = null;
+      // Use the deployed Render.com backend
+      this.baseUrl = 'https://getcash-backend.onrender.com/api';
       this.isDeployed = true;
     }
     
@@ -35,10 +34,7 @@ class ApiClient {
 
   // Generic API request handler
   async request(endpoint, options = {}) {
-    // Check if we're on a deployed site without a server
-    if (this.isDeployed && !this.baseUrl) {
-      throw new Error('🚨 Server not available on GitHub Pages. Please run locally or deploy the server to a hosting platform like Render.com');
-    }
+    // All configurations now have baseUrl, so no need for the deployed check
     
     const url = `${this.baseUrl}${endpoint}`;
     const config = {
