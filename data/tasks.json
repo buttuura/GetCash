@@ -1,4 +1,15 @@
 {
-  "tasks": [],
-  "lastUpdated": "2025-10-05T18:25:28.554Z"
+  "tasks": [
+    {
+      "id": "1759689075461",
+      "title": "Samsung alutra s24",
+      "description": "Boost the sales to day to get more customers ",
+      "reward": "2000",
+      "price": "2000",
+      "uploadDate": "2025-10-05T18:31:18.209Z",
+      "img": "https://raw.githubusercontent.com/buttuura/GetCash/main/data/images/task_1759689075461_1759689075574.jpg",
+      "status": "active"
+    }
+  ],
+  "lastUpdated": "2025-10-05T18:31:18.225Z"
 }
