@@ -2,7 +2,66 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=5.0">
+    <meta name="viewport" content="    if (isAdmin) {
+      // Create admin controls container
+      const adminContainer = document.createElement('div');
+      adminContainer.style = 'text-align: center; margin: 20px auto; max-width: 400px;';
+      
+      // Main admin dashboard button
+      const adminBtn = document.createElement('button');
+      adminBtn.textContent = '👑 Admin Dashboard';
+      adminBtn.style = 'display:block;margin:10px auto;padding:12px 25px;width:100%;font-size:1.1em;background:linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);color:#fff;border:none;border-radius:25px;cursor:pointer;box-shadow:0 4px 15px rgba(255, 107, 107, 0.3);transition:all 0.3s ease;';
+      adminBtn.onmouseover = function() { 
+        this.style.transform = 'translateY(-2px)'; 
+        this.style.boxShadow = '0 6px 20px rgba(255, 107, 107, 0.4)';
+      };
+      adminBtn.onmouseout = function() { 
+        this.style.transform = 'translateY(0)'; 
+        this.style.boxShadow = '0 4px 15px rgba(255, 107, 107, 0.3)';
+      };
+      adminBtn.onclick = function() { window.location.href = 'admin-tasks.html'; };
+      
+      // GitHub storage upload button
+      const uploadBtn = document.createElement('button');
+      uploadBtn.textContent = '🚀 Upload Task (GitHub)';
+      uploadBtn.style = 'display:block;margin:5px auto;padding:10px 20px;width:100%;font-size:1em;background:linear-gradient(135deg, #4CAF50 0%, #45a049 100%);color:#fff;border:none;border-radius:20px;cursor:pointer;box-shadow:0 3px 12px rgba(76, 175, 80, 0.3);transition:all 0.3s ease;';
+      uploadBtn.onmouseover = function() { 
+        this.style.transform = 'translateY(-1px)'; 
+        this.style.boxShadow = '0 5px 15px rgba(76, 175, 80, 0.4)';
+      };
+      uploadBtn.onmouseout = function() { 
+        this.style.transform = 'translateY(0)'; 
+        this.style.boxShadow = '0 3px 12px rgba(76, 175, 80, 0.3)';
+      };
+      uploadBtn.onclick = function() { window.location.href = 'task-upload-github.html'; };
+      
+      // GitHub storage manage button
+      const manageBtn = document.createElement('button');
+      manageBtn.textContent = '🔗 Manage Tasks (GitHub)';
+      manageBtn.style = 'display:block;margin:5px auto;padding:10px 20px;width:100%;font-size:1em;background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);color:#fff;border:none;border-radius:20px;cursor:pointer;box-shadow:0 3px 12px rgba(102, 126, 234, 0.3);transition:all 0.3s ease;';
+      manageBtn.onmouseover = function() { 
+        this.style.transform = 'translateY(-1px)'; 
+        this.style.boxShadow = '0 5px 15px rgba(102, 126, 234, 0.4)';
+      };
+      manageBtn.onmouseout = function() { 
+        this.style.transform = 'translateY(0)'; 
+        this.style.boxShadow = '0 3px 12px rgba(102, 126, 234, 0.3)';
+      };
+      manageBtn.onclick = function() { window.location.href = 'admin-manage-tasks.html'; };
+      
+      // Storage info
+      const storageInfo = document.createElement('div');
+      storageInfo.innerHTML = '✨ <strong>GitHub Storage</strong><br><small>Unlimited • No quotas • Global access</small>';
+      storageInfo.style = 'margin:10px auto;padding:8px;background:rgba(76, 175, 80, 0.1);border:1px solid rgba(76, 175, 80, 0.3);border-radius:10px;color:#2e7d32;font-size:0.9em;';
+      
+      // Add all elements to container
+      adminContainer.appendChild(adminBtn);
+      adminContainer.appendChild(uploadBtn);
+      adminContainer.appendChild(manageBtn);
+      adminContainer.appendChild(storageInfo);
+      
+      document.body.insertBefore(adminContainer, document.body.firstChild.nextSibling);
+    }dth, initial-scale=1.0, user-scalable=yes, maximum-scale=5.0">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">

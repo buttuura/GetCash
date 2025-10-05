@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Task List</title>
+  <title>Task List (GitHub Storage)</title>
   <link rel="stylesheet" href="getcash.css">
+  <script src="github-storage.js"></script>
   <!-- Removed internal <style> for consistency -->
 </head>
 <body>
@@ -23,29 +24,25 @@
     </div>
   </div>
   <script>
-    // Load tasks from localStorage (uploaded by admin)
+    // Load tasks from GitHub storage (unlimited, persistent)
     let tasks = [];
     let completedTasks = [];
     
-
-
-    // Initialize data
-    function loadTaskData() {
+    // Initialize data from GitHub
+    async function loadTaskData() {
       try {
-        // Load admin uploaded tasks from localStorage (primary source)
-        const adminTasks = JSON.parse(localStorage.getItem('adminTasks') || '[]');
+        console.log('🔄 Loading tasks from GitHub storage...');
         
-        if (adminTasks && Array.isArray(adminTasks) && adminTasks.length > 0) {
-          tasks = adminTasks;
-          console.log('✅ Loaded admin tasks:', adminTasks.length);
+        // Load tasks from GitHub repository
+        const githubTasks = await githubStorage.getTasks();
+        
+        if (githubTasks && Array.isArray(githubTasks) && githubTasks.length > 0) {
+          tasks = githubTasks;
+          console.log('✅ Loaded', githubTasks.length, 'tasks from GitHub storage');
         } else {
-          // Show default sample tasks if no admin tasks exist
-          tasks = [
-            { id: 1, title: 'Upload Product Image', price: 5000, img: 'image/Currency.jpg' },
-            { id: 2, title: 'Share Promo Banner', price: 3000, img: 'image/Currency2.jpg' },
-            { id: 3, title: 'Post Offer Screenshot', price: 7000, img: 'image/icon/profit.png' }
-          ];
-          console.log('📋 Using default sample tasks');
+          // Show message when no tasks available
+          tasks = [];
+          console.log('📋 No tasks found in GitHub storage');
         }
         
         // Load completed tasks
@@ -83,17 +80,34 @@
       }
     }, 30000);
     
-    // Manual refresh function
-    function refreshTasks() {
-      const oldTaskCount = tasks.length;
-      loadTaskData();
+    // Manual refresh function with GitHub storage
+    async function refreshTasks() {
+      const refreshBtn = document.querySelector('button[onclick="refreshTasks()"]');
+      const originalText = refreshBtn.textContent;
+      refreshBtn.textContent = '🔄 Loading...';
+      refreshBtn.disabled = true;
       
-      if (typeof showNotification === 'function') {
-        if (tasks.length > oldTaskCount) {
-          showNotification(`🆕 Found ${tasks.length - oldTaskCount} new tasks!`, 'success', 3000);
-        } else {
-          showNotification('✅ Task list refreshed!', 'info', 2000);
+      try {
+        const oldTaskCount = tasks.length;
+        await loadTaskData();
+        renderTasks();
+        
+        if (typeof showNotification === 'function') {
+          if (tasks.length > oldTaskCount) {
+            showNotification(`🆕 Found ${tasks.length - oldTaskCount} new tasks from GitHub!`, 'success', 3000);
+          } else {
+            showNotification('✅ Task list refreshed from GitHub!', 'info', 2000);
+          }
         }
+        console.log('✨ Task list refreshed from GitHub storage!');
+      } catch (error) {
+        console.error('❌ Failed to refresh tasks:', error);
+        if (typeof showNotification === 'function') {
+          showNotification('❌ Failed to load tasks from GitHub', 'error', 3000);
+        }
+      } finally {
+        refreshBtn.textContent = originalText;
+        refreshBtn.disabled = false;
       }
     }
     
@@ -239,6 +253,30 @@
     </main>
     <script src="notifications.js"></script>
     <script src="getcash.js"></script>
+    <script>
+      // Initialize GitHub storage task list
+      window.addEventListener('load', async function() {
+        console.log('🚀 Initializing GitHub storage task list...');
+        try {
+          await loadTaskData();
+          renderTasks();
+          console.log('✅ Task list initialized with GitHub storage');
+        } catch (error) {
+          console.error('❌ Failed to initialize with GitHub storage:', error);
+          // Show a user-friendly message
+          document.getElementById('task-list').innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #666;">
+              <h3>🔗 GitHub Storage Loading...</h3>
+              <p>Tasks are loading from unlimited GitHub storage.<br>
+              This may take a moment on first load.</p>
+              <button onclick="refreshTasks()" style="padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                🔄 Retry Loading
+              </button>
+            </div>
+          `;
+        }
+      });
+    </script>
     <script>
       // Footer icon active state
       const footerIcons = document.querySelectorAll('.footer-icon');

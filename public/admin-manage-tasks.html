@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Manage Tasks (GitHub Storage)</title>
+  <link rel="stylesheet" href="getcash.css">
+  <script src="github-storage.js"></script>
+  <style>
+    .admin-view-container {
+      max-width: 1200px;
+      margin: 40px auto 100px auto;
+      padding: 24px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    }
+    
+    .storage-info {
+      background: linear-gradient(135deg, #4CAF50, #45a049);
+      color: white;
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-danger {
+      background: #ff4757;
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background: #ff3838;
+    }
+    
+    .btn-primary {
+      background: #4CAF50;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #45a049;
+    }
+    
+    .btn-secondary {
+      background: #667eea;
+      color: white;
+    }
+    
+    .btn-secondary:hover {
+      background: #5a67d8;
+    }
+    
+    .tasks-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    .tasks-table th {
+      background: #f8faff;
+      padding: 12px;
+      text-align: left;
+      font-weight: bold;
+      border-bottom: 2px solid #e0eaff;
+    }
+    
+    .tasks-table td {
+      padding: 12px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .tasks-table tr:hover {
+      background: #f8faff;
+    }
+    
+    .tasks-table img {
+      max-width: 80px;
+      max-height: 80px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    
+    .tasks-table img:hover {
+      transform: scale(1.1);
+    }
+    
+    .delete-btn {
+      background: #ff4757;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background 0.2s ease;
+    }
+    
+    .delete-btn:hover {
+      background: #ff3838;
+    }
+    
+    .loading, .no-tasks {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+    
+    .no-tasks {
+      font-style: italic;
+    }
+    
+    .task-count {
+      background: #e3f2fd;
+      color: #1976d2;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      margin-left: 10px;
+    }
+    
+    .token-setup {
+      background: #fff3cd;
+      border: 1px solid #ffeaa7;
+      color: #856404;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-view-container">
+    <h2>🔗 Manage Tasks (GitHub Storage) <span id="taskCount" class="task-count">Loading...</span></h2>
+    
+    <div class="storage-info">
+      <strong>✨ GitHub Storage Active</strong><br>
+      Unlimited tasks • Global access • Full image quality • No quotas • Persistent storage
+    </div>
+
+    <div id="tokenSetup" class="token-setup" style="display: none;">
+      <h3>🔑 GitHub Token Required</h3>
+      <p>To manage tasks, please provide your GitHub Personal Access Token:</p>
+      <ol>
+        <li>Go to <a href="https://github.com/settings/tokens" target="_blank">GitHub Settings → Tokens</a></li>
+        <li>Generate new token with "repo" permissions</li>
+        <li>Copy and paste below:</li>
+      </ol>
+      <input type="password" id="tokenInput" placeholder="Paste GitHub token here" style="width: 300px; padding: 8px;">
+      <button onclick="setupToken()" class="btn btn-primary" style="margin-left: 10px;">Save Token</button>
+    </div>
+    
+    <div class="controls">
+      <button onclick="loadTasks()" class="btn btn-primary">
+        🔄 Refresh Tasks
+      </button>
+      <button onclick="window.location.href='task-upload-github.html'" class="btn btn-secondary">
+        ➕ Upload New Task
+      </button>
+      <button onclick="deleteAllTasks()" class="btn btn-danger" id="deleteAllBtn">
+        🗑️ Delete All Tasks
+      </button>
+      <button onclick="window.location.href='getcash.html'" class="btn btn-secondary">
+        ← Back to Dashboard
+      </button>
+    </div>
+
+    <table class="tasks-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Title</th>
+          <th>Description</th>
+          <th>Reward</th>
+          <th>Image</th>
+          <th>Upload Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="tasksTableBody">
+        <tr>
+          <td colspan="7" class="loading">🔄 Loading tasks from GitHub...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    let allTasks = [];
+    let isTokenSet = false;
+
+    // Initialize on page load
+    window.addEventListener('load', async function() {
+      await checkGitHubToken();
+      if (isTokenSet) {
+        await loadTasks();
+      }
+    });
+
+    async function checkGitHubToken() {
+      const savedToken = localStorage.getItem('github_token');
+      if (!savedToken) {
+        document.getElementById('tokenSetup').style.display = 'block';
+        return false;
+      } else {
+        githubStorage.setToken(savedToken);
+        isTokenSet = true;
+        return true;
+      }
+    }
+
+    function setupToken() {
+      const token = document.getElementById('tokenInput').value.trim();
+      if (!token) {
+        alert('Please enter a valid GitHub token');
+        return;
+      }
+
+      githubStorage.setToken(token);
+      document.getElementById('tokenSetup').style.display = 'none';
+      isTokenSet = true;
+      loadTasks();
+      alert('✅ GitHub token saved! You can now manage tasks.');
+    }
+
+    async function loadTasks() {
+      if (!isTokenSet && !await checkGitHubToken()) {
+        return;
+      }
+
+      const tableBody = document.getElementById('tasksTableBody');
+      const taskCount = document.getElementById('taskCount');
+      
+      tableBody.innerHTML = '<tr><td colspan="7" class="loading">🔄 Loading tasks from GitHub...</td></tr>';
+      taskCount.textContent = 'Loading...';
+
+      try {
+        allTasks = await githubStorage.getTasks();
+        console.log('📋 Loaded', allTasks.length, 'tasks from GitHub');
+        displayTasks();
+        taskCount.textContent = `${allTasks.length} tasks`;
+      } catch (error) {
+        console.error('❌ Error loading tasks:', error);
+        tableBody.innerHTML = `<tr><td colspan="7" style="color: red; text-align: center; padding: 20px;">❌ Failed to load tasks: ${error.message}</td></tr>`;
+        taskCount.textContent = 'Error';
+      }
+    }
+
+    function displayTasks() {
+      const tableBody = document.getElementById('tasksTableBody');
+      
+      if (allTasks.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="7" class="no-tasks">📝 No tasks found.<br><a href="task-upload-github.html">Upload your first task</a></td></tr>';
+        return;
+      }
+
+      tableBody.innerHTML = allTasks.map((task, index) => `
+        <tr>
+          <td><strong>${index + 1}</strong></td>
+          <td><strong>${task.title || 'Untitled'}</strong></td>
+          <td>${task.description ? (task.description.length > 100 ? task.description.substring(0, 100) + '...' : task.description) : 'No description'}</td>
+          <td style="color: #4CAF50; font-weight: bold;">$${task.reward || '0'}</td>
+          <td>
+            ${task.img ? 
+              `<img src="${task.img}" alt="Task image" onclick="showImageModal('${task.img}')" title="Click to view full size">` : 
+              '<span style="color: #999;">📷 No image</span>'
+            }
+          </td>
+          <td>${formatDate(task.uploadDate)}</td>
+          <td>
+            <button onclick="deleteTask('${task.id}')" class="delete-btn" title="Delete this task">
+              🗑️
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function deleteTask(taskId) {
+      const task = allTasks.find(t => t.id === taskId);
+      if (!task) return;
+
+      const confirmed = confirm(`🗑️ Delete "${task.title}"?\n\nThis will permanently remove the task from GitHub storage.\nThis action cannot be undone.`);
+      if (!confirmed) return;
+
+      try {
+        await githubStorage.deleteTask(taskId);
+        await loadTasks(); // Reload to refresh display
+        alert('✅ Task deleted successfully!');
+      } catch (error) {
+        console.error('Delete failed:', error);
+        alert('❌ Failed to delete task: ' + error.message);
+      }
+    }
+
+    async function deleteAllTasks() {
+      if (allTasks.length === 0) {
+        alert('📝 No tasks to delete!');
+        return;
+      }
+
+      const warning = `🚨 DELETE ALL ${allTasks.length} TASKS?\n\nThis will permanently delete ALL tasks from GitHub storage.\n\n⚠️ THIS ACTION CANNOT BE UNDONE! ⚠️\n\nAre you absolutely sure?`;
+      
+      if (!confirm(warning)) return;
+
+      const confirmation = prompt('Type "DELETE ALL TASKS" to confirm this destructive action:');
+      if (confirmation !== 'DELETE ALL TASKS') {
+        alert('❌ Deletion cancelled - confirmation text did not match.');
+        return;
+      }
+
+      const deleteBtn = document.getElementById('deleteAllBtn');
+      const originalText = deleteBtn.textContent;
+      deleteBtn.textContent = '🔄 Deleting...';
+      deleteBtn.disabled = true;
+
+      try {
+        await githubStorage.deleteAllTasks();
+        await loadTasks(); // Reload to refresh display
+        alert('✅ All tasks deleted successfully!');
+      } catch (error) {
+        console.error('Delete all failed:', error);
+        alert('❌ Failed to delete all tasks: ' + error.message);
+      } finally {
+        deleteBtn.textContent = originalText;
+        deleteBtn.disabled = false;
+      }
+    }
+
+    function formatDate(dateString) {
+      if (!dateString) return 'Unknown';
+      const date = new Date(dateString);
+      return date.toLocaleDateString() + '<br><small>' + date.toLocaleTimeString() + '</small>';
+    }
+
+    function showImageModal(imageSrc) {
+      const modal = document.createElement('div');
+      modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.9);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        cursor: pointer;
+      `;
+      
+      const img = document.createElement('img');
+      img.src = imageSrc;
+      img.style.cssText = `
+        max-width: 95%;
+        max-height: 95%;
+        border-radius: 8px;
+        box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+      `;
+      
+      const closeText = document.createElement('div');
+      closeText.style.cssText = `
+        position: absolute;
+        top: 20px;
+        right: 30px;
+        color: white;
+        font-size: 30px;
+        font-weight: bold;
+      `;
+      closeText.textContent = '×';
+      
+      modal.appendChild(img);
+      modal.appendChild(closeText);
+      document.body.appendChild(modal);
+      
+      modal.addEventListener('click', () => {
+        document.body.removeChild(modal);
+      });
+    }
+  </script>
+</body>
+</html>

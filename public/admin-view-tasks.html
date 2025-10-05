@@ -3,8 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin - View Uploaded Tasks by Date</title>
+  <title>Admin - Manage Tasks (GitHub Stora  <div class="admin-view-container">
+    <h2>🔗 Manage Tasks (GitHub Storage)</h2>
+    
+    <div class="sgorage)-info">
+      <strong>✨ GitHub Storage Active</strong><br>
+      Unlimited tasks • Global access • Full image quality • No quotas
+    </div>
+    
+    <div style="text-align: center; margin-bottom: 16px;">
+      <button class="delete-all-btn" onclick="deleteAllTasks()" id="deleteAllBtn">
+        🗑️ Delete All Tasks
+      </button>
+      <button onclick="loadTasks()" style="margin-left: 10px; padding: 8px 16px; background: #4CAF50; color: white; border: none; border-radius: 6px; cursor: pointer;">
+        🔄 Refresh Tasks
+      </button>
+    </div></title>
   <link rel="stylesheet" href="getcash.css">
+  <script src="github-storage.js"></script>
   <style>
     .admin-view-container {
       max-width: 900px;
@@ -48,6 +64,50 @@
       max-width: 60px;
       max-height: 60px;
       border-radius: 6px;
+    }
+    .delete-btn {
+      background: #ff4757;
+      color: white;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .delete-btn:hover {
+      background: #ff3838;
+    }
+    .delete-all-btn {
+      background: #ff4757;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-bottom: 16px;
+    }
+    .delete-all-btn:hover {
+      background: #ff3838;
+    }
+    .storage-info {
+      background: #e8f5e8;
+      border: 1px solid #4CAF50;
+      color: #2d5a2d;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+    }
+    .no-tasks {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+      font-style: italic;
     }
     .no-tasks {
       text-align: center;
