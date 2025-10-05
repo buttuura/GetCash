@@ -14,6 +14,9 @@
       <button onclick="refreshTasks()" style="background: linear-gradient(45deg, #00ff41, #00d935); color: white; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: bold;">
         🔄 Refresh
       </button>
+      <button onclick="debugTasks()" style="background: linear-gradient(45deg, #ff6b6b, #ee5a24); color: white; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 12px; margin-left: 10px;">
+        🔍 Debug
+      </button>
     </div>
     <div id="task-list" class="task-list-grid">
       <!-- Tasks will be loaded here -->
@@ -28,15 +31,19 @@
     function loadTaskData() {
       try {
         // Load admin uploaded tasks from localStorage
-        tasks = JSON.parse(localStorage.getItem('adminTasks') || '[]');
+        const adminTasks = JSON.parse(localStorage.getItem('adminTasks') || '[]');
         
-        // If no admin tasks, show default sample tasks
-        if (!tasks || !Array.isArray(tasks) || tasks.length === 0) {
+        // Use admin tasks if they exist, otherwise show default sample tasks
+        if (adminTasks && Array.isArray(adminTasks) && adminTasks.length > 0) {
+          tasks = adminTasks;
+          console.log('Loaded admin tasks:', adminTasks.length);
+        } else {
           tasks = [
             { id: 1, title: 'Upload Product Image', price: 5000, img: 'image/Currency.jpg' },
             { id: 2, title: 'Share Promo Banner', price: 3000, img: 'image/Currency2.jpg' },
             { id: 3, title: 'Post Offer Screenshot', price: 7000, img: 'image/icon/profit.png' }
           ];
+          console.log('Using default sample tasks');
         }
         
         // Load completed tasks
@@ -87,6 +94,27 @@
         }
       }
     }
+    
+    // Debug function to check localStorage
+    function debugTasks() {
+      const adminTasks = localStorage.getItem('adminTasks');
+      const completedTasks = localStorage.getItem('completedTasks');
+      
+      console.log('=== DEBUG TASKS ===');
+      console.log('Raw adminTasks:', adminTasks);
+      console.log('Raw completedTasks:', completedTasks);
+      
+      if (adminTasks) {
+        const parsed = JSON.parse(adminTasks);
+        console.log('Parsed adminTasks:', parsed);
+        console.log('adminTasks count:', parsed.length);
+      } else {
+        console.log('No adminTasks found in localStorage');
+      }
+      
+      alert(`Admin Tasks: ${adminTasks ? JSON.parse(adminTasks).length : 0} found.\nCheck console for details.`);
+    }
+    
     function renderTasks() {
       const list = document.getElementById('task-list');
       list.innerHTML = '';
