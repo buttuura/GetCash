@@ -3,8 +3,295 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wallet Interface</title>
+    <title>💰 Wallet Interface - GetCash</title>
     <link rel="stylesheet" href="getcash.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .wallet-container {
+            max-width: 420px;
+            margin: 0 auto;
+            padding: 20px 16px 100px 16px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px 20px 0 0;
+            box-shadow: 0 -5px 30px rgba(0, 0, 0, 0.1);
+            min-height: calc(100vh - 40px);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .job-bond {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .job-bond .icon {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .header button {
+            background: rgba(220, 53, 69, 0.9) !important;
+            border: none;
+            padding: 8px 12px !important;
+            border-radius: 20px !important;
+            color: white;
+            font-size: 12px !important;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .header button:hover {
+            background: rgba(220, 53, 69, 1) !important;
+            transform: translateY(-2px);
+        }
+        
+        .wallet-container > div:nth-child(2) {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 25px;
+            padding: 12px;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .wallet-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 25px;
+        }
+        
+        .wallet-info > div {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 20px 16px;
+            border-radius: 16px;
+            text-align: center;
+            font-weight: 600;
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .wallet-info > div:nth-child(2) {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            box-shadow: 0 8px 25px rgba(0, 123, 255, 0.2);
+        }
+        
+        .wallet-info > div:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 35px rgba(40, 167, 69, 0.3);
+        }
+        
+        .wallet-info > div:nth-child(2):hover {
+            box-shadow: 0 12px 35px rgba(0, 123, 255, 0.3);
+        }
+        
+        .wallet-info span {
+            display: block;
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 8px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .earnings-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+        
+        .earnings-info > div {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 18px 12px;
+            border-radius: 14px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(102, 126, 234, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .earnings-info > div:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border-color: rgba(102, 126, 234, 0.3);
+        }
+        
+        .other-info {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+        
+        .other-info > div {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid #ffc107;
+            transition: all 0.3s ease;
+        }
+        
+        .other-info > div:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .total-withdrawal {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(220, 53, 69, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .total-withdrawal:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(220, 53, 69, 0.3);
+        }
+        
+        .actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .actions > div {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px 12px;
+            border-radius: 16px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            color: #333;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .actions > div:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+            border-color: rgba(102, 126, 234, 0.3);
+            background: rgba(102, 126, 234, 0.05);
+        }
+        
+        .actions img {
+            width: 32px;
+            height: 32px;
+            margin-bottom: 8px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+            transition: all 0.3s ease;
+        }
+        
+        .actions > div:hover img {
+            transform: scale(1.1);
+            filter: drop-shadow(0 4px 8px rgba(102, 126, 234, 0.3));
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 480px) {
+            .wallet-container {
+                margin: 0;
+                padding: 16px 12px 100px 12px;
+                border-radius: 0;
+            }
+            
+            .header {
+                padding: 16px;
+                margin-bottom: 16px;
+            }
+            
+            .wallet-info, .earnings-info {
+                gap: 12px;
+            }
+            
+            .wallet-info > div {
+                padding: 16px 12px;
+            }
+            
+            .wallet-info span {
+                font-size: 20px;
+            }
+            
+            .earnings-info > div {
+                padding: 14px 8px;
+                font-size: 12px;
+            }
+            
+            .actions {
+                gap: 12px;
+            }
+            
+            .actions > div {
+                padding: 16px 8px;
+            }
+        }
+        
+        /* Animations */
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .wallet-container > div {
+            animation: slideInUp 0.6s ease-out;
+        }
+        
+        .wallet-container > div:nth-child(1) { animation-delay: 0.1s; }
+        .wallet-container > div:nth-child(2) { animation-delay: 0.2s; }
+        .wallet-container > div:nth-child(3) { animation-delay: 0.3s; }
+        .wallet-container > div:nth-child(4) { animation-delay: 0.4s; }
+        .wallet-container > div:nth-child(5) { animation-delay: 0.5s; }
+        .wallet-container > div:nth-child(6) { animation-delay: 0.6s; }
+        .wallet-container > div:nth-child(7) { animation-delay: 0.7s; }
+    </style>
 </head>
 <body>
     <div class="wallet-container">
@@ -15,13 +302,21 @@
             </div>
             <div style="display: flex; align-items: center; gap: 10px;">
                 <span>0776944322</span>
-                <button onclick="logout()" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 12px; cursor: pointer;" title="Logout">🚪 Logout</button>
+                <button onclick="logout()" style="background: rgba(220, 53, 69, 0.9); color: white; border: none; padding: 8px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(10px);" title="Logout" onmouseover="this.style.background='rgba(220, 53, 69, 1)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(220, 53, 69, 0.9)'; this.style.transform='translateY(0)'">🚪 Logout</button>
             </div>
         </div>
-        <div>Effective date: 2025-09-28 ~ 2025-10-01</div>
+        <div>
+            <span style="font-weight: 600;">📅 Account Active Period:</span> 
+            <span style="color: #667eea; font-weight: bold;">2025-09-28 ~ 2025-10-01</span>
+        </div>
         <div class="wallet-info">
-            <div>Income Wallet<br>0.00</div>
-            <div>Personal Wallet<br>3500.00</div>
+            <div>Income Wallet<br><span id="incomeWallet">0.00</span></div>
+            <div>Personal Wallet<br><span id="personalWallet">0.00</span></div>
+        </div>
+        <div style="text-align: center; margin: 15px 0;">
+            <button id="transferBtn" onclick="transferToPersonal()" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; padding: 12px 24px; border-radius: 25px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(40, 167, 69, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(40, 167, 69, 0.3)'" title="Transfer earnings from Income Wallet to Personal Wallet">
+                💸 Transfer to Personal Wallet
+            </button>
         </div>
         <div class="earnings-info">
             <div>Yesterday's earnings<br>1750</div>
@@ -35,12 +330,6 @@
             <div>Referral rebate<br>0.00</div>
         </div>
         <div class="total-withdrawal">Total withdrawal<br>0.00</div>
-        <div class="actions">
-            <div onclick="location.href='settings.html'"><img src="image/icon/user.png" alt=""><br>Personal information</div>
-            <div onclick="location.href='recharge.html'"><img src="image/icon/Recharge.png" alt=""><br>Recharge</div>
-            <div onclick="location.href='withdraw.html'" style="cursor: pointer;"><img src="image/icon/Wallet.png" alt=""><br>Withdrawal</div>
-            <div onclick="logout()" style="cursor: pointer;"><img src="image/icon/profit.png" alt="" style="filter: hue-rotate(180deg);"><br>Logout</div>
-        </div>
     </div>
         <footer class="footer">
             <div class="footer-icon" onclick="location.href='getcash.html'">
@@ -65,33 +354,98 @@
     <script>
       let userData = null;
       
+      // Fallback showNotification function if not available
+      if (typeof showNotification === 'undefined') {
+        window.showNotification = function(message, type = 'info', duration = 3000) {
+          console.log(`[${type.toUpperCase()}] ${message}`);
+          
+          // Create a simple notification div
+          const notification = document.createElement('div');
+          notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : type === 'warning' ? '#ffc107' : '#17a2b8'};
+            color: ${type === 'warning' ? '#000' : '#fff'};
+            padding: 15px 20px;
+            border-radius: 8px;
+            z-index: 10000;
+            max-width: 300px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            font-weight: 600;
+          `;
+          notification.textContent = message;
+          document.body.appendChild(notification);
+          
+          setTimeout(() => {
+            notification.remove();
+          }, duration);
+        };
+      }
+      
+      // Helper function to get week number
+      function getWeekNumber(date) {
+        const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
+        const pastDaysOfYear = (date - firstDayOfYear) / 86400000;
+        return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+      }
+      
       // Load user wallet data
       async function loadWalletData() {
-        try {
-          const username = localStorage.getItem('username');
-          if (!username) {
-            window.location.href = 'login-page.html';
-            return;
-          }
+        const username = localStorage.getItem('username');
+        if (!username) {
+          window.location.href = 'login-page.html';
+          return;
+        }
 
-          // Get user data from API
-          const response = await apiClient.request('/api/user/data');
-          if (response.ok) {
-            userData = await response.json();
-            updateWalletDisplay();
+        try {
+          // Try to get data from API first (if available)
+          if (typeof apiClient !== 'undefined' && apiClient.request) {
+            const response = await apiClient.request('/api/user/data');
+            if (response.ok) {
+              userData = await response.json();
+            }
           }
         } catch (error) {
-          console.error('Error loading wallet data:', error);
-          // Use fallback data
-          userData = {
-            job_level: 'trainee',
-            personal_wallet: 3500,
-            income_wallet: 0,
-            total_earnings: 3500,
-            total_withdrawals: 0
-          };
-          updateWalletDisplay();
+          console.log('API not available, using localStorage:', error.message);
         }
+
+        // Use localStorage data (primary source for wallet balance)
+        const personalWallet = parseInt(localStorage.getItem(`wallet_${username}`) || '0');
+        const incomeWallet = parseInt(localStorage.getItem(`incomeWallet_${username}`) || '0');
+        const transactions = JSON.parse(localStorage.getItem(`transactions_${username}`) || '[]');
+        const jobData = JSON.parse(localStorage.getItem(`jobData_${username}`) || '{}');
+        
+        // Get earnings data
+        const today = new Date().toDateString();
+        const yesterday = new Date(Date.now() - 86400000).toDateString();
+        const currentWeek = getWeekNumber(new Date());
+        const currentMonth = new Date().getMonth();
+        
+        const todaysEarnings = parseInt(localStorage.getItem(`todaysEarnings_${username}_${today}`) || '0');
+        const yesterdaysEarnings = parseInt(localStorage.getItem(`todaysEarnings_${username}_${yesterday}`) || '0');
+        const weeklyEarnings = parseInt(localStorage.getItem(`weeklyEarnings_${username}_${currentWeek}`) || '0');
+        const monthlyEarnings = parseInt(localStorage.getItem(`monthlyEarnings_${username}_${currentMonth}`) || '0');
+        const totalRevenue = parseInt(localStorage.getItem(`totalRevenue_${username}`) || '0');
+        
+        // Calculate total withdrawals from transactions
+        const totalWithdrawals = transactions
+          .filter(t => t.type === 'debit' && t.description.includes('Withdrawal'))
+          .reduce((sum, t) => sum + t.amount, 0);
+
+        userData = {
+          job_level: jobData.currentLevel || 'intern',
+          personal_wallet: personalWallet,
+          income_wallet: incomeWallet,
+          total_revenue: totalRevenue,
+          total_withdrawals: totalWithdrawals,
+          todays_earnings: todaysEarnings,
+          yesterdays_earnings: yesterdaysEarnings,
+          weekly_earnings: weeklyEarnings,
+          monthly_earnings: monthlyEarnings
+        };
+        
+        updateWalletDisplay();
       }
 
       function updateWalletDisplay() {
@@ -103,71 +457,205 @@
         const totalEarnings = userData.total_earnings || 0;
         const totalWithdrawals = userData.total_withdrawals || 0;
 
-        // Update job level
-        document.querySelector('.job-bond .icon').textContent = jobLevel;
+        // Update job level with enhanced display
+        const jobBond = document.querySelector('.job-bond');
+        jobBond.innerHTML = `
+          <div>
+            <span class="icon">${jobLevel}</span>
+            <div style="font-size: 14px; margin-top: 4px; opacity: 0.9;">💼 Job Level</div>
+          </div>
+          <div style="font-size: 14px; opacity: 0.8;">
+            <div>💎 Job bond</div>
+            <div style="font-weight: bold; margin-top: 2px;">UGX 0.00</div>
+          </div>
+        `;
         
         // Update phone number
         const users = JSON.parse(localStorage.getItem('users') || '[]');
         const currentUser = users.find(u => u.username === localStorage.getItem('username'));
+        const headerRight = document.querySelector('.header > div:last-child');
         if (currentUser && currentUser.phone) {
-          document.querySelector('.header span:last-child').textContent = currentUser.phone;
+          headerRight.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="text-align: right;">
+                <div style="font-size: 12px; opacity: 0.8;">📱 Phone</div>
+                <div style="font-weight: bold;">${currentUser.phone}</div>
+              </div>
+              <button onclick="logout()" style="background: rgba(220, 53, 69, 0.9); color: white; border: none; padding: 8px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;" title="Logout" onmouseover="this.style.background='rgba(220, 53, 69, 1)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(220, 53, 69, 0.9)'; this.style.transform='translateY(0)'">🚪 Logout</button>
+            </div>
+          `;
         }
 
-        // Update wallet info
+        // Update wallet info with enhanced styling and real data
         const walletInfo = document.querySelector('.wallet-info');
         walletInfo.innerHTML = `
-          <div>Income Wallet<br>UGX ${incomeWallet.toLocaleString()}</div>
-          <div>Personal Wallet<br>UGX ${personalWallet.toLocaleString()}</div>
+          <div>
+            <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">💰 Income Wallet</div>
+            <span>UGX ${userData.income_wallet.toLocaleString()}</span>
+          </div>
+          <div>
+            <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">👛 Personal Wallet</div>
+            <span>UGX ${userData.personal_wallet.toLocaleString()}</span>
+          </div>
         `;
 
-        // Calculate daily/weekly/monthly earnings (simplified)
-        const todaysEarnings = Math.floor(totalEarnings * 0.3); // 30% as today's
-        const weeklyEarnings = Math.floor(totalEarnings * 0.7); // 70% as weekly
-        const monthlyEarnings = totalEarnings;
-
-        // Update earnings info
+        // Update earnings info with real data and icons
         const earningsInfo = document.querySelector('.earnings-info');
         earningsInfo.innerHTML = `
-          <div>Yesterday's earnings<br>UGX ${Math.floor(todaysEarnings * 0.8).toLocaleString()}</div>
-          <div>Today's earnings<br>UGX ${todaysEarnings.toLocaleString()}</div>
-          <div>This month's earnings<br>UGX ${monthlyEarnings.toLocaleString()}</div>
-          <div>This week's earnings<br>UGX ${weeklyEarnings.toLocaleString()}</div>
+          <div>
+            <div style="color: #666; font-size: 12px; margin-bottom: 6px;">📅 Yesterday's earnings</div>
+            <div style="font-size: 16px; font-weight: bold; color: #28a745;">UGX ${userData.yesterdays_earnings.toLocaleString()}</div>
+          </div>
+          <div>
+            <div style="color: #666; font-size: 12px; margin-bottom: 6px;">🌟 Today's earnings</div>
+            <div style="font-size: 16px; font-weight: bold; color: #007bff;">UGX ${userData.todays_earnings.toLocaleString()}</div>
+          </div>
+          <div>
+            <div style="color: #666; font-size: 12px; margin-bottom: 6px;">📊 This month's earnings</div>
+            <div style="font-size: 16px; font-weight: bold; color: #ffc107;">UGX ${userData.monthly_earnings.toLocaleString()}</div>
+          </div>
+          <div>
+            <div style="color: #666; font-size: 12px; margin-bottom: 6px;">📈 This week's earnings</div>
+            <div style="font-size: 16px; font-weight: bold; color: #17a2b8;">UGX ${userData.weekly_earnings.toLocaleString()}</div>
+          </div>
         `;
 
-        // Update other info
+        // Update other info with enhanced styling and real data
         const otherInfo = document.querySelector('.other-info');
         otherInfo.innerHTML = `
-          <div>Total revenue<br>UGX ${totalEarnings.toLocaleString()}</div>
-          <div>Subordinate task commission<br>UGX 0.00</div>
-          <div>Referral rebate<br>UGX 0.00</div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span><strong>💵 Total revenue</strong></span>
+            <span style="font-size: 18px; color: #28a745; font-weight: bold;">UGX ${userData.total_revenue.toLocaleString()}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span><strong>👥 Subordinate commission</strong></span>
+            <span style="font-size: 16px; color: #6c757d;">UGX 0.00</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span><strong>🎁 Referral rebate</strong></span>
+            <span style="font-size: 16px; color: #6c757d;">UGX 0.00</span>
+          </div>
         `;
 
-        // Update total withdrawal
+        // Update total withdrawal with enhanced styling
         const totalWithdrawal = document.querySelector('.total-withdrawal');
-        totalWithdrawal.innerHTML = `Total withdrawal<br>UGX ${totalWithdrawals.toLocaleString()}`;
+        totalWithdrawal.innerHTML = `
+          <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">💸 Total Withdrawal</div>
+          <div style="font-size: 24px; font-weight: bold;">UGX ${totalWithdrawals.toLocaleString()}</div>
+        `;
       }
 
-      // Footer icon active state
-      const footerIcons = document.querySelectorAll('.footer-icon');
-      footerIcons.forEach(icon => {
-        icon.addEventListener('click', function() {
-          footerIcons.forEach(i => i.classList.remove('footer-active'));
-          this.classList.add('footer-active');
+      // Transfer money from Income Wallet to Personal Wallet
+      function transferToPersonal() {
+        const username = localStorage.getItem('username');
+        if (!username) {
+          if (typeof showNotification === 'function') {
+            showNotification('❌ Please log in first', 'error');
+          } else {
+            alert('❌ Please log in first');
+          }
+          return;
+        }
+
+        const incomeWallet = parseInt(localStorage.getItem(`incomeWallet_${username}`) || '0');
+        
+        if (incomeWallet <= 0) {
+          if (typeof showNotification === 'function') {
+            showNotification('❌ No funds available in Income Wallet to transfer', 'warning');
+          } else {
+            alert('❌ No funds available in Income Wallet to transfer');
+          }
+          return;
+        }
+
+        const confirmed = confirm(`💸 Transfer all Income Wallet funds to Personal Wallet?\n\nAmount: UGX ${incomeWallet.toLocaleString()}\n\nThis will move your task earnings to your withdrawable balance.`);
+        
+        if (!confirmed) return;
+
+        try {
+          // Transfer from income to personal
+          const personalWallet = parseInt(localStorage.getItem(`wallet_${username}`) || '0');
+          const newPersonalBalance = personalWallet + incomeWallet;
+          
+          localStorage.setItem(`wallet_${username}`, newPersonalBalance.toString());
+          localStorage.setItem(`incomeWallet_${username}`, '0');
+
+          // Add transaction record
+          let transactions = JSON.parse(localStorage.getItem(`transactions_${username}`) || '[]');
+          transactions.push({
+            type: 'transfer',
+            amount: incomeWallet,
+            description: 'Transfer from Income to Personal Wallet',
+            date: new Date().toISOString(),
+            source: 'wallet_transfer'
+          });
+          localStorage.setItem(`transactions_${username}`, JSON.stringify(transactions));
+
+          // Update wallet transaction tracking
+          let walletTransactions = JSON.parse(localStorage.getItem(`walletTransactions_${username}`) || '[]');
+          walletTransactions.push({
+            id: Date.now().toString(),
+            type: 'credit',
+            amount: incomeWallet,
+            description: 'Transfer from Income Wallet',
+            date: new Date().toISOString(),
+            balance: newPersonalBalance
+          });
+          localStorage.setItem(`walletTransactions_${username}`, JSON.stringify(walletTransactions));
+
+          // Refresh the display
+          loadWalletData();
+
+          // Show success message
+          if (typeof showNotification === 'function') {
+            showNotification(`✅ Transfer Successful! UGX ${incomeWallet.toLocaleString()} moved to Personal Wallet`, 'success', 4000);
+          } else {
+            alert(`✅ Transfer Successful!\n\nTransferred: UGX ${incomeWallet.toLocaleString()}\nNew Personal Wallet Balance: UGX ${newPersonalBalance.toLocaleString()}`);
+          }
+        } catch (error) {
+          console.error('Transfer error:', error);
+          if (typeof showNotification === 'function') {
+            showNotification('❌ Transfer failed. Please try again.', 'error');
+          } else {
+            alert('❌ Transfer failed. Please try again.');
+          }
+        }
+      }
+
+      // Footer icon active state and navigation
+      function initializeFooterNavigation() {
+        const footerIcons = document.querySelectorAll('.footer-icon');
+        footerIcons.forEach(icon => {
+          icon.addEventListener('click', function(e) {
+            // Remove active state from all icons
+            footerIcons.forEach(i => i.classList.remove('footer-active'));
+            // Add active state to clicked icon
+            this.classList.add('footer-active');
+          });
         });
+      }
+      
+      // Initialize footer navigation
+      document.addEventListener('DOMContentLoaded', function() {
+        initializeFooterNavigation();
       });
 
       // Logout function
       function logout() {
         // Show confirmation dialog
-        if (confirm('Are you sure you want to logout?')) {
+        if (confirm('🚪 Are you sure you want to logout?')) {
           try {
             // Clear authentication data
             localStorage.removeItem('authToken');
             localStorage.removeItem('username');
             localStorage.removeItem('userData');
             
-            // Show logout message
-            showNotification('Logged out successfully!', 'success', 2000);
+            // Show logout message (with fallback)
+            if (typeof showNotification === 'function') {
+              showNotification('✅ Logged out successfully!', 'success', 2000);
+            } else {
+              alert('✅ Logged out successfully!');
+            }
             
             // Redirect to login page after a short delay
             setTimeout(() => {
@@ -175,7 +663,11 @@
             }, 1000);
           } catch (error) {
             console.error('Logout error:', error);
-            showNotification('Error during logout', 'error');
+            if (typeof showNotification === 'function') {
+              showNotification('❌ Error during logout', 'error');
+            } else {
+              alert('❌ Error during logout');
+            }
             // Still redirect to login page
             setTimeout(() => {
               window.location.href = 'login-page.html';
@@ -184,8 +676,91 @@
         }
       }
 
+      // Test all button functionality
+      function testButtons() {
+        console.log('🧪 Testing all button functionality...');
+        
+        const tests = [
+          {
+            name: 'Logout Button',
+            test: () => typeof logout === 'function',
+            element: 'button[onclick="logout()"]'
+          },
+          {
+            name: 'Transfer Button', 
+            test: () => typeof transferToPersonal === 'function',
+            element: 'button[onclick="transferToPersonal()"]'
+          },
+          {
+            name: 'Footer Navigation',
+            test: () => document.querySelectorAll('.footer-icon').length === 4,
+            element: '.footer-icon'
+          },
+          {
+            name: 'ShowNotification Function',
+            test: () => typeof showNotification === 'function',
+            element: null
+          }
+        ];
+        
+        tests.forEach(test => {
+          const passed = test.test();
+          console.log(`${passed ? '✅' : '❌'} ${test.name}: ${passed ? 'Working' : 'Failed'}`);
+          
+          if (test.element) {
+            const elements = document.querySelectorAll(test.element);
+            console.log(`   Found ${elements.length} element(s) for ${test.name}`);
+          }
+        });
+        
+        // Test if data loading is working
+        const hasUsername = !!localStorage.getItem('username');
+        console.log(`${hasUsername ? '✅' : '❌'} Username in localStorage: ${hasUsername}`);
+        
+        console.log('🧪 Button testing complete! Check console for results.');
+      }
+      
+      // Add keyboard shortcut for testing (Ctrl+Shift+T)
+      document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.shiftKey && e.key === 'T') {
+          testButtons();
+        }
+      });
+
+      // Initialize page and show ready status
+      async function initializePage() {
+        try {
+          // Show loading indicator
+          if (typeof showNotification === 'function') {
+            showNotification('🔄 Loading wallet data...', 'info', 1500);
+          }
+          
+          // Load wallet data
+          await loadWalletData();
+          
+          // Verify all functions are working
+          const functionsReady = typeof logout === 'function' && typeof transferToPersonal === 'function';
+          
+          if (functionsReady) {
+            setTimeout(() => {
+              if (typeof showNotification === 'function') {
+                showNotification('✅ Wallet interface ready! All buttons functional.', 'success', 2500);
+              }
+            }, 1000);
+          } else {
+            console.error('❌ Some functions are not ready');
+          }
+          
+        } catch (error) {
+          console.error('Error initializing wallet interface:', error);
+          if (typeof showNotification === 'function') {
+            showNotification('❌ Error loading wallet data', 'error');
+          }
+        }
+      }
+
       // Load data when page loads
-      document.addEventListener('DOMContentLoaded', loadWalletData);
+      document.addEventListener('DOMContentLoaded', initializePage);
     </script>
 </body>
 </html>

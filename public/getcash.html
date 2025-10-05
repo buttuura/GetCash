@@ -89,11 +89,28 @@
         }
       };
       
+      // Create admin approvals button
+      const approvalsBtn = document.createElement('button');
+      approvalsBtn.style.cssText = 'background:#28a745; color:white; border:none; padding:8px 12px; margin:4px; border-radius:6px; cursor:pointer; font-size:12px; transition:all 0.2s;';
+      approvalsBtn.textContent = '👑 Admin Approvals';
+      approvalsBtn.onmouseover = function() { 
+        this.style.transform = 'translateY(-2px)'; 
+        this.style.boxShadow = '0 4px 12px rgba(40, 167, 69, 0.4)';
+      };
+      approvalsBtn.onmouseout = function() { 
+        this.style.transform = 'translateY(0)'; 
+        this.style.boxShadow = '0 2px 8px rgba(40, 167, 69, 0.3)';
+      };
+      approvalsBtn.onclick = function() { 
+        window.location.href = 'admin-approvals.html';
+      };
+
       // Add all elements to container
       adminContainer.appendChild(adminBtn);
       adminContainer.appendChild(uploadBtn);
       adminContainer.appendChild(simpleUploadBtn);
       adminContainer.appendChild(manageBtn);
+      adminContainer.appendChild(approvalsBtn);
       adminContainer.appendChild(clearStorageBtn);
       adminContainer.appendChild(storageInfo);
       
@@ -201,19 +218,74 @@
     const isAdmin = localStorage.getItem('isAdmin') === 'true' || loggedInUser === adminUsername;
     
     if (isAdmin) {
+      // Create admin controls container
+      const adminContainer = document.createElement('div');
+      adminContainer.style.cssText = 'text-align: center; margin: 20px auto; max-width: 600px; background: rgba(255,255,255,0.9); padding: 15px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);';
+      
+      // Main admin dashboard button
       const adminBtn = document.createElement('button');
       adminBtn.textContent = '👑 Admin Dashboard';
-      adminBtn.style = 'display:block;margin:20px auto;padding:12px 25px;font-size:1.1em;background:linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);color:#fff;border:none;border-radius:25px;cursor:pointer;box-shadow:0 4px 15px rgba(255, 107, 107, 0.3);transition:all 0.3s ease;';
+      adminBtn.style.cssText = 'background:linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); color:white; border:none; padding:10px 20px; margin:5px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600; transition:all 0.2s; box-shadow:0 2px 8px rgba(255,107,107,0.3);';
       adminBtn.onmouseover = function() { 
         this.style.transform = 'translateY(-2px)';
-        this.style.boxShadow = '0 8px 25px rgba(255, 107, 107, 0.4)';
+        this.style.boxShadow = '0 4px 12px rgba(255,107,107,0.4)';
       };
       adminBtn.onmouseout = function() { 
         this.style.transform = 'translateY(0)';
-        this.style.boxShadow = '0 4px 15px rgba(255, 107, 107, 0.3)';
+        this.style.boxShadow = '0 2px 8px rgba(255,107,107,0.3)';
       };
       adminBtn.onclick = function() { window.location.href = 'admin-tasks.html'; };
-      document.body.insertBefore(adminBtn, document.body.firstChild.nextSibling);
+
+      // Admin approvals button
+      const approvalsBtn = document.createElement('button');
+      approvalsBtn.textContent = '👑 Admin Approvals';
+      approvalsBtn.style.cssText = 'background:#28a745; color:white; border:none; padding:10px 20px; margin:5px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600; transition:all 0.2s; box-shadow:0 2px 8px rgba(40,167,69,0.3);';
+      approvalsBtn.onmouseover = function() { 
+        this.style.transform = 'translateY(-2px)';
+        this.style.boxShadow = '0 4px 12px rgba(40,167,69,0.4)';
+      };
+      approvalsBtn.onmouseout = function() { 
+        this.style.transform = 'translateY(0)';
+        this.style.boxShadow = '0 2px 8px rgba(40,167,69,0.3)';
+      };
+      approvalsBtn.onclick = function() { window.location.href = 'admin-approvals.html'; };
+
+      // Manage tasks button
+      const manageBtn = document.createElement('button');
+      manageBtn.textContent = '🗑️ Manage Tasks';
+      manageBtn.style.cssText = 'background:#667eea; color:white; border:none; padding:10px 20px; margin:5px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600; transition:all 0.2s; box-shadow:0 2px 8px rgba(102,126,234,0.3);';
+      manageBtn.onmouseover = function() { 
+        this.style.transform = 'translateY(-2px)';
+        this.style.boxShadow = '0 4px 12px rgba(102,126,234,0.4)';
+      };
+      manageBtn.onmouseout = function() { 
+        this.style.transform = 'translateY(0)';
+        this.style.boxShadow = '0 2px 8px rgba(102,126,234,0.3)';
+      };
+      manageBtn.onclick = function() { window.location.href = 'admin-manage-tasks.html'; };
+
+      // Wallet management button
+      const walletBtn = document.createElement('button');
+      walletBtn.textContent = '💰 Wallet Management';
+      walletBtn.style.cssText = 'background:#17a2b8; color:white; border:none; padding:10px 20px; margin:5px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600; transition:all 0.2s; box-shadow:0 2px 8px rgba(23,162,184,0.3);';
+      walletBtn.onmouseover = function() { 
+        this.style.transform = 'translateY(-2px)';
+        this.style.boxShadow = '0 4px 12px rgba(23,162,184,0.4)';
+      };
+      walletBtn.onmouseout = function() { 
+        this.style.transform = 'translateY(0)';
+        this.style.boxShadow = '0 2px 8px rgba(23,162,184,0.3)';
+      };
+      walletBtn.onclick = function() { window.location.href = 'admin-wallet.html'; };
+
+      // Add buttons to container
+      adminContainer.appendChild(adminBtn);
+      adminContainer.appendChild(approvalsBtn);
+      adminContainer.appendChild(walletBtn);
+      adminContainer.appendChild(manageBtn);
+      
+      // Insert admin container at the top
+      document.body.insertBefore(adminContainer, document.body.firstChild.nextSibling);
     }
     
     // Cross-device compatibility and welcome notification

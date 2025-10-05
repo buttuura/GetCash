@@ -227,6 +227,26 @@
         </div>
       </div>
 
+      <!-- Job System Management Card -->
+      <div class="admin-card">
+        <h3>🚀 Job System</h3>
+        <div class="admin-buttons">
+          <a href="admin-approvals.html" class="admin-btn">📋 View Approvals</a>
+          <a href="admin-wallet.html" class="admin-btn secondary">💰 Wallet Management</a>
+          <a href="jobs.html" class="admin-btn tertiary">🎯 Jobs Page</a>
+        </div>
+      </div>
+
+      <!-- Testing & Workflow Card -->
+      <div class="admin-card">
+        <h3>🧪 System Testing</h3>
+        <div class="admin-buttons">
+          <a href="test-workflow.html" class="admin-btn">🧪 Test Full Workflow</a>
+          <a href="add-sample-tasks.html" class="admin-btn secondary">🎯 Sample Tasks</a>
+          <button class="admin-btn tertiary" onclick="resetTestEnvironment()">🔄 Reset Test Data</button>
+        </div>
+      </div>
+
       <!-- Settings Card -->
       <div class="admin-card">
         <h3>⚙️ Settings</h3>
@@ -444,6 +464,57 @@ Generated: ${report.generated}
     function securitySettings() {
       if (typeof showNotification === 'function') {
         showNotification('🔒 Security settings coming soon!', 'info');
+      }
+    }
+
+    function resetTestEnvironment() {
+      if (confirm('⚠️ Reset test environment? This will:\n\n• Reset all users to intern level\n• Clear completed tasks\n• Clear pending approvals\n• Reset wallet balances\n\nContinue?')) {
+        try {
+          // Get all usernames from localStorage
+          const usernames = [];
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.startsWith('jobData_')) {
+              const username = key.replace('jobData_', '');
+              usernames.push(username);
+            }
+          }
+
+          // Reset each user's data
+          usernames.forEach(username => {
+            // Reset job data
+            const resetJobData = {
+              currentLevel: 'intern',
+              levelStartDate: new Date().toISOString(),
+              tasksCompleted: 0,
+              totalEarnings: 0,
+              upgradeHistory: []
+            };
+            localStorage.setItem(`jobData_${username}`, JSON.stringify(resetJobData));
+
+            // Reset wallets
+            localStorage.removeItem(`incomeWallet_${username}`);
+            localStorage.removeItem(`personalWallet_${username}`);
+            localStorage.removeItem(`walletTransactions_${username}`);
+          });
+
+          // Clear global data
+          localStorage.setItem('completedTasks', JSON.stringify([]));
+          localStorage.setItem('adminApprovals', JSON.stringify([]));
+
+          if (typeof showNotification === 'function') {
+            showNotification('✅ Test environment reset successfully! All users are now interns with clean data.', 'success', 5000);
+          } else {
+            alert('✅ Test environment reset successfully!');
+          }
+        } catch (error) {
+          console.error('Error resetting test environment:', error);
+          if (typeof showNotification === 'function') {
+            showNotification('❌ Error resetting test environment: ' + error.message, 'error');
+          } else {
+            alert('❌ Error resetting test environment: ' + error.message);
+          }
+        }
       }
     }
     

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Recharge Wallet</title>
+  <title>Recharge Wallet - GetCash</title>
   <link rel="stylesheet" href="getcash.css">
   <style>
     .recharge-container {
@@ -81,6 +81,8 @@
         <div id="modalText" style="margin-bottom:16px;"></div>
   <input type="tel" id="userPhone" placeholder="e.g. 2567XXXXXXXX" style="width:90%;padding:8px;margin-bottom:4px;border:1px solid #ccc;border-radius:6px;" required><br>
   <div id="phoneError" style="color:#dc3545;font-size:0.95em;display:none;margin-bottom:8px;">Please enter the number correctly.</div>
+  <input type="text" id="accountName" placeholder="Account name registered with number" style="width:90%;padding:8px;margin-bottom:4px;border:1px solid #ccc;border-radius:6px;" required><br>
+  <div id="nameError" style="color:#dc3545;font-size:0.95em;display:none;margin-bottom:8px;">Please enter the account name.</div>
   <div style="display:flex;justify-content:center;gap:10px;margin-bottom:12px;">
           <div id="mtnOption" style="background:#ffe066;color:#222;padding:4px 16px;border-radius:6px;cursor:pointer;font-weight:bold;font-size:0.95em;user-select:none;">MTN</div>
           <div id="airtelOption" style="background:#ff6666;color:#fff;padding:4px 16px;border-radius:6px;cursor:pointer;font-weight:bold;font-size:0.95em;user-select:none;">Airtel</div>
@@ -128,6 +130,31 @@
   </footer>
   <script src="notifications.js"></script>
   <script>
+    // Check if this is an upgrade recharge
+    const urlParams = new URLSearchParams(window.location.search);
+    const upgradeLevel = urlParams.get('targetLevel') || urlParams.get('upgrade');
+    const upgradeAmount = urlParams.get('amount');
+    const upgradeFromLevel = urlParams.get('fromLevel');
+    
+    if (upgradeLevel && upgradeAmount) {
+      // Pre-fill amount for upgrade
+      document.getElementById('amount').value = upgradeAmount;
+      
+      // Update header for upgrade
+      const headerElement = document.querySelector('.recharge-container h2');
+      headerElement.innerHTML = `🚀 Upgrade to ${upgradeLevel.charAt(0).toUpperCase() + upgradeLevel.slice(1)}<br><small>Recharge Required: UGX ${parseInt(upgradeAmount).toLocaleString()}</small>`;
+      
+      // Add upgrade notice
+      const form = document.getElementById('rechargeForm');
+      const upgradeNotice = document.createElement('div');
+      upgradeNotice.style.cssText = 'background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center;';
+      upgradeNotice.innerHTML = `
+        <strong>🎯 Job Level Upgrade</strong><br>
+        <small>Complete this recharge to upgrade your job level and unlock higher earnings!</small>
+      `;
+      form.parentNode.insertBefore(upgradeNotice, form);
+    }
+    
     document.getElementById('rechargeForm').addEventListener('submit', function(e) {
       e.preventDefault();
       const amount = parseInt(document.getElementById('amount').value, 10);
@@ -143,8 +170,10 @@
         showNotification('Please switch on WePay to continue.', 'warning');
         return;
       }
-      modalText.innerHTML = `To recharge your account with <b>UGX ${amount}</b>, please enter your actual phone number:`;
+      modalText.innerHTML = `To recharge your account with <b>UGX ${amount}</b>, please enter your phone number and account name:`;
       userPhone.value = '';
+      document.getElementById('accountName').value = '';
+      localStorage.setItem('rechargeAmount', amount);
       modal.style.display = 'flex';
     });
     // WePay switch label update
@@ -177,25 +206,89 @@
     };
     document.getElementById('confirmRechargeBtn').onclick = function() {
       const userPhone = document.getElementById('userPhone').value.trim();
+      const accountNameValue = document.getElementById('accountName').value.trim();
       const successMsg = document.getElementById('successMessage');
       const errorMsg = document.getElementById('errorMessage');
+      
+      // Validate account name
+      if (accountNameValue.length < 2) {
+        document.getElementById('nameError').textContent = 'Please enter a valid account name (at least 2 characters)';
+        document.getElementById('nameError').style.display = 'block';
+        return;
+      }
+      
       if (!selectedNetwork) {
         document.getElementById('networkError').style.display = 'block';
         return;
       }
       const phoneError = document.getElementById('phoneError');
+      const nameError = document.getElementById('nameError');
       phoneError.style.display = 'none';
+      nameError.style.display = 'none';
       if (/^2567\d{8}$/.test(userPhone)) {
         document.getElementById('rechargeModal').style.display = 'none';
-        // Show stepper and payment info
-        document.getElementById('successMessage').style.display = 'none';
-        const paymentInfo = document.getElementById('paymentInfo');
-        paymentInfo.style.display = 'block';
+        
+        // If this is an upgrade recharge, create admin approval request
+        if (upgradeLevel && upgradeAmount) {
+          const username = localStorage.getItem('username') || 'user';
+          const upgradeRequest = {
+            id: Date.now().toString(),
+            type: 'upgrade',
+            userId: username,
+            userPhone: userPhone,
+            accountName: accountNameValue,
+            fromLevel: 'intern', // Current level (could be dynamic)
+            targetLevel: upgradeLevel,
+            amount: parseInt(upgradeAmount),
+            network: selectedNetwork,
+            requestDate: new Date().toISOString(),
+            status: 'pending'
+          };
+
+          // Add to admin approvals list
+          let adminApprovals = JSON.parse(localStorage.getItem('adminApprovals') || '[]');
+          adminApprovals.push(upgradeRequest);
+          localStorage.setItem('adminApprovals', JSON.stringify(adminApprovals));
+
+          // Show upgrade success message
+          alert(`✅ Upgrade Request Submitted!\n\n🎯 Target Level: ${upgradeLevel.charAt(0).toUpperCase() + upgradeLevel.slice(1)}\n💰 Amount: UGX ${parseInt(upgradeAmount).toLocaleString()}\n📱 Phone: ${userPhone}\n� Account Name: ${accountNameValue}\n�📋 Status: Pending Admin Approval\n\nYou'll be notified once approved!`);
+          
+          // Redirect back to jobs with success flag
+          setTimeout(() => {
+            window.location.href = 'jobs.html?upgrade_success=true';
+          }, 2000);
+        } else {
+          // Regular recharge - create wallet recharge request and show payment info
+          const username = localStorage.getItem('username') || 'user';
+          const rechargeAmount = localStorage.getItem('rechargeAmount');
+          
+          const walletRechargeRequest = {
+            id: 'wallet_' + Date.now(),
+            type: 'wallet_recharge',
+            userId: username,
+            userPhone: userPhone,
+            accountName: accountNameValue,
+            amount: parseInt(rechargeAmount),
+            network: selectedNetwork,
+            requestDate: new Date().toISOString(),
+            status: 'pending'
+          };
+
+          // Add to wallet recharge requests
+          let walletRequests = JSON.parse(localStorage.getItem('walletRechargeRequests') || '[]');
+          walletRequests.push(walletRechargeRequest);
+          localStorage.setItem('walletRechargeRequests', JSON.stringify(walletRequests));
+
+          document.getElementById('successMessage').style.display = 'none';
+          const paymentInfo = document.getElementById('paymentInfo');
+          paymentInfo.style.display = 'block';
+          setTimeout(() => { paymentInfo.scrollIntoView({behavior:'smooth'}); }, 200);
+        }
+        
         document.getElementById('rechargeForm').reset();
         selectedNetwork = '';
         mtnOption.style.outline = 'none';
         airtelOption.style.outline = 'none';
-        setTimeout(() => { paymentInfo.scrollIntoView({behavior:'smooth'}); }, 200);
       } else {
         phoneError.style.display = 'block';
         // Keep the modal open so user can correct the number
