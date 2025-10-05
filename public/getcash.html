@@ -54,10 +54,32 @@
       storageInfo.innerHTML = '✨ <strong>GitHub Storage</strong><br><small>Unlimited • No quotas • Global access</small>';
       storageInfo.style = 'margin:10px auto;padding:8px;background:rgba(76, 175, 80, 0.1);border:1px solid rgba(76, 175, 80, 0.3);border-radius:10px;color:#2e7d32;font-size:0.9em;';
       
+      // localStorage management button
+      const clearStorageBtn = document.createElement('button');
+      clearStorageBtn.textContent = '🧹 Clear localStorage';
+      clearStorageBtn.style = 'display:block;margin:5px auto;padding:8px 16px;width:100%;font-size:0.9em;background:linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);color:#fff;border:none;border-radius:15px;cursor:pointer;box-shadow:0 2px 8px rgba(255, 107, 107, 0.3);transition:all 0.3s ease;';
+      clearStorageBtn.onmouseover = function() { 
+        this.style.transform = 'translateY(-1px)'; 
+        this.style.boxShadow = '0 4px 12px rgba(255, 107, 107, 0.4)';
+      };
+      clearStorageBtn.onmouseout = function() { 
+        this.style.transform = 'translateY(0)'; 
+        this.style.boxShadow = '0 2px 8px rgba(255, 107, 107, 0.3)';
+      };
+      clearStorageBtn.onclick = function() { 
+        if (confirm('🗑️ Clear all localStorage data?\\n\\nThis will delete all locally stored tasks, preferences, and cache.\\n\\n⚠️ This cannot be undone!')) {
+          const size = getCurrentLocalStorageSize();
+          localStorage.clear();
+          alert(`✅ localStorage cleared!\\n\\nFreed ${(size/1024).toFixed(2)}KB of space.`);
+          window.location.reload();
+        }
+      };
+      
       // Add all elements to container
       adminContainer.appendChild(adminBtn);
       adminContainer.appendChild(uploadBtn);
       adminContainer.appendChild(manageBtn);
+      adminContainer.appendChild(clearStorageBtn);
       adminContainer.appendChild(storageInfo);
       
       document.body.insertBefore(adminContainer, document.body.firstChild.nextSibling);
@@ -239,6 +261,17 @@
         }, { passive: false });
       });
     });
+    
+    // Helper function to calculate localStorage size
+    function getCurrentLocalStorageSize() {
+      let total = 0;
+      for (let key in localStorage) {
+        if (localStorage.hasOwnProperty(key)) {
+          total += localStorage[key].length + key.length;
+        }
+      }
+      return total;
+    }
     </script>
 </body>
 </html>

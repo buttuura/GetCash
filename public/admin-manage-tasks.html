@@ -185,6 +185,9 @@
       <button onclick="window.location.href='getcash.html'" class="btn btn-secondary">
         ← Back to Dashboard
       </button>
+      <button onclick="clearLocalStorage()" class="btn btn-danger" style="background: #ff6b6b;">
+        🧹 Clear localStorage
+      </button>
     </div>
 
     <table class="tasks-table">
@@ -398,6 +401,49 @@
       modal.addEventListener('click', () => {
         document.body.removeChild(modal);
       });
+    }
+    
+    // Clear all localStorage data
+    function clearLocalStorage() {
+      const confirmed = confirm('🗑️ CLEAR ALL LOCALSTORAGE?\n\nThis will permanently delete:\n• All cached tasks\n• User preferences  \n• Login sessions\n• Any locally stored data\n\n⚠️ This action cannot be undone!\n\nAre you sure?');
+      
+      if (!confirmed) return;
+      
+      const doubleConfirm = prompt('Type "CLEAR ALL" to confirm this action:');
+      if (doubleConfirm !== 'CLEAR ALL') {
+        alert('❌ Action cancelled - confirmation text did not match.');
+        return;
+      }
+      
+      try {
+        // Get current storage size before clearing
+        const sizeBefore = getCurrentLocalStorageSize();
+        
+        // Clear all localStorage
+        localStorage.clear();
+        
+        console.log('🧹 localStorage cleared completely');
+        console.log('📊 Storage freed:', (sizeBefore / 1024).toFixed(2) + 'KB');
+        
+        alert(`✅ localStorage cleared successfully!\n\n📊 Freed ${(sizeBefore / 1024).toFixed(2)}KB of storage space.\n\nPage will reload to reflect changes.`);
+        
+        // Reload page to reflect changes
+        window.location.reload();
+      } catch (error) {
+        console.error('❌ Error clearing localStorage:', error);
+        alert('❌ Failed to clear localStorage: ' + error.message);
+      }
+    }
+    
+    // Helper function to calculate localStorage size
+    function getCurrentLocalStorageSize() {
+      let total = 0;
+      for (let key in localStorage) {
+        if (localStorage.hasOwnProperty(key)) {
+          total += localStorage[key].length + key.length;
+        }
+      }
+      return total;
     }
   </script>
 </body>
