@@ -27,55 +27,25 @@
     let tasks = [];
     let completedTasks = [];
     
-    // Load tasks from global GitHub database
-    async function loadGlobalTasks() {
-      try {
-        const response = await fetch('https://raw.githubusercontent.com/buttuura/GetCash/main/tasks-database.json?t=' + Date.now());
-        
-        if (response.ok) {
-          const data = await response.json();
-          if (data.tasks && Array.isArray(data.tasks) && data.tasks.length > 0) {
-            tasks = data.tasks;
-            console.log('✅ Loaded global tasks:', data.tasks.length);
-            console.log('Last updated:', data.lastUpdated);
-            
-            // Cache locally as backup
-            localStorage.setItem('globalTasks', JSON.stringify(data.tasks));
-            return true;
-          }
-        }
-        return false;
-      } catch (error) {
-        console.log('Global tasks not available:', error);
-        return false;
-      }
-    }
+
 
     // Initialize data
-    async function loadTaskData() {
+    function loadTaskData() {
       try {
-        // First try to load from global GitHub database
-        const globalLoaded = await loadGlobalTasks();
+        // Load admin uploaded tasks from localStorage (primary source)
+        const adminTasks = JSON.parse(localStorage.getItem('adminTasks') || '[]');
         
-        if (!globalLoaded) {
-          // Fallback to localStorage then default tasks
-          const adminTasks = JSON.parse(localStorage.getItem('adminTasks') || '[]');
-          const localBackup = JSON.parse(localStorage.getItem('globalTasks') || '[]');
-          
-          if (localBackup.length > 0) {
-            tasks = localBackup;
-            console.log('📦 Using local backup tasks:', localBackup.length);
-          } else if (adminTasks && Array.isArray(adminTasks) && adminTasks.length > 0) {
-            tasks = adminTasks;
-            console.log('Loaded local admin tasks:', adminTasks.length);
-          } else {
-            tasks = [
-              { id: 1, title: 'Upload Product Image', price: 5000, img: 'image/Currency.jpg' },
-              { id: 2, title: 'Share Promo Banner', price: 3000, img: 'image/Currency2.jpg' },
-              { id: 3, title: 'Post Offer Screenshot', price: 7000, img: 'image/icon/profit.png' }
-            ];
-            console.log('Using default sample tasks');
-          }
+        if (adminTasks && Array.isArray(adminTasks) && adminTasks.length > 0) {
+          tasks = adminTasks;
+          console.log('✅ Loaded admin tasks:', adminTasks.length);
+        } else {
+          // Show default sample tasks if no admin tasks exist
+          tasks = [
+            { id: 1, title: 'Upload Product Image', price: 5000, img: 'image/Currency.jpg' },
+            { id: 2, title: 'Share Promo Banner', price: 3000, img: 'image/Currency2.jpg' },
+            { id: 3, title: 'Post Offer Screenshot', price: 7000, img: 'image/icon/profit.png' }
+          ];
+          console.log('📋 Using default sample tasks');
         }
         
         // Load completed tasks
