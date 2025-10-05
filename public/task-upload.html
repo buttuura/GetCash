@@ -370,10 +370,10 @@
             <div class="form-group">
                 <label for="taskImage">🖼️ Task Image</label>
                 <div class="file-upload">
-                    <input type="file" id="taskImage" accept="image/*" required>
-                    <div class="file-upload-btn">
+                    <input type="file" id="taskImage" accept="image/*" required style="position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer;">
+                    <label for="taskImage" class="file-upload-btn" style="display: block; cursor: pointer;">
                         📷 Click to upload image or drag & drop
-                    </div>
+                    </label>
                 </div>
                 <div class="image-preview" id="imagePreview">
                     <img id="previewImg" alt="Preview">
@@ -408,11 +408,8 @@
     <script>
         let imageData = null;
 
-        // Make sure file input opens when custom button is clicked (desktop fix)
-        document.querySelector('.file-upload-btn').addEventListener('click', function(e) {
-            e.preventDefault();
-            document.getElementById('taskImage').click();
-        });
+        // File upload now uses proper label element - no additional JS needed for basic functionality
+        // But keep drag and drop and preview features
 
         // Handle image upload
         document.getElementById('taskImage').addEventListener('change', function(e) {
