@@ -446,8 +446,88 @@
     <script>
         let imageData = null;
 
-        // File upload now uses proper label element - no additional JS needed for basic functionality
-        // But keep drag and drop and preview features
+        // Global task storage functions
+        async function saveTaskGlobally(task) {
+            try {
+                // First try to get existing tasks from GitHub
+                const response = await fetch('https://raw.githubusercontent.com/buttuura/GetCash/main/tasks-database.json');
+                let tasksData = { tasks: [], lastUpdated: new Date().toISOString() };
+                
+                if (response.ok) {
+                    tasksData = await response.json();
+                }
+                
+                // Add new task
+                tasksData.tasks.push(task);
+                tasksData.lastUpdated = new Date().toISOString();
+                
+                // Save locally as backup
+                localStorage.setItem('globalTasks', JSON.stringify(tasksData.tasks));
+                localStorage.setItem('adminTasks', JSON.stringify(tasksData.tasks));
+                
+                console.log('Task saved globally:', task);
+                console.log('Total global tasks:', tasksData.tasks.length);
+                
+                // Show instructions to update GitHub
+                showGitHubUpdateInstructions(tasksData);
+                
+            } catch (error) {
+                console.error('Failed to save globally, using localStorage backup:', error);
+                // Fallback to localStorage
+                let existingTasks = JSON.parse(localStorage.getItem('adminTasks') || '[]');
+                if (!Array.isArray(existingTasks)) {
+                    existingTasks = [];
+                }
+                existingTasks.push(task);
+                localStorage.setItem('adminTasks', JSON.stringify(existingTasks));
+            }
+        }
+        
+        function showGitHubUpdateInstructions(tasksData) {
+            const instructions = `
+                📝 TO MAKE THIS TASK AVAILABLE TO ALL USERS:
+                
+                1. Copy this JSON data:
+                ${JSON.stringify(tasksData, null, 2)}
+                
+                2. Go to GitHub.com → Your GetCash repository
+                3. Edit the file: tasks-database.json
+                4. Replace content with the JSON above
+                5. Commit changes
+                
+                The task is saved locally for now but won't be visible to other users until you update GitHub.
+            `;
+            
+            console.log(instructions);
+            
+            // Create a modal with copy button
+            const modal = document.createElement('div');
+            modal.style = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:1000;display:flex;align-items:center;justify-content:center;';
+            
+            modal.innerHTML = `
+                <div style="background:white;padding:20px;border-radius:15px;max-width:500px;max-height:80vh;overflow-y:auto;">
+                    <h3>📡 Update Global Database</h3>
+                    <p>To make this task visible to all users, copy this data to GitHub:</p>
+                    <textarea id="jsonData" style="width:100%;height:200px;font-family:monospace;font-size:12px;">${JSON.stringify(tasksData, null, 2)}</textarea>
+                    <div style="margin-top:15px;">
+                        <button onclick="copyToClipboard()" style="background:#00ff41;color:white;border:none;padding:10px 20px;border-radius:20px;cursor:pointer;margin-right:10px;">📋 Copy JSON</button>
+                        <button onclick="document.body.removeChild(this.closest('div').parentElement)" style="background:#666;color:white;border:none;padding:10px 20px;border-radius:20px;cursor:pointer;">Close</button>
+                    </div>
+                    <p style="font-size:12px;color:#666;margin-top:10px;">
+                        Go to: GitHub.com → GetCash → tasks-database.json → Edit → Paste → Commit
+                    </p>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Add copy function
+            window.copyToClipboard = function() {
+                document.getElementById('jsonData').select();
+                document.execCommand('copy');
+                alert('JSON copied! Now paste it in GitHub tasks-database.json file');
+            };
+        }
 
         // Handle image upload
         document.getElementById('taskImage').addEventListener('change', function(e) {
@@ -512,13 +592,8 @@
                 status: 'active'
             };
 
-            // Save to localStorage (same key your task-list.html uses)
-            let existingTasks = JSON.parse(localStorage.getItem('adminTasks') || '[]');
-            if (!Array.isArray(existingTasks)) {
-                existingTasks = [];
-            }
-            existingTasks.push(task);
-            localStorage.setItem('adminTasks', JSON.stringify(existingTasks));
+            // Save to global storage for all users
+            saveTaskGlobally(task);
 
             // Show success message
             document.getElementById('taskUploadForm').style.display = 'none';
