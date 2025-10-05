@@ -477,11 +477,54 @@
         
         // Run cleanup on page load
         cleanupStorage();
+        
+        // Ultra-aggressive image compression to fit localStorage
+        function compressImageData(base64String) {
+            try {
+                // Create a temporary canvas for compression
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
+                
+                // Synchronous approach using canvas
+                img.src = base64String;
+                
+                // Set very small dimensions to save maximum space
+                canvas.width = 100;  // Even smaller to save more space
+                canvas.height = 100;
+                
+                // Draw and compress
+                ctx.drawImage(img, 0, 0, 100, 100);
+                
+                // Convert to JPEG with extremely low quality to minimize size
+                const compressed = canvas.toDataURL('image/jpeg', 0.1); // 10% quality - very low
+                
+                console.log('🗜️ Ultra-compressed from', base64String.length, 'to', compressed.length, 'chars');
+                console.log('📉 Size reduction:', ((1 - compressed.length/base64String.length) * 100).toFixed(1) + '%');
+                
+                return compressed;
+            } catch (e) {
+                console.log('Compression failed:', e);
+                // Fallback: just truncate the image data very severely
+                return base64String.substring(0, 15000);
+            }
+        }
 
         // Optimized task storage with quota management
         function saveTaskGlobally(task) {
             try {
                 console.log('🔄 Starting to save task:', task);
+                
+                // Get current storage usage and clear if too full
+                const currentUsage = getCurrentStorageSize();
+                console.log('📊 Current localStorage usage:', (currentUsage / 1024).toFixed(2) + 'KB');
+                
+                // If storage is already over 2MB, clear it immediately
+                if (currentUsage > 2000000) {
+                    console.log('🚨 Storage already over 2MB, clearing immediately...');
+                    localStorage.clear();
+                    console.log('🧹 Storage cleared, starting fresh');
+                }
                 
                 // Validate task object
                 if (!task || typeof task !== 'object') {
@@ -491,14 +534,15 @@
                     throw new Error('Task missing required fields (title/price)');
                 }
                 
-                // Optimize image data to reduce storage size
-                if (task.img && task.img.length > 200000) { // If image > 200KB
-                    console.log('🗜️ Large image detected, will compress...');
-                    // Simple compression by reducing quality in the data URL
-                    if (task.img.includes('data:image/jpeg')) {
-                        // Already JPEG, reduce quality by truncating some data
-                        const truncatePoint = Math.floor(task.img.length * 0.8);
-                        task.img = task.img.substring(0, truncatePoint) + task.img.substring(task.img.length - 100);
+                // Ultra-aggressive image optimization to prevent quota issues
+                if (task.img && task.img.length > 20000) { // If image > 20KB
+                    console.log('🗜️ Image detected, compressing aggressively...');
+                    task.img = compressImageData(task.img);
+                    
+                    // If still too large after compression, truncate severely
+                    if (task.img && task.img.length > 30000) {
+                        console.log('🔪 Image still large after compression, truncating...');
+                        task.img = task.img.substring(0, 25000);
                     }
                 }
                 
@@ -515,10 +559,10 @@
                     existingTasks = [];
                 }
                 
-                // Limit to maximum 50 tasks to prevent quota issues
-                if (existingTasks.length >= 50) {
+                // Limit to maximum 10 tasks to prevent quota issues
+                if (existingTasks.length >= 10) {
                     console.log('🗑️ Removing old tasks to make space...');
-                    existingTasks = existingTasks.slice(-40); // Keep only last 40 tasks
+                    existingTasks = existingTasks.slice(-5); // Keep only last 5 tasks
                 }
                 
                 // Add new task
@@ -533,30 +577,45 @@
                     const estimatedSize = new Blob([tasksJson]).size;
                     console.log('📊 Estimated storage size:', (estimatedSize / 1024).toFixed(2) + 'KB');
                     
-                    if (estimatedSize > 4500000) { // If approaching 5MB limit
+                    if (estimatedSize > 1000000) { // If approaching 1MB limit (very conservative)
                         console.log('⚠️ Storage getting full, cleaning up...');
-                        existingTasks = existingTasks.slice(-20); // Keep only last 20 tasks
+                        existingTasks = existingTasks.slice(-3); // Keep only last 3 tasks
+                        existingTasks.push(task); // Add the new task
                         const compactJson = JSON.stringify(existingTasks);
                         localStorage.setItem('adminTasks', compactJson);
-                        localStorage.setItem('globalTasks', compactJson);
                     } else {
                         localStorage.setItem('adminTasks', tasksJson);
-                        localStorage.setItem('globalTasks', tasksJson);
                     }
                     
                     console.log('💾 Saved to localStorage successfully');
                     
                 } catch (quotaError) {
-                    // Handle quota exceeded error
+                    // Handle quota exceeded error with aggressive cleanup
                     console.log('🚨 Storage quota exceeded, emergency cleanup...');
                     
-                    // Clear old data and keep only essential
-                    localStorage.removeItem('globalTasks');
-                    existingTasks = existingTasks.slice(-10); // Keep only last 10 tasks
-                    existingTasks.push(task);
-                    
-                    localStorage.setItem('adminTasks', JSON.stringify(existingTasks));
-                    console.log('🔧 Emergency save completed with', existingTasks.length, 'tasks');
+                    try {
+                        // Clear ALL localStorage completely
+                        localStorage.clear();
+                        console.log('🧹 All storage cleared');
+                        
+                        // Save only the current task with minimal data
+                        const emergencyTask = {
+                            id: task.id,
+                            title: task.title,
+                            description: task.description,
+                            reward: task.reward,
+                            img: task.img ? task.img.substring(0, 10000) : null // Severely limit image
+                        };
+                        
+                        localStorage.setItem('adminTasks', JSON.stringify([emergencyTask]));
+                        console.log('🔧 Emergency save: saved minimal task data only');
+                        
+                        alert('⚠️ Storage was completely full. Cleared everything and saved your task with reduced image quality.');
+                    } catch (emergencyError) {
+                        console.log('🚨 Even emergency save failed:', emergencyError);
+                        localStorage.clear();
+                        alert('❌ Storage completely full. All data cleared. Please try uploading again with a smaller image.');
+                    }
                 }
 
                 
