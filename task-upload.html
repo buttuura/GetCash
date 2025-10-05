@@ -478,6 +478,17 @@
         // Run cleanup on page load
         cleanupStorage();
         
+        // Get current localStorage usage
+        function getCurrentStorageSize() {
+            let total = 0;
+            for (let key in localStorage) {
+                if (localStorage.hasOwnProperty(key)) {
+                    total += localStorage[key].length + key.length;
+                }
+            }
+            return total;
+        }
+        
         // Ultra-aggressive image compression to fit localStorage
         function compressImageData(base64String) {
             try {
