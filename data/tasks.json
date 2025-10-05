@@ -19,7 +19,17 @@
       "uploadDate": "2025-10-05T12:43:50.734Z",
       "img": "https://raw.githubusercontent.com/buttuura/GetCash/main/data/images/task_1759668228046_1759668228084.jpg",
       "status": "active"
+    },
+    {
+      "id": "1759669406155",
+      "title": "Almost there",
+      "description": "Never give up",
+      "reward": "500",
+      "price": "500",
+      "uploadDate": "2025-10-05T13:03:29.285Z",
+      "img": "https://raw.githubusercontent.com/buttuura/GetCash/main/data/images/task_1759669406155_1759669406269.jpg",
+      "status": "active"
     }
   ],
-  "lastUpdated": "2025-10-05T12:43:50.740Z"
+  "lastUpdated": "2025-10-05T13:03:29.303Z"
 }
