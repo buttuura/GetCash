@@ -19,7 +19,17 @@
       "uploadDate": "2025-10-05T13:03:29.285Z",
       "img": "https://raw.githubusercontent.com/buttuura/GetCash/main/data/images/task_1759669406155_1759669406269.jpg",
       "status": "active"
+    },
+    {
+      "id": "1759683956223",
+      "title": "u",
+      "description": "i",
+      "reward": "600",
+      "price": "600",
+      "uploadDate": "2025-10-05T17:05:56.803Z",
+      "img": null,
+      "status": "active"
     }
   ],
-  "lastUpdated": "2025-10-05T13:05:58.207Z"
+  "lastUpdated": "2025-10-05T17:05:56.815Z"
 }
