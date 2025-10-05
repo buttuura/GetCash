@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Task - GetCash Admin</title>
+    <link rel="stylesheet" href="getcash.css">
+    <style>
+        .upload-container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .upload-header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .upload-header h1 {
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #00ff41, #00d935);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            color: white;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #00ff41;
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .file-upload {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-upload input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-upload-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #3742fa, #5352ed);
+            color: white;
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload-btn:hover {
+            border-color: #00ff41;
+            background: linear-gradient(45deg, #00ff41, #00d935);
+        }
+
+        .image-preview {
+            margin-top: 15px;
+            text-align: center;
+            display: none;
+        }
+
+        .image-preview img {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 10px;
+            border: 2px solid #00ff41;
+            box-shadow: 0 4px 15px rgba(0, 255, 65, 0.3);
+        }
+
+        .upload-btn {
+            width: 100%;
+            background: linear-gradient(45deg, #00ff41, #00d935);
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 255, 65, 0.4);
+        }
+
+        .upload-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .task-preview {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: none;
+        }
+
+        .task-preview h3 {
+            color: #00ff41;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .preview-card {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            gap: 15px;
+        }
+
+        .preview-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .preview-info {
+            flex: 1;
+            color: white;
+        }
+
+        .preview-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .preview-price {
+            color: #00ff41;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .success-message {
+            background: linear-gradient(45deg, #00ff41, #00d935);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .upload-container {
+                margin: 10px;
+                padding: 15px;
+            }
+
+            .form-group input,
+            .form-group textarea {
+                padding: 12px;
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+
+            .preview-card {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .preview-img {
+                width: 120px;
+                height: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="upload-container">
+        <button class="back-btn" onclick="goBack()">← Back</button>
+        
+        <div class="upload-header">
+            <h1>📤 Upload New Task</h1>
+            <p>Create tasks for users to complete and earn money</p>
+        </div>
+
+        <form id="taskUploadForm">
+            <div class="form-group">
+                <label for="taskTitle">📝 Task Title</label>
+                <input type="text" id="taskTitle" placeholder="Enter task title (e.g., Share on Facebook)" required>
+            </div>
+
+            <div class="form-group">
+                <label for="taskPrice">💰 Task Price (UGX)</label>
+                <input type="number" id="taskPrice" placeholder="Enter price (e.g., 5000)" min="100" required>
+            </div>
+
+            <div class="form-group">
+                <label for="taskDescription">📄 Task Description (Optional)</label>
+                <textarea id="taskDescription" placeholder="Describe what users need to do..." rows="3"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="taskImage">🖼️ Task Image</label>
+                <div class="file-upload">
+                    <input type="file" id="taskImage" accept="image/*" required>
+                    <div class="file-upload-btn">
+                        📷 Click to upload image or drag & drop
+                    </div>
+                </div>
+                <div class="image-preview" id="imagePreview">
+                    <img id="previewImg" alt="Preview">
+                </div>
+            </div>
+
+            <div class="task-preview" id="taskPreview">
+                <h3>👀 Task Preview</h3>
+                <div class="preview-card">
+                    <img class="preview-img" id="previewCardImg" alt="Task Image">
+                    <div class="preview-info">
+                        <div class="preview-title" id="previewTitle">Task Title</div>
+                        <div class="preview-price" id="previewPrice">UGX 0</div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="upload-btn" id="uploadBtn">
+                🚀 Upload Task
+            </button>
+        </form>
+
+        <div class="success-message" id="successMessage">
+            <h3>✅ Task Uploaded Successfully!</h3>
+            <p>Users can now see and complete this task in the task list.</p>
+            <button onclick="viewTaskList()" style="background: rgba(255,255,255,0.2); border: none; padding: 10px 20px; border-radius: 20px; color: white; margin-top: 10px; cursor: pointer;">
+                👀 View Task List
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let imageData = null;
+
+        // Handle image upload
+        document.getElementById('taskImage').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imageData = e.target.result;
+                    
+                    // Show image preview
+                    document.getElementById('previewImg').src = imageData;
+                    document.getElementById('imagePreview').style.display = 'block';
+                    
+                    // Update file upload button text
+                    document.querySelector('.file-upload-btn').innerHTML = `✅ ${file.name}`;
+                    
+                    // Update preview
+                    updatePreview();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Update preview as user types
+        document.getElementById('taskTitle').addEventListener('input', updatePreview);
+        document.getElementById('taskPrice').addEventListener('input', updatePreview);
+
+        function updatePreview() {
+            const title = document.getElementById('taskTitle').value || 'Task Title';
+            const price = document.getElementById('taskPrice').value || '0';
+            
+            document.getElementById('previewTitle').textContent = title;
+            document.getElementById('previewPrice').textContent = `UGX ${parseInt(price || 0).toLocaleString()}`;
+            
+            if (imageData) {
+                document.getElementById('previewCardImg').src = imageData;
+                document.getElementById('taskPreview').style.display = 'block';
+            }
+        }
+
+        // Handle form submission
+        document.getElementById('taskUploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const title = document.getElementById('taskTitle').value;
+            const price = parseInt(document.getElementById('taskPrice').value);
+            const description = document.getElementById('taskDescription').value;
+            
+            if (!imageData) {
+                alert('Please select an image for the task');
+                return;
+            }
+
+            // Create task object that matches your task-list.html format
+            const task = {
+                id: Date.now(), // Unique ID
+                title: title,
+                price: price,
+                img: imageData, // Base64 image data
+                description: description,
+                createdAt: new Date().toISOString(),
+                status: 'active'
+            };
+
+            // Save to localStorage (same key your task-list.html uses)
+            let existingTasks = JSON.parse(localStorage.getItem('adminTasks') || '[]');
+            if (!Array.isArray(existingTasks)) {
+                existingTasks = [];
+            }
+            existingTasks.push(task);
+            localStorage.setItem('adminTasks', JSON.stringify(existingTasks));
+
+            // Show success message
+            document.getElementById('taskUploadForm').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'block';
+            
+            console.log('Task uploaded:', task);
+            console.log('Total tasks now:', existingTasks.length);
+        });
+
+        function viewTaskList() {
+            window.location.href = 'task-list.html';
+        }
+
+        function goBack() {
+            // Check if there's a previous page, otherwise go to admin dashboard
+            if (document.referrer) {
+                history.back();
+            } else {
+                window.location.href = 'admin-tasks.html';
+            }
+        }
+
+        // Drag and drop functionality
+        const fileUpload = document.querySelector('.file-upload');
+        const fileInput = document.getElementById('taskImage');
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            fileUpload.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            fileUpload.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            fileUpload.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            fileUpload.querySelector('.file-upload-btn').style.borderColor = '#00ff41';
+        }
+
+        function unhighlight(e) {
+            fileUpload.querySelector('.file-upload-btn').style.borderColor = 'rgba(255, 255, 255, 0.3)';
+        }
+
+        fileUpload.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            
+            if (files.length > 0) {
+                fileInput.files = files;
+                fileInput.dispatchEvent(new Event('change'));
+            }
+        }
+    </script>
+
+    <!-- Footer Navigation -->
+    <footer class="footer">
+        <div class="footer-icon" onclick="location.href='getcash.html'">
+            <img src="image/icon/index.png" alt="Home">
+            <span>Home</span>
+        </div>
+        <div class="footer-icon footer-active">
+            <img src="image/icon/user.png" alt="Admin">
+            <span>Admin</span>
+        </div>
+        <div class="footer-icon" onclick="location.href='task-list.html'">
+            <img src="image/icon/Task.png" alt="Tasks">
+            <span>Tasks</span>
+        </div>
+        <div class="footer-icon" onclick="location.href='admin-tasks.html'">
+            <img src="image/icon/grab.png" alt="Dashboard">
+            <span>Dashboard</span>
+        </div>
+    </footer>
+</body>
+</html>

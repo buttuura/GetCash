@@ -137,59 +137,6 @@
       backdrop-filter: blur(10px);
     }
     
-    .admin-form {
-      background: rgba(255, 255, 255, 0.95);
-      padding: 25px;
-      border-radius: 15px;
-      margin-top: 20px;
-    }
-    
-    .admin-form label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: bold;
-      color: #333;
-    }
-    
-    .admin-form input, .admin-form textarea {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 16px;
-      border: 2px solid #ddd;
-      border-radius: 8px;
-      font-size: 16px;
-      transition: border-color 0.3s ease;
-      box-sizing: border-box;
-    }
-    
-    .admin-form input:focus, .admin-form textarea:focus {
-      outline: none;
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-    
-    .task-preview {
-      text-align: center;
-      background: rgba(255, 255, 255, 0.1);
-      padding: 20px;
-      border-radius: 10px;
-      margin: 15px 0;
-    }
-    
-    .task-preview img {
-      max-width: 150px;
-      max-height: 150px;
-      border-radius: 10px;
-      margin-bottom: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-    }
-    
-    .task-preview div {
-      color: white;
-      font-weight: bold;
-      margin: 5px 0;
-    }
-    
     @media (max-width: 768px) {
       .admin-grid {
         grid-template-columns: 1fr;
@@ -197,10 +144,6 @@
       
       .admin-header h1 {
         font-size: 2em;
-      }
-      
-      .admin-form input, .admin-form textarea {
-        font-size: 16px; /* Prevents zoom on iOS */
       }
     }
   </style>
@@ -228,6 +171,16 @@
           <a href="admin-users.html" class="admin-btn">View All Users</a>
           <a href="admin-setup.html" class="admin-btn secondary">Admin Setup</a>
           <button class="admin-btn tertiary" onclick="exportUsers()">Export User Data</button>
+        </div>
+      </div>
+
+      <!-- Task Management Card -->
+      <div class="admin-card">
+        <h3>📋 Task Management</h3>
+        <div class="admin-buttons">
+          <a href="task-upload.html" class="admin-btn">📤 Upload New Task</a>
+          <a href="task-list.html" class="admin-btn secondary">👀 View All Tasks</a>
+          <button class="admin-btn tertiary" onclick="viewUploadedTasks()">📊 Manage Tasks</button>
         </div>
       </div>
 
@@ -283,36 +236,6 @@
           <button class="admin-btn tertiary" onclick="securitySettings()">Security</button>
         </div>
       </div>
-    </div>
-
-    <!-- Task Upload Section -->
-    <div class="admin-card" style="max-width: 600px; margin: 30px auto;">
-      <h3>📤 Upload New Task</h3>
-      <form id="adminTaskForm" class="admin-form">
-        <label for="taskTitle">Task Title:</label>
-        <input type="text" id="taskTitle" name="taskTitle" placeholder="Enter task title" required>
-        
-        <label for="taskPrice">Task Price (UGX):</label>
-        <input type="number" id="taskPrice" name="taskPrice" placeholder="Enter price" step="0.01" required>
-        
-        <label for="taskDescription">Task Description:</label>
-        <textarea id="taskDescription" name="taskDescription" placeholder="Enter task description" rows="3"></textarea>
-        
-        <label for="taskImage">Task Image:</label>
-        <input type="file" id="taskImage" name="taskImage" accept="image/*" required>
-        
-        <div id="taskPreview" class="task-preview" style="display: none;"></div>
-        
-        <button type="submit" class="admin-btn" style="margin-top: 20px;">📤 Upload Task</button>
-        <button type="button" class="admin-btn" id="cancelEditBtn" onclick="cancelEdit()" style="margin-top: 10px; background: linear-gradient(45deg, #ff6b35, #f7931e); display: none;">❌ Cancel Edit</button>
-        <button type="button" class="admin-btn secondary" onclick="viewUploadedTasks()" style="margin-top: 10px;">👀 View Uploaded Tasks</button>
-      </form>
-    </div>
-    
-    <!-- Uploaded Tasks Display -->
-    <div id="uploadedTasksSection" class="admin-card" style="max-width: 800px; margin: 20px auto; display: none;">
-      <h3>📋 Uploaded Tasks</h3>
-      <div id="uploadedTasksList"></div>
     </div>
   </div>
 
@@ -524,273 +447,28 @@ Generated: ${report.generated}
       }
     }
     
-    // Task Upload Functionality
-    document.getElementById('taskImage').addEventListener('change', function(e) {
-      const file = e.target.files[0];
-      const preview = document.getElementById('taskPreview');
-      const title = document.getElementById('taskTitle').value;
-      const price = document.getElementById('taskPrice').value;
+    function viewUploadedTasks() {
+      const tasks = JSON.parse(localStorage.getItem('adminTasks') || '[]');
       
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(evt) {
-          preview.innerHTML = `
-            <img src="${evt.target.result}" alt="Preview">
-            <div>${title || 'Task Title'}</div>
-            <div>UGX ${price || '0'}</div>
-          `;
-          preview.style.display = 'block';
-        };
-        reader.readAsDataURL(file);
-      } else {
-        preview.innerHTML = '';
-        preview.style.display = 'none';
-      }
-    });
-    
-    // Update preview when title or price changes
-    document.getElementById('taskTitle').addEventListener('input', updatePreview);
-    document.getElementById('taskPrice').addEventListener('input', updatePreview);
-    
-    function updatePreview() {
-      const file = document.getElementById('taskImage').files[0];
-      if (file) {
-        document.getElementById('taskImage').dispatchEvent(new Event('change'));
-      }
-    }
-    
-    // Handle form submission
-    document.getElementById('adminTaskForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      
-      const title = document.getElementById('taskTitle').value;
-      const price = document.getElementById('taskPrice').value;
-      const description = document.getElementById('taskDescription').value;
-      const imageInput = document.getElementById('taskImage');
-      const file = imageInput.files[0];
-      const editingId = this.dataset.editingId;
-      
-      // For editing, image is optional (keep existing if no new image)
-      if (!file && !editingId) {
+      if (tasks.length === 0) {
         if (typeof showNotification === 'function') {
-          showNotification('❌ Please select an image file!', 'error');
+          showNotification('📭 No tasks uploaded yet. Use "Upload New Task" to create your first task!', 'info');
+        } else {
+          alert('No tasks uploaded yet. Use "Upload New Task" to create your first task!');
         }
         return;
       }
       
-      const processTask = (imageData = null) => {
-        try {
-          const data = clientStorage.getData();
-          if (!data.tasks) data.tasks = [];
-          
-          if (editingId) {
-            // Update existing task
-            const taskIndex = data.tasks.findIndex(t => t.id == editingId);
-            if (taskIndex !== -1) {
-              data.tasks[taskIndex] = {
-                ...data.tasks[taskIndex],
-                title: title,
-                description: description,
-                price: parseFloat(price),
-                ...(imageData && { image: imageData }),
-                updatedAt: new Date().toISOString()
-              };
-              
-              if (typeof showNotification === 'function') {
-                showNotification(`✅ Task "${title}" updated successfully!`, 'success');
-              }
-            }
-          } else {
-            // Create new task
-            const taskData = {
-              id: Date.now(),
-              title: title,
-              description: description,
-              price: parseFloat(price),
-              image: imageData,
-              status: 'available',
-              category: 'admin',
-              createdAt: new Date().toISOString()
-            };
-            data.tasks.push(taskData);
-            
-            if (typeof showNotification === 'function') {
-              showNotification(`✅ Task "${title}" uploaded successfully!`, 'success');
-            }
-          }
-          
-          clientStorage.saveData(data);
-          
-          // Reset form
-          document.getElementById('adminTaskForm').reset();
-          document.getElementById('taskPreview').style.display = 'none';
-          delete this.dataset.editingId;
-          
-          // Reset buttons
-          const submitBtn = document.querySelector('#adminTaskForm button[type="submit"]');
-          submitBtn.innerHTML = '📤 Upload Task';
-          document.getElementById('cancelEditBtn').style.display = 'none';
-          
-          // Refresh task list if visible
-          if (document.getElementById('uploadedTasksSection').style.display !== 'none') {
-            viewUploadedTasks();
-          }
-          
-        } catch (error) {
-          console.error('Task processing error:', error);
-          if (typeof showNotification === 'function') {
-            showNotification('❌ Failed to process task: ' + error.message, 'error');
-          }
-        }
-      };
+      const taskList = tasks.map((task, index) => 
+        `${index + 1}. ${task.title} - UGX ${task.price.toLocaleString()}`
+      ).join('\n');
       
-      if (file) {
-        if (typeof showNotification === 'function') {
-          showNotification(editingId ? '📝 Updating task...' : '📤 Uploading task...', 'info', 2000);
-        }
-        
-        const reader = new FileReader();
-        reader.onload = function(evt) {
-          processTask(evt.target.result);
-        };
-        reader.readAsDataURL(file);
-      } else {
-        // For editing without new image
-        if (typeof showNotification === 'function') {
-          showNotification('📝 Updating task...', 'info', 2000);
-        }
-        processTask();
-      }
-    });
-    
-    // Task Management Functions
-    function viewUploadedTasks() {
-      const tasksSection = document.getElementById('uploadedTasksSection');
-      const tasksList = document.getElementById('uploadedTasksList');
-      
-      // Get tasks from client storage
-      const data = clientStorage.getData();
-      const tasks = data.tasks || [];
-      
-      if (tasks.length === 0) {
-        tasksList.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">📭 No tasks uploaded yet.</p>';
-      } else {
-        tasksList.innerHTML = tasks.map(task => `
-          <div class="task-item" style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 15px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(10px);">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
-              <h4 style="margin: 0; color: #fff; flex: 1;">${task.title}</h4>
-              <span style="background: ${task.status === 'available' ? 'linear-gradient(45deg, #00ff41, #00d935)' : 'linear-gradient(45deg, #ff6b35, #f7931e)'}; color: white; padding: 4px 8px; border-radius: 15px; font-size: 12px; margin-left: 10px;">
-                ${task.status === 'available' ? '✅ Active' : '⏸️ Inactive'}
-              </span>
-            </div>
-            <p style="color: #00ff41; font-weight: bold; margin: 5px 0; font-size: 18px;">💰 UGX ${task.price}</p>
-            <p style="color: #ccc; margin: 10px 0; line-height: 1.4;">${task.description}</p>
-            ${task.image ? `
-              <div style="margin: 10px 0;">
-                <img src="${task.image}" alt="Task Image" style="max-width: 100%; max-height: 200px; border-radius: 8px; object-fit: cover;">
-              </div>
-            ` : ''}
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; flex-wrap: wrap; gap: 10px;">
-              <span style="color: #999; font-size: 12px;">📅 ${new Date(task.createdAt).toLocaleString()}</span>
-              <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <button onclick="toggleTaskStatus(${task.id})" style="background: linear-gradient(45deg, #3742fa, #5352ed); color: white; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 12px; white-space: nowrap;">
-                  ${task.status === 'available' ? '⏸️ Deactivate' : '✅ Activate'}
-                </button>
-                <button onclick="editTask(${task.id})" style="background: linear-gradient(45deg, #ff9ff3, #f368e0); color: white; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 12px; white-space: nowrap;">
-                  ✏️ Edit
-                </button>
-                <button onclick="deleteTask(${task.id})" style="background: linear-gradient(45deg, #ff4757, #ff6b81); color: white; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 12px; white-space: nowrap;">
-                  🗑️ Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        `).join('');
-      }
-      
-      // Toggle visibility
-      if (tasksSection.style.display === 'none' || tasksSection.style.display === '') {
-        tasksSection.style.display = 'block';
-        tasksSection.scrollIntoView({ behavior: 'smooth' });
-        document.querySelector('button[onclick="viewUploadedTasks()"]').textContent = '🙈 Hide Tasks';
-      } else {
-        tasksSection.style.display = 'none';
-        document.querySelector('button[onclick="viewUploadedTasks()"]').textContent = '👀 View Uploaded Tasks';
-      }
-    }
-    
-    function toggleTaskStatus(taskId) {
-      const data = clientStorage.getData();
-      const task = data.tasks.find(t => t.id === taskId);
-      
-      if (task) {
-        task.status = task.status === 'available' ? 'inactive' : 'available';
-        clientStorage.saveData(data);
-        
-        if (typeof showNotification === 'function') {
-          showNotification(`✅ Task "${task.title}" ${task.status === 'available' ? 'activated' : 'deactivated'}!`, 'success');
-        }
-        
-        viewUploadedTasks(); // Refresh the list
-      }
-    }
-    
-    function editTask(taskId) {
-      const data = clientStorage.getData();
-      const task = data.tasks.find(t => t.id === taskId);
-      
-      if (task) {
-        // Pre-fill the form with task data
-        document.getElementById('taskTitle').value = task.title;
-        document.getElementById('taskPrice').value = task.price;
-        document.getElementById('taskDescription').value = task.description;
-        
-        // Scroll to form
-        document.querySelector('.admin-card:has(#adminTaskForm)').scrollIntoView({ behavior: 'smooth' });
-        
-        // Store the task ID for updating instead of creating new
-        document.getElementById('adminTaskForm').dataset.editingId = taskId;
-        
-        // Change submit button text and show cancel button
-        const submitBtn = document.querySelector('#adminTaskForm button[type="submit"]');
-        submitBtn.innerHTML = '✏️ Update Task';
-        document.getElementById('cancelEditBtn').style.display = 'inline-block';
-        
-        if (typeof showNotification === 'function') {
-          showNotification(`✏️ Editing task: ${task.title}`, 'info');
-        }
-      }
-    }
-    
-    function cancelEdit() {
-      // Reset form
-      document.getElementById('adminTaskForm').reset();
-      document.getElementById('taskPreview').style.display = 'none';
-      delete document.getElementById('adminTaskForm').dataset.editingId;
-      
-      // Reset buttons
-      const submitBtn = document.querySelector('#adminTaskForm button[type="submit"]');
-      submitBtn.innerHTML = '📤 Upload Task';
-      document.getElementById('cancelEditBtn').style.display = 'none';
+      const message = `📋 Uploaded Tasks (${tasks.length}):\n\n${taskList}\n\n💡 Users can see these tasks in the Task List page.`;
       
       if (typeof showNotification === 'function') {
-        showNotification('❌ Edit cancelled', 'info');
-      }
-    }
-    
-    function deleteTask(taskId) {
-      const data = clientStorage.getData();
-      const task = data.tasks.find(t => t.id === taskId);
-      
-      if (task && confirm(`🗑️ Are you sure you want to delete "${task.title}"?\n\nThis action cannot be undone.`)) {
-        data.tasks = data.tasks.filter(t => t.id !== taskId);
-        clientStorage.saveData(data);
-        
-        if (typeof showNotification === 'function') {
-          showNotification(`🗑️ Task "${task.title}" deleted successfully!`, 'warning');
-        }
-        
-        viewUploadedTasks(); // Refresh the list
+        showNotification(message, 'info', 8000);
+      } else {
+        alert(message);
       }
     }
   </script>
