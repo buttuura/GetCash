@@ -9,7 +9,17 @@
       "uploadDate": "2025-10-05T12:35:53.344Z",
       "img": "https://raw.githubusercontent.com/buttuura/GetCash/main/data/images/task_1759667748440_1759667749062.jpg",
       "status": "active"
+    },
+    {
+      "id": "1759668228046",
+      "title": "MY ME",
+      "description": "JOB",
+      "reward": "500",
+      "price": "500",
+      "uploadDate": "2025-10-05T12:43:50.734Z",
+      "img": "https://raw.githubusercontent.com/buttuura/GetCash/main/data/images/task_1759668228046_1759668228084.jpg",
+      "status": "active"
     }
   ],
-  "lastUpdated": "2025-10-05T12:35:53.634Z"
+  "lastUpdated": "2025-10-05T12:43:50.740Z"
 }
