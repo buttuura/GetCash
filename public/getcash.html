@@ -35,6 +35,20 @@
       };
       uploadBtn.onclick = function() { window.location.href = 'task-upload-github.html'; };
       
+      // No-token upload button
+      const simpleUploadBtn = document.createElement('button');
+      simpleUploadBtn.textContent = '📤 Upload Task (No Token)';
+      simpleUploadBtn.style = 'display:block;margin:5px auto;padding:10px 20px;width:100%;font-size:1em;background:linear-gradient(135deg, #FF9500 0%, #FF6B35 100%);color:#fff;border:none;border-radius:20px;cursor:pointer;box-shadow:0 3px 12px rgba(255, 149, 0, 0.3);transition:all 0.3s ease;';
+      simpleUploadBtn.onmouseover = function() { 
+        this.style.transform = 'translateY(-1px)'; 
+        this.style.boxShadow = '0 5px 15px rgba(255, 149, 0, 0.4)';
+      };
+      simpleUploadBtn.onmouseout = function() { 
+        this.style.transform = 'translateY(0)'; 
+        this.style.boxShadow = '0 3px 12px rgba(255, 149, 0, 0.3)';
+      };
+      simpleUploadBtn.onclick = function() { window.location.href = 'task-upload-simple.html'; };
+      
       // GitHub storage manage button
       const manageBtn = document.createElement('button');
       manageBtn.textContent = '🔗 Manage Tasks (GitHub)';
@@ -78,6 +92,7 @@
       // Add all elements to container
       adminContainer.appendChild(adminBtn);
       adminContainer.appendChild(uploadBtn);
+      adminContainer.appendChild(simpleUploadBtn);
       adminContainer.appendChild(manageBtn);
       adminContainer.appendChild(clearStorageBtn);
       adminContainer.appendChild(storageInfo);
