@@ -449,30 +449,59 @@
         // Simplified global task storage
         function saveTaskGlobally(task) {
             try {
+                console.log('🔄 Starting to save task:', task);
+                
+                // Validate task object
+                if (!task || typeof task !== 'object') {
+                    throw new Error('Invalid task object');
+                }
+                if (!task.title || !task.price) {
+                    throw new Error('Task missing required fields (title/price)');
+                }
+                
                 // Get existing tasks from localStorage
-                let existingTasks = JSON.parse(localStorage.getItem('adminTasks') || '[]');
+                let existingTasks;
+                try {
+                    existingTasks = JSON.parse(localStorage.getItem('adminTasks') || '[]');
+                } catch (parseError) {
+                    console.warn('localStorage parse error, using empty array');
+                    existingTasks = [];
+                }
+                
                 if (!Array.isArray(existingTasks)) {
                     existingTasks = [];
                 }
                 
                 // Add new task
                 existingTasks.push(task);
+                console.log('📝 Adding task to array, new total:', existingTasks.length);
                 
                 // Save to all storage keys for maximum compatibility
-                localStorage.setItem('adminTasks', JSON.stringify(existingTasks));
-                localStorage.setItem('globalTasks', JSON.stringify(existingTasks));
+                const tasksJson = JSON.stringify(existingTasks);
+                localStorage.setItem('adminTasks', tasksJson);
+                localStorage.setItem('globalTasks', tasksJson);
+                console.log('💾 Saved to localStorage successfully');
                 
                 console.log('✅ Task saved successfully:', task);
                 console.log('📊 Total tasks now:', existingTasks.length);
                 
-                // Show success without GitHub complexity
-                if (typeof showNotification === 'function') {
-                    showNotification('✅ Task uploaded! It will appear in task list immediately.', 'success', 4000);
+                // Show success message
+                try {
+                    if (typeof showNotification === 'function') {
+                        showNotification('✅ Task uploaded! It will appear in task list immediately.', 'success', 4000);
+                    } else {
+                        // Fallback success message
+                        alert('✅ Task uploaded successfully! Go to task list to see it.');
+                    }
+                } catch (notifyError) {
+                    console.log('Notification error (non-critical):', notifyError);
+                    alert('✅ Task uploaded successfully! Go to task list to see it.');
                 }
                 
             } catch (error) {
                 console.error('❌ Failed to save task:', error);
-                alert('Error saving task. Please try again.');
+                console.error('Error details:', error.message, error.stack);
+                alert('Error saving task: ' + error.message + '. Please try again.');
             }
         }
 
@@ -547,8 +576,7 @@
             document.getElementById('taskUploadForm').style.display = 'none';
             document.getElementById('successMessage').style.display = 'block';
             
-            console.log('Task uploaded:', task);
-            console.log('Total tasks now:', existingTasks.length);
+            console.log('✅ Task upload process completed:', task);
         });
 
         function viewTaskList() {
