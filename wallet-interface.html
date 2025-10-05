@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wallet Interface</title>
+    <link rel="stylesheet" href="getcash.css">
+</head>
+<body>
+    <div class="wallet-container">
+        <div class="header">
+            <div class="job-bond">
+                <span class="icon">Trainee</span>
+                <span>Job bond 0.00</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span>0776944322</span>
+                <button onclick="logout()" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 12px; cursor: pointer;" title="Logout">🚪 Logout</button>
+            </div>
+        </div>
+        <div>Effective date: 2025-09-28 ~ 2025-10-01</div>
+        <div class="wallet-info">
+            <div>Income Wallet<br>0.00</div>
+            <div>Personal Wallet<br>3500.00</div>
+        </div>
+        <div class="earnings-info">
+            <div>Yesterday's earnings<br>1750</div>
+            <div>Today's earnings<br>1750</div>
+            <div>This month's earnings<br>3500</div>
+            <div>This week's earnings<br>1750</div>
+        </div>
+        <div class="other-info">
+            <div>Total revenue<br>3500</div>
+            <div>Subordinate task commission<br>0.00</div>
+            <div>Referral rebate<br>0.00</div>
+        </div>
+        <div class="total-withdrawal">Total withdrawal<br>0.00</div>
+        <div class="actions">
+            <div onclick="location.href='settings.html'"><img src="image/icon/user.png" alt=""><br>Personal information</div>
+            <div onclick="location.href='recharge.html'"><img src="image/icon/Recharge.png" alt=""><br>Recharge</div>
+            <div onclick="location.href='withdraw.html'" style="cursor: pointer;"><img src="image/icon/Wallet.png" alt=""><br>Withdrawal</div>
+            <div onclick="logout()" style="cursor: pointer;"><img src="image/icon/profit.png" alt="" style="filter: hue-rotate(180deg);"><br>Logout</div>
+        </div>
+    </div>
+        <footer class="footer">
+            <div class="footer-icon" onclick="location.href='index.html'">
+                <img src="image/icon/index.png" alt="Home">
+                <span>Home</span>
+            </div>
+            <div class="footer-icon" onclick="location.href='task-list.html'">
+                <img src="image/icon/grab.png" alt="Task">
+                <span>Task</span>
+            </div>
+            <div class="footer-icon" onclick="location.href='withdraw.html'">
+                <img src="image/icon/profit.png" alt="Withdraw">
+                <span>Withdraw</span>
+            </div>
+            <div class="footer-icon footer-active" onclick="location.href='wallet-interface.html'">
+                <img src="image/icon/user.png" alt="Profile">
+                <span>Profile</span>
+            </div>
+        </footer>
+    <script src="notifications.js"></script>
+    <script src="storage-manager.js"></script>
+    <script>
+      let userData = null;
+      
+      // Load user wallet data
+      async function loadWalletData() {
+        try {
+          const username = localStorage.getItem('username');
+          if (!username) {
+            window.location.href = 'login-page.html';
+            return;
+          }
+
+          // Get user data from API
+          const response = await apiClient.request('/api/user/data');
+          if (response.ok) {
+            userData = await response.json();
+            updateWalletDisplay();
+          }
+        } catch (error) {
+          console.error('Error loading wallet data:', error);
+          // Use fallback data
+          userData = {
+            job_level: 'trainee',
+            personal_wallet: 3500,
+            income_wallet: 0,
+            total_earnings: 3500,
+            total_withdrawals: 0
+          };
+          updateWalletDisplay();
+        }
+      }
+
+      function updateWalletDisplay() {
+        if (!userData) return;
+
+        const jobLevel = (userData.job_level || 'trainee').toUpperCase();
+        const personalWallet = userData.personal_wallet || 0;
+        const incomeWallet = userData.income_wallet || 0;
+        const totalEarnings = userData.total_earnings || 0;
+        const totalWithdrawals = userData.total_withdrawals || 0;
+
+        // Update job level
+        document.querySelector('.job-bond .icon').textContent = jobLevel;
+        
+        // Update phone number
+        const users = JSON.parse(localStorage.getItem('users') || '[]');
+        const currentUser = users.find(u => u.username === localStorage.getItem('username'));
+        if (currentUser && currentUser.phone) {
+          document.querySelector('.header span:last-child').textContent = currentUser.phone;
+        }
+
+        // Update wallet info
+        const walletInfo = document.querySelector('.wallet-info');
+        walletInfo.innerHTML = `
+          <div>Income Wallet<br>UGX ${incomeWallet.toLocaleString()}</div>
+          <div>Personal Wallet<br>UGX ${personalWallet.toLocaleString()}</div>
+        `;
+
+        // Calculate daily/weekly/monthly earnings (simplified)
+        const todaysEarnings = Math.floor(totalEarnings * 0.3); // 30% as today's
+        const weeklyEarnings = Math.floor(totalEarnings * 0.7); // 70% as weekly
+        const monthlyEarnings = totalEarnings;
+
+        // Update earnings info
+        const earningsInfo = document.querySelector('.earnings-info');
+        earningsInfo.innerHTML = `
+          <div>Yesterday's earnings<br>UGX ${Math.floor(todaysEarnings * 0.8).toLocaleString()}</div>
+          <div>Today's earnings<br>UGX ${todaysEarnings.toLocaleString()}</div>
+          <div>This month's earnings<br>UGX ${monthlyEarnings.toLocaleString()}</div>
+          <div>This week's earnings<br>UGX ${weeklyEarnings.toLocaleString()}</div>
+        `;
+
+        // Update other info
+        const otherInfo = document.querySelector('.other-info');
+        otherInfo.innerHTML = `
+          <div>Total revenue<br>UGX ${totalEarnings.toLocaleString()}</div>
+          <div>Subordinate task commission<br>UGX 0.00</div>
+          <div>Referral rebate<br>UGX 0.00</div>
+        `;
+
+        // Update total withdrawal
+        const totalWithdrawal = document.querySelector('.total-withdrawal');
+        totalWithdrawal.innerHTML = `Total withdrawal<br>UGX ${totalWithdrawals.toLocaleString()}`;
+      }
+
+      // Footer icon active state
+      const footerIcons = document.querySelectorAll('.footer-icon');
+      footerIcons.forEach(icon => {
+        icon.addEventListener('click', function() {
+          footerIcons.forEach(i => i.classList.remove('footer-active'));
+          this.classList.add('footer-active');
+        });
+      });
+
+      // Logout function
+      function logout() {
+        // Show confirmation dialog
+        if (confirm('Are you sure you want to logout?')) {
+          try {
+            // Clear authentication data
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('username');
+            localStorage.removeItem('userData');
+            
+            // Show logout message
+            showNotification('Logged out successfully!', 'success', 2000);
+            
+            // Redirect to login page after a short delay
+            setTimeout(() => {
+              window.location.href = 'login-page.html';
+            }, 1000);
+          } catch (error) {
+            console.error('Logout error:', error);
+            showNotification('Error during logout', 'error');
+            // Still redirect to login page
+            setTimeout(() => {
+              window.location.href = 'login-page.html';
+            }, 1000);
+          }
+        }
+      }
+
+      // Load data when page loads
+      document.addEventListener('DOMContentLoaded', loadWalletData);
+    </script>
+</body>
+</html>

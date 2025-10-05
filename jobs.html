@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Job Levels</title>
+  <link rel="stylesheet" href="getcash.css">
+  <style>
+    .jobs-container {
+      max-width: 100%;
+      margin: 20px auto 100px auto;
+      padding: 16px;
+      overflow-x: auto;
+    }
+    
+    .jobs-header {
+      text-align: center;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #007bff, #0056b3);
+      color: white;
+      padding: 12px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,123,255,0.3);
+    }
+    
+    .jobs-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      padding: 12px;
+    }
+
+
+    
+    .jobs-header h1 {
+      margin: 0 0 4px 0;
+      font-size: 1.2em;
+    }
+    
+    .jobs-header p {
+      margin: 0;
+      opacity: 0.9;
+      font-size: 0.8em;
+    }
+    
+    .job-section {
+      background: #fff;
+      border-radius: 8px;
+      padding: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      border-left: 3px solid;
+      transition: transform 0.2s, box-shadow 0.2s;
+      height: fit-content;
+    }
+    
+    .job-section:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    }
+    
+    .job-section.trainee {
+      border-left-color: #28a745;
+      background: linear-gradient(135deg, #f8fff9, #ffffff);
+    }
+    
+    .job-section.junior {
+      border-left-color: #17a2b8;
+      background: linear-gradient(135deg, #f0fdff, #ffffff);
+    }
+    
+    .job-section.senior {
+      border-left-color: #ffc107;
+      background: linear-gradient(135deg, #fffdf0, #ffffff);
+    }
+    
+    .job-section.expert {
+      border-left-color: #fd7e14;
+      background: linear-gradient(135deg, #fff9f0, #ffffff);
+    }
+    
+    .job-section.master {
+      border-left-color: #dc3545;
+      background: linear-gradient(135deg, #fff0f0, #ffffff);
+    }
+    
+    .job-title {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    
+    .job-icon {
+      font-size: 1.5em;
+      margin-right: 8px;
+    }
+    
+    .job-title h3 {
+      margin: 0;
+      color: #333;
+      font-size: 1em;
+    }
+    
+    .job-level {
+      background: rgba(0,123,255,0.1);
+      color: #007bff;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.65em;
+      font-weight: bold;
+      margin-left: auto;
+    }
+    
+    .job-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    
+    .detail-item {
+      background: rgba(0,0,0,0.03);
+      padding: 8px;
+      border-radius: 6px;
+      text-align: center;
+    }
+    
+    .detail-label {
+      font-size: 0.7em;
+      color: #666;
+      margin-bottom: 2px;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+    
+    .detail-value {
+      font-size: 0.9em;
+      font-weight: bold;
+      color: #333;
+    }
+    
+    .earning-highlight {
+      color: #28a745;
+    }
+    
+    .input-highlight {
+      color: #007bff;
+    }
+    
+    .requirements {
+      background: rgba(255,193,7,0.1);
+      border: 1px solid rgba(255,193,7,0.3);
+      border-radius: 6px;
+      padding: 8px;
+      margin-bottom: 10px;
+    }
+    
+    .requirements h4 {
+      margin: 0 0 4px 0;
+      color: #856404;
+      font-size: 0.8em;
+    }
+    
+    .requirements ul {
+      margin: 0;
+      padding-left: 12px;
+      color: #856404;
+      font-size: 0.75em;
+    }
+    
+    .action-button {
+      width: 100%;
+      padding: 8px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.9em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    
+    .action-button:hover {
+      background: #0056b3;
+    }
+    
+    .action-button.disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+    }
+    
+    .current-level {
+      background: #28a745;
+      color: white;
+    }
+    
+    .upgrade-available {
+      background: #ffc107;
+      color: #333;
+    }
+    
+    .locked {
+      opacity: 0.7;
+    }
+    
+    .locked .action-button {
+      background: #6c757d;
+      cursor: not-allowed;
+    }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 8px;
+      font-size: 0.65em;
+      font-weight: bold;
+      margin-left: 4px;
+    }
+    
+    .status-current {
+      background: #28a745;
+      color: white;
+    }
+    
+    .status-available {
+      background: #ffc107;
+      color: #333;
+    }
+    
+    .status-locked {
+      background: #6c757d;
+      color: white;
+    }
+    
+    @media (max-width: 500px) {
+      .jobs-container {
+        margin: 8px;
+        padding: 8px;
+      }
+      
+      .jobs-grid {
+        gap: 8px;
+        padding: 8px;
+      }
+      
+      .job-details {
+        grid-template-columns: 1fr;
+        gap: 6px;
+      }
+      
+      .jobs-header {
+        padding: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="jobs-container">
+    <!-- Header -->
+    <div class="jobs-header">
+      <h1>💼 Job Levels</h1>
+      <p>Choose your career path and start earning more</p>
+    </div>
+
+    <!-- Jobs Grid Container -->
+    <div class="jobs-grid">
+      <!-- Section 1: Train Yourself (Trainee) -->
+    <div class="job-section trainee">
+      <div class="job-title">
+        <div class="job-icon">🎓</div>
+        <div>
+          <h3>Train Yourself</h3>
+          <span class="status-badge status-current">CURRENT</span>
+        </div>
+        <div class="job-level">Level 1</div>
+      </div>
+      
+      <div class="job-details">
+        <div class="detail-item">
+          <div class="detail-label">Per Order</div>
+          <div class="detail-value earning-highlight">UGX 500</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Daily Tasks</div>
+          <div class="detail-value">5 Tasks</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Daily Earnings</div>
+          <div class="detail-value earning-highlight">UGX 2,000</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Investment Required</div>
+          <div class="detail-value input-highlight">UGX 0</div>
+        </div>
+      </div>
+      
+      <div class="requirements">
+        <h4>📋 Requirements:</h4>
+        <ul>
+          <li>Complete account registration</li>
+          <li>No investment required</li>
+          <li>Perfect for beginners</li>
+        </ul>
+      </div>
+      
+      <button class="action-button current-level">✅ Current Level</button>
+    </div>
+
+    <!-- Section 2: Junior Worker -->
+    <div class="job-section junior">
+      <div class="job-title">
+        <div class="job-icon">👨‍💼</div>
+        <div>
+          <h3>Junior Worker</h3>
+          <span class="status-badge status-available">AVAILABLE</span>
+        </div>
+        <div class="job-level">Level 2</div>
+      </div>
+      
+      <div class="job-details">
+        <div class="detail-item">
+          <div class="detail-label">Per Order</div>
+          <div class="detail-value earning-highlight">UGX 500</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Daily Tasks</div>
+          <div class="detail-value">5 Tasks</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Daily Earnings</div>
+          <div class="detail-value earning-highlight">UGX 2,000</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Investment Required</div>
+          <div class="detail-value input-highlight">UGX 70,000</div>
+        </div>
+      </div>
+      
+      <div class="requirements">
+        <h4>📋 Requirements:</h4>
+        <ul>
+          <li>Complete at least 10 tasks in trainee level</li>
+          <li>Investment of UGX 70,000</li>
+          <li>Maintain 95% task completion rate</li>
+        </ul>
+      </div>
+      
+      <button class="action-button upgrade-available">🚀 Upgrade to Junior</button>
+    </div>
+
+    <!-- Section 3: Senior Worker -->
+    <div class="job-section senior">
+      <div class="job-title">
+        <div class="job-icon">👨‍💻</div>
+        <div>
+          <h3>Senior Worker</h3>
+          <span class="status-badge status-available">AVAILABLE</span>
+        </div>
+        <div class="job-level">Level 3</div>
+      </div>
+      
+      <div class="job-details">
+        <div class="detail-item">
+          <div class="detail-label">Per Order</div>
+          <div class="detail-value earning-highlight">UGX 1,000</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Daily Tasks</div>
+          <div class="detail-value">10 Tasks</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Daily Earnings</div>
+          <div class="detail-value earning-highlight">UGX 6,000</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Investment Required</div>
+          <div class="detail-value input-highlight">UGX 250,000</div>
+        </div>
+      </div>
+      
+      <div class="requirements">
+        <h4>📋 Requirements:</h4>
+        <ul>
+          <li>Complete 30 days as Junior Worker</li>
+          <li>Investment of UGX 250,000</li>
+          <li>Maintain 98% task completion rate</li>
+        </ul>
+      </div>
+      
+      <button class="action-button upgrade-available">⭐ Upgrade to Senior</button>
+    </div>
+
+    <!-- Section 4: Expert Worker -->
+    <div class="job-section expert">
+      <div class="job-title">
+        <div class="job-icon">🏆</div>
+        <div>
+          <h3>Expert Worker</h3>
+          <span class="status-badge status-locked">LOCKED</span>
+        </div>
+        <div class="job-level">Level 4</div>
+      </div>
+      
+      <div class="job-details">
+        <div class="detail-item">
+          <div class="detail-label">Per Order</div>
+          <div class="detail-value earning-highlight">UGX 1,200</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Daily Tasks</div>
+          <div class="detail-value">20 Tasks</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Daily Earnings</div>
+          <div class="detail-value earning-highlight">UGX 15,000</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Investment Required</div>
+          <div class="detail-value input-highlight">UGX 650,000</div>
+        </div>
+      </div>
+      
+      <div class="requirements">
+        <h4>📋 Requirements:</h4>
+        <ul>
+          <li>Complete 60 days as Senior Worker</li>
+          <li>Investment of UGX 650,000</li>
+          <li>Perfect task completion record</li>
+        </ul>
+      </div>
+      
+      <button class="action-button disabled">🔒 Requires Senior Level</button>
+    </div>
+
+    <!-- Section 5: Master Worker -->
+    <div class="job-section master locked">
+      <div class="job-title">
+        <div class="job-icon">👑</div>
+        <div>
+          <h3>Master Worker</h3>
+          <span class="status-badge status-locked">LOCKED</span>
+        </div>
+        <div class="job-level">Level 5</div>
+      </div>
+      
+      <div class="job-details">
+        <div class="detail-item">
+          <div class="detail-label">Per Order</div>
+          <div class="detail-value earning-highlight">UGX 2,000</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Daily Tasks</div>
+          <div class="detail-value">30 Tasks</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Daily Earnings</div>
+          <div class="detail-value earning-highlight">UGX 40,000</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Investment Required</div>
+          <div class="detail-value input-highlight">UGX 1,500,000</div>
+        </div>
+      </div>
+      
+      <div class="requirements">
+        <h4>📋 Requirements:</h4>
+        <ul>
+          <li>Complete 90 days as Expert Worker</li>
+          <li>Investment of UGX 1,500,000</li>
+          <li>VIP membership status</li>
+          <li>Referral of 5+ active users</li>
+        </ul>
+      </div>
+      
+      <button class="action-button disabled">🔒 Requires Expert Level</button>
+    </div>
+    </div> <!-- End jobs-grid -->
+  </div>
+
+  <footer class="footer">
+    <div class="footer-icon" onclick="location.href='index.html'">
+      <img src="image/icon/index.png" alt="Home">
+      <span>Home</span>
+    </div>
+    <div class="footer-icon footer-active" onclick="location.href='task-list.html'">
+      <img src="image/icon/grab.png" alt="Task">
+      <span>Task</span>
+    </div>
+    <div class="footer-icon" onclick="location.href='withdraw.html'">
+      <img src="image/icon/profit.png" alt="Withdraw">
+      <span>Withdraw</span>
+    </div>
+    <div class="footer-icon" onclick="location.href='wallet-interface.html'">
+      <img src="image/icon/user.png" alt="Profile">
+      <span>Profile</span>
+    </div>
+  </footer>
+
+  <script src="notifications.js"></script>
+  <script src="storage-manager.js"></script>
+  <script>
+    let currentUserData = null;
+    let jobLevels = {};
+    
+    const jobLevelMap = {
+      'trainee': 'Train Yourself',
+      'junior': 'Junior Worker',
+      'senior': 'Senior Worker', 
+      'expert': 'Expert Worker',
+      'master': 'Master Worker'
+    };
+
+    // Load user data and update job status
+    async function loadUserData() {
+      try {
+        const username = localStorage.getItem('username');
+        if (!username) {
+          return;
+        }
+
+        // Load job levels
+        const jobResponse = await apiClient.request('/api/job-levels');
+        if (jobResponse.ok) {
+          jobLevels = await jobResponse.json();
+        }
+
+        // Load user's current job level
+        const userResponse = await apiClient.request('/api/user/data');
+        if (userResponse.ok) {
+          currentUserData = await userResponse.json();
+          updateJobStatus();
+        }
+      } catch (error) {
+        console.error('Error loading user data:', error);
+        currentUserData = { job_level: 'trainee' };
+        updateJobStatus();
+      }
+    }
+
+    function updateJobStatus() {
+      if (!currentUserData) return;
+      
+      const currentLevel = currentUserData.job_level || 'trainee';
+      const jobSections = document.querySelectorAll('.job-section');
+      
+      jobSections.forEach((section, index) => {
+        const levelKeys = ['trainee', 'junior', 'senior', 'expert', 'master'];
+        const sectionLevel = levelKeys[index];
+        const statusBadge = section.querySelector('.status-badge');
+        const actionButton = section.querySelector('.action-button');
+        
+        if (sectionLevel === currentLevel) {
+          // Current level
+          statusBadge.className = 'status-badge status-current';
+          statusBadge.textContent = 'CURRENT';
+          actionButton.className = 'action-button current-level';
+          actionButton.textContent = '✅ Current Level';
+          actionButton.disabled = true;
+        } else if (levelKeys.indexOf(sectionLevel) < levelKeys.indexOf(currentLevel)) {
+          // Completed levels
+          statusBadge.className = 'status-badge status-current';
+          statusBadge.textContent = 'COMPLETED';
+          actionButton.className = 'action-button current-level';
+          actionButton.textContent = '✅ Completed';
+          actionButton.disabled = true;
+        } else if (levelKeys.indexOf(sectionLevel) === levelKeys.indexOf(currentLevel) + 1) {
+          // Next available level
+          statusBadge.className = 'status-badge status-available';
+          statusBadge.textContent = 'AVAILABLE';
+          actionButton.className = 'action-button upgrade-available';
+          actionButton.disabled = false;
+        } else {
+          // Locked levels
+          statusBadge.className = 'status-badge status-locked';
+          statusBadge.textContent = 'LOCKED';
+          actionButton.className = 'action-button disabled';
+          actionButton.disabled = true;
+          section.classList.add('locked');
+        }
+      });
+    }
+
+    // Job upgrade functionality
+    async function upgradeJob(jobSection) {
+      const jobTitle = jobSection.querySelector('h3').textContent;
+      const levelKeys = ['trainee', 'junior', 'senior', 'expert', 'master'];
+      const sectionIndex = Array.from(document.querySelectorAll('.job-section')).indexOf(jobSection);
+      const targetLevel = levelKeys[sectionIndex];
+      
+      if (!jobLevels[targetLevel]) return;
+      
+      const investment = jobLevels[targetLevel].investment;
+      const currentBalance = currentUserData?.personal_wallet || 0;
+      
+      if (investment > currentBalance) {
+        showNotification(
+          `Insufficient balance!\n\nRequired: UGX ${investment.toLocaleString()}\nYour Balance: UGX ${currentBalance.toLocaleString()}`,
+          'error'
+        );
+        return;
+      }
+
+      const confirmed = await showConfirmDialog(
+        'Upgrade Job Level',
+        `Upgrade to ${jobTitle}?\n\nInvestment Required: UGX ${investment.toLocaleString()}\nPer Task Earning: UGX ${jobLevels[targetLevel].perTask.toLocaleString()}\nDaily Tasks: ${jobLevels[targetLevel].dailyTasks}`
+      );
+      
+      if (!confirmed) return;
+
+      try {
+        const response = await apiClient.request('/api/user/upgrade-job', {
+          method: 'POST',
+          body: JSON.stringify({
+            jobLevel: targetLevel,
+            investmentAmount: investment
+          })
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          currentUserData.job_level = targetLevel;
+          currentUserData.personal_wallet -= investment;
+          
+          updateJobStatus();
+          showNotification(
+            `🎉 Successfully upgraded to ${jobTitle}!\n\nNew earning rate: UGX ${result.perTaskEarning.toLocaleString()} per task`,
+            'success',
+            5000
+          );
+        } else {
+          const error = await response.json();
+          showNotification(error.message || 'Upgrade failed', 'error');
+        }
+      } catch (error) {
+        showNotification('Upgrade request failed: ' + error.message, 'error');
+      }
+    }
+
+    // Add click handlers to upgrade buttons
+    document.addEventListener('DOMContentLoaded', function() {
+      loadUserData();
+      
+      document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('upgrade-available')) {
+          const jobSection = e.target.closest('.job-section');
+          upgradeJob(jobSection);
+        }
+      });
+    });
+
+
+
+    // Footer icon active state
+    const footerIcons = document.querySelectorAll('.footer-icon');
+    footerIcons.forEach(icon => {
+      icon.addEventListener('click', function() {
+        footerIcons.forEach(i => i.classList.remove('footer-active'));
+        this.classList.add('footer-active');
+      });
+    });
+  </script>
+</body>
+</html>

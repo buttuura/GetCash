@@ -24,38 +24,38 @@
         </section>
         <section>
           <div class="main-page-icons">
-            <div class="icon-img-cotainer" onclick="location.href='jobs.html'" style="cursor: pointer;">
+            <div class="icon-img-cotainer" data-href="jobs.html" style="cursor: pointer;">
               <img class="icon-img" src="image/icon/Job.png">
               <span>
                 Job
               </span>
             </div>
-             <div class="icon-img-cotainer" onclick="location.href='task-list.html'" style="cursor: pointer;">
-              <img  class="icon-img"src="image/icon/Task.png">
+             <div class="icon-img-cotainer" data-href="task-list.html" style="cursor: pointer;">
+              <img class="icon-img" src="image/icon/Task.png">
               <span>
                 Task
               </span>
             </div>
-             <div class="icon-img-cotainer" onclick="location.href='recharge.html'" style="cursor: pointer;">
-              <img class="icon-img"src="image/icon/Recharge.png">
+             <div class="icon-img-cotainer" data-href="recharge.html" style="cursor: pointer;">
+              <img class="icon-img" src="image/icon/Recharge.png">
               <span>
                 Recharge
               </span>
             </div>
 
-             <div class="icon-img-cotainer" onclick="location.href='wallet-interface.html'" style="cursor: pointer;">
-              <img class="icon-img" class="icon-img" src="image/icon/Wallet.png">
+             <div class="icon-img-cotainer" data-href="wallet-interface.html" style="cursor: pointer;">
+              <img class="icon-img" src="image/icon/Wallet.png">
               <span>
                 wallet
               </span>
             </div>
-             <div class="icon-img-cotainer">
+             <div class="icon-img-cotainer" data-href="invite.html" style="cursor: pointer;">
               <img class="icon-img" src="image/icon/Invite.png">
               <span>
                 invite Friend
               </span>
             </div>
-            <div class="icon-img-cotainer">
+            <div class="icon-img-cotainer" data-href="tutorial.html" style="cursor: pointer;">
               <img class="icon-img" src="image/icon/selfTeach.png">
               <span>
                 self teach
@@ -151,11 +151,30 @@
         }, 1000);
       }
       
-      // Ensure all click handlers work on touch devices
-      const clickableElements = document.querySelectorAll('.icon-img-cotainer, .footer-icon');
-      clickableElements.forEach(element => {
+      // Universal click handlers for main page icons
+      const mainIcons = document.querySelectorAll('.icon-img-cotainer');
+      mainIcons.forEach(icon => {
+        const targetHref = icon.getAttribute('data-href');
+        if (targetHref) {
+          // Add click event for desktop
+          icon.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.location.href = targetHref;
+          });
+          
+          // Add touch event for mobile
+          icon.addEventListener('touchend', function(e) {
+            e.preventDefault();
+            window.location.href = targetHref;
+          });
+        }
+      });
+      
+      // Handle footer icons
+      const footerIcons = document.querySelectorAll('.footer-icon');
+      footerIcons.forEach(icon => {
         // Add touch support for mobile devices
-        element.addEventListener('touchstart', function(e) {
+        icon.addEventListener('touchstart', function(e) {
           e.preventDefault();
           this.click();
         }, { passive: false });

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            padding: 20px;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 5px;
+            }
+            .stats {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .stat {
+                margin: 0 0 10px 0;
+            }
+            .start-task button {
+                font-size: 14px;
+                padding: 8px 10px;
+            }
+            .footer {
+                flex-direction: column;
+                font-size: 14px;
+            }
+        }
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .stat {
+            text-align: center;
+            flex: 1;
+            margin: 0 10px;
+        }
+        .stat-icon {
+            font-size: 24px;
+            color: #007bff;
+        }
+        .start-task {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .start-task button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            width: 100%;
+            font-size: 16px;
+        }
+        .status {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .important-notice {
+            margin-top: 20px;
+        }
+        .important-notice h3 {
+            margin-top: 0;
+        }
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: #f8f9fa;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px;
+            border-top: 1px solid #ddd;
+        }
+        .footer-item {
+            text-align: center;
+            flex: 1;
+        }
+        .footer-item.active {
+            color: #007bff;
+        }
+        .footer-icons {
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            background-color: #f8f9fa;
+            border-top: 1px solid #ddd;
+        }
+        .footer-icon {
+            text-align: center;
+            flex: 1;
+        }
+        .footer-btn {
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+        }
+        .footer-img {
+            width: 24px;
+            height: 24px;
+        }
+        .footer-active {
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-icon">&#📈;</div>
+                <div>Today's earnings</div>
+                <div>UGX 1750</div>
+            </div>
+            <div class="stat">
+                <div class="stat-icon">&#💷;</div>
+                <div>Total balance</div>
+                <div>UGX 3500</div>
+            </div>
+        </div>
+        <div class="status">
+            Starting 5/5
+        </div>
+        <div class="start-task">
+            <button>Start Task</button>
+        </div>
+        <div class="important-notice">
+            <h3>Important Notice</h3>
+            <ul>
+                <li>Working hours: 00:01-23:59</li>
+                <li>If you need assistance, please contact your hiring manager!</li>
+                <li>You can get the recruitment manager number through online customer service</li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer">
+        <div class="footer-item"><span>&#🏠;</span><br>Home</div>
+        <div class="footer-item active"><span>&#📅;</span><br>Task Area</div>
+        <div class="footer-item" onclick="location.href='withdraw.html'" style="cursor: pointer;"><span>&#�;</span><br>Withdraw</div>
+        <div class="footer-item"><span>&#👤;</span><br>My</div>
+    </div>
+    <footer>
+      <div class="footer-icons">
+        <div class="footer-icon"><button class="footer-btn"><img class="footer-img" src="image/icon/index.png"></button><p>Home</p></div>
+        <div class="footer-icon"><button class="footer-btn"><img class="footer-img" src="image/icon/grab.png"></button><p>Task</p></div>
+        <div class="footer-icon" onclick="location.href='withdraw.html'"><button class="footer-btn"><img class="footer-img" src="image/icon/profit.png"></button><p>Withdraw</p></div>
+        <div class="footer-icon"><button class="footer-btn"><img class="footer-img" src="image/icon/user.png"></button><p>Profile</p></div>
+      </div>
+    </footer>
+    <script src="notifications.js"></script>
+    <script src="storage-manager.js"></script>
+    <script>
+      let currentUserData = null;
+      let jobLevels = {};
+
+      // Load user data and job levels
+      async function loadUserData() {
+        try {
+          const username = localStorage.getItem('username');
+          if (!username) {
+            window.location.href = 'login-page.html';
+            return;
+          }
+
+          // Load job levels
+          const jobResponse = await apiClient.request('/api/job-levels');
+          if (jobResponse.ok) {
+            jobLevels = await jobResponse.json();
+          }
+
+          // Load user data
+          const userResponse = await apiClient.request('/api/user/data');
+          if (userResponse.ok) {
+            currentUserData = await userResponse.json();
+            updateDisplay();
+          }
+        } catch (error) {
+          console.error('Error loading data:', error);
+          // Use fallback data
+          currentUserData = {
+            personal_wallet: 3500,
+            total_earnings: 3500,
+            job_level: 'trainee',
+            tasks_completed_today: 0
+          };
+          updateDisplay();
+        }
+      }
+
+      function updateDisplay() {
+        if (!currentUserData) return;
+
+        const jobLevel = currentUserData.job_level || 'trainee';
+        const perTaskEarning = jobLevels[jobLevel]?.perTask || 500;
+        const dailyTasks = jobLevels[jobLevel]?.dailyTasks || 5;
+        const completedToday = currentUserData.tasks_completed_today || 0;
+        const todaysEarnings = completedToday * perTaskEarning;
+
+        // Update stats display
+        document.querySelector('.stats .stat:nth-child(1) div:last-child').textContent = 
+          `UGX ${perTaskEarning.toLocaleString()} per task`;
+        document.querySelector('.stats .stat:nth-child(2) div:last-child').textContent = 
+          `UGX ${todaysEarnings.toLocaleString()}`;
+        document.querySelector('.stats .stat:nth-child(3) div:last-child').textContent = 
+          `UGX ${(currentUserData.personal_wallet || 0).toLocaleString()}`;
+
+        // Update status
+        document.querySelector('.status').textContent = 
+          `Completed ${completedToday}/${dailyTasks} (${jobLevel.toUpperCase()})`;
+
+        // Update start task button
+        const startButton = document.querySelector('.start-task button');
+        if (completedToday >= dailyTasks) {
+          startButton.textContent = 'Daily Limit Reached';
+          startButton.disabled = true;
+          startButton.style.background = '#6c757d';
+        } else {
+          startButton.textContent = 'Go to Tasks';
+          startButton.disabled = false;
+          startButton.style.background = '#007bff';
+          startButton.onclick = () => window.location.href = 'task-list.html';
+        }
+      }
+
+      // Footer icon active state
+      const footerIcons = document.querySelectorAll('.footer-icon');
+      footerIcons.forEach(icon => {
+        icon.addEventListener('click', function() {
+          footerIcons.forEach(i => i.classList.remove('footer-active'));
+          this.classList.add('footer-active');
+        });
+      });
+
+      // Load data when page loads
+      document.addEventListener('DOMContentLoaded', loadUserData);
+    </script>
+</body>
+</html>
