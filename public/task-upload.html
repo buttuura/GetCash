@@ -408,6 +408,12 @@
     <script>
         let imageData = null;
 
+        // Make sure file input opens when custom button is clicked (desktop fix)
+        document.querySelector('.file-upload-btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('taskImage').click();
+        });
+
         // Handle image upload
         document.getElementById('taskImage').addEventListener('change', function(e) {
             const file = e.target.files[0];
