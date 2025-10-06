@@ -9,5 +9,16 @@
     "createdAt": "2025-10-06T16:19:06.366Z",
     "status": "active",
     "source": "github_upload"
+  },
+  {
+    "id": 1759767631190,
+    "title": "heat",
+    "price": 500,
+    "description": "asdvbnmmnb ",
+    "targetPage": "task-list",
+    "imageUrl": "https://raw.githubusercontent.com/buttuura/GetCash/main/task-images/task-1759767627570-BOOK_2.png",
+    "createdAt": "2025-10-06T16:20:31.190Z",
+    "status": "active",
+    "source": "github_upload"
   }
 ]
