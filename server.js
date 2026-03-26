@@ -30,32 +30,50 @@ const corsOptions = {
       'https://buttuura.github.io/GetCash',
       'https://getcash.onrender.com',
       'http://localhost:3300',
-      'http://127.0.0.1:3300'
+      'http://127.0.0.1:3300',
+      'http://localhost:3000',
+      'http://localhost:5500'
     ];
     
+    // Allow if no origin (like mobile apps or curl requests)
+    if (!origin) {
+      callback(null, true);
+      return;
+    }
+    
     // Allow if origin is in whitelist
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (allowedOrigins.includes(origin)) {
       callback(null, true);
+      return;
     }
-    // Allow all *.onrender.com domains (for development)
-    else if (origin && origin.includes('.onrender.com')) {
+    
+    // Allow all *.onrender.com domains
+    if (origin.includes('.onrender.com')) {
       callback(null, true);
+      return;
     }
-    else {
-      console.warn(`CORS blocked origin: ${origin}`);
-      callback(new Error('CORS not allowed'));
+    
+    // Allow environment variable specified origin
+    const envOrigin = process.env.CORS_ORIGIN;
+    if (envOrigin && origin === envOrigin) {
+      callback(null, true);
+      return;
     }
+    
+    console.warn(`CORS blocked origin: ${origin}`);
+    callback(new Error(`CORS not allowed for origin: ${origin}`));
   },
   credentials: true,
   optionsSuccessStatus: 200,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH', 'HEAD'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['Content-Type', 'Authorization']
 };
 
 app.use(cors(corsOptions));
 app.use(bodyParser.json({ limit: process.env.MAX_FILE_SIZE || '10mb' }));
 
-// Explicit OPTIONS handler for preflight requests
+// Explicit OPTIONS handler for preflight requests (must come before routes)
 app.options('*', cors(corsOptions));
 
 // Request logging middleware
