@@ -39,6 +39,9 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(bodyParser.json({ limit: process.env.MAX_FILE_SIZE || '10mb' }));
 
+// Explicit OPTIONS handler for preflight requests
+app.options('*', cors(corsOptions));
+
 // Request logging middleware
 app.use((req, res, next) => {
   const timestamp = new Date().toISOString();
