@@ -11,13 +11,11 @@ class DatabaseManager {
       const users = await this.getUserCount();
       const tasks = await this.getTaskCount();
       const completedTasks = await this.getCompletedTaskCount();
-      const dbSize = await this.getDatabaseSize();
       
       return {
         users,
         tasks,
         completedTasks,
-        databaseSize: dbSize,
         timestamp: new Date().toISOString()
       };
     } catch (error) {
@@ -26,81 +24,44 @@ class DatabaseManager {
     }
   }
 
-  // User management
+  // User management (MongoDB queries)
   async getUserCount() {
-    return new Promise((resolve, reject) => {
-      this.db.db.get('SELECT COUNT(*) as count FROM users', (err, row) => {
-        if (err) reject(err);
-        else resolve(row.count);
-      });
-    });
-  }
-
-  async getTaskCount() {
-    return new Promise((resolve, reject) => {
-      this.db.db.get('SELECT COUNT(*) as count FROM tasks', (err, row) => {
-        if (err) reject(err);
-        else resolve(row.count);
-      });
-    });
-  }
-
-  async getCompletedTaskCount() {
-    return new Promise((resolve, reject) => {
-      this.db.db.get('SELECT COUNT(*) as count FROM completed_tasks', (err, row) => {
-        if (err) reject(err);
-        else resolve(row.count);
-      });
-    });
-  }
-
-  async getDatabaseSize() {
-    const fs = require('fs');
-    const path = require('path');
-    
     try {
-      const dbPath = path.join(__dirname, 'app_data.db');
-      const stats = fs.statSync(dbPath);
-      return {
-        bytes: stats.size,
-        mb: (stats.size / (1024 * 1024)).toFixed(2),
-        kb: (stats.size / 1024).toFixed(2)
-      };
+      if (!this.db.User) throw new Error('Database not initialized');
+      return await this.db.User.countDocuments();
     } catch (error) {
-      return { bytes: 0, mb: '0.00', kb: '0.00' };
+      console.error('Error counting users:', error);
+      throw error;
     }
   }
 
-  // Data export for backup
+  async getTaskCount() {
+    try {
+      if (!this.db.Task) throw new Error('Database not initialized');
+      return await this.db.Task.countDocuments();
+    } catch (error) {
+      console.error('Error counting tasks:', error);
+      throw error;
+    }
+  }
+
+  async getCompletedTaskCount() {
+    try {
+      if (!this.db.CompletedTask) throw new Error('Database not initialized');
+      return await this.db.CompletedTask.countDocuments();
+    } catch (error) {
+      console.error('Error counting completed tasks:', error);
+      throw error;
+    }
+  }
+
+  // Data export for backup (MongoDB)
   async exportAllData() {
     try {
-      const users = await new Promise((resolve, reject) => {
-        this.db.db.all('SELECT id, username, phone, created_at FROM users', (err, rows) => {
-          if (err) reject(err);
-          else resolve(rows);
-        });
-      });
-
-      const tasks = await new Promise((resolve, reject) => {
-        this.db.db.all('SELECT * FROM tasks', (err, rows) => {
-          if (err) reject(err);
-          else resolve(rows);
-        });
-      });
-
-      const completedTasks = await new Promise((resolve, reject) => {
-        this.db.db.all('SELECT * FROM completed_tasks', (err, rows) => {
-          if (err) reject(err);
-          else resolve(rows);
-        });
-      });
-
-      const userData = await new Promise((resolve, reject) => {
-        this.db.db.all('SELECT * FROM user_data', (err, rows) => {
-          if (err) reject(err);
-          else resolve(rows);
-        });
-      });
+      const users = await this.db.User.find({}, 'username phone created_at').lean();
+      const tasks = await this.db.Task.find({}).lean();
+      const completedTasks = await this.db.CompletedTask.find({}).lean();
+      const userData = await this.db.UserData.find({}).lean();
 
       return {
         exportDate: new Date().toISOString(),
@@ -125,22 +86,14 @@ class DatabaseManager {
     try {
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - daysOld);
-      const cutoff = cutoffDate.toISOString();
 
       // Remove old completed tasks
-      const result = await new Promise((resolve, reject) => {
-        this.db.db.run(
-          'DELETE FROM completed_tasks WHERE completed_at < ?',
-          [cutoff],
-          function(err) {
-            if (err) reject(err);
-            else resolve(this.changes);
-          }
-        );
+      const result = await this.db.CompletedTask.deleteMany({
+        completed_at: { $lt: cutoffDate }
       });
 
-      console.log(`Cleaned up ${result} old completed tasks`);
-      return result;
+      console.log(`Cleaned up ${result.deletedCount} old completed tasks`);
+      return result.deletedCount;
     } catch (error) {
       console.error('Error cleaning up old data:', error);
       throw error;
@@ -169,10 +122,6 @@ class DatabaseManager {
       throw error;
     }
   }
-
-  async close() {
-    this.db.close();
-  }
 }
 
 // CLI interface for database management
@@ -189,7 +138,6 @@ if (require.main === module) {
           console.log(`👥 Users: ${stats.users}`);
           console.log(`📋 Tasks: ${stats.tasks}`);
           console.log(`✅ Completed Tasks: ${stats.completedTasks}`);
-          console.log(`💾 Database Size: ${stats.databaseSize.mb} MB`);
           console.log(`📅 Last Updated: ${stats.timestamp}`);
           break;
 
@@ -222,8 +170,6 @@ if (require.main === module) {
       }
     } catch (error) {
       console.error('Command failed:', error.message);
-    } finally {
-      await manager.close();
     }
   }
 

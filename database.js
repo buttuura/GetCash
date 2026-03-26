@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const crypto = require('crypto');
+const bcrypt = require('bcrypt');
 
 // MongoDB connection
 class Database {
@@ -29,7 +29,7 @@ class Database {
     // User Schema
     const userSchema = new mongoose.Schema({
       username: { type: String, required: true, unique: true },
-      password: { type: String, required: true },
+      password: { type: String, required: true }, // Will store hashed password
       phone: { type: String, required: true },
       created_at: { type: Date, default: Date.now }
     });
@@ -73,10 +73,29 @@ class Database {
     console.log('Database schemas created successfully');
   }
 
+  // Hash password using bcrypt
+  async hashPassword(password) {
+    try {
+      return await bcrypt.hash(password, 10);
+    } catch (error) {
+      throw new Error('Error hashing password');
+    }
+  }
+
+  // Compare password with hashed password
+  async comparePassword(password, hashedPassword) {
+    try {
+      return await bcrypt.compare(password, hashedPassword);
+    } catch (error) {
+      throw new Error('Error comparing password');
+    }
+  }
+
   // User operations
   async createUser(username, password, phone) {
     try {
-      const user = new this.User({ username, password, phone });
+      const hashedPassword = await this.hashPassword(password);
+      const user = new this.User({ username, password: hashedPassword, phone });
       const savedUser = await user.save();
       
       // Create initial user data entry
@@ -91,8 +110,14 @@ class Database {
 
   async getUserByCredentials(username, password) {
     try {
-      const user = await this.User.findOne({ username, password });
-      return user ? { id: user._id, username: user.username, phone: user.phone, password: user.password } : null;
+      const user = await this.User.findOne({ username });
+      if (!user) return null;
+      
+      // Compare provided password with stored hashed password
+      const passwordMatch = await this.comparePassword(password, user.password);
+      if (!passwordMatch) return null;
+      
+      return { id: user._id, username: user.username, phone: user.phone };
     } catch (error) {
       throw error;
     }
