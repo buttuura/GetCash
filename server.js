@@ -25,7 +25,12 @@ const db = new Database();
 // CORS configuration
 const corsOptions = {
   origin: NODE_ENV === 'production' 
-    ? [process.env.CORS_ORIGIN || 'https://buttuura.github.io', 'https://buttuura.github.io/GetCash']
+    ? [
+        'https://buttuura.github.io',
+        'https://buttuura.github.io/GetCash',
+        'https://getcash.onrender.com',
+        process.env.CORS_ORIGIN
+      ].filter(Boolean)
     : ['http://localhost:3300', 'http://127.0.0.1:3300'],
   credentials: true,
   optionsSuccessStatus: 200
