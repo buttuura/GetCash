@@ -14,3 +14,7 @@ services:
         value: https://buttuura.github.io
       - key: PORT
         value: 10000
+      - key: MONGODB_URI
+        value: mongodb+srv://GetCash:buttuura@cluster0.od3sa0a.mongodb.net/GetCash?retryWrites=true&w=majority&appName=Cluster0
+      - key: MAX_FILE_SIZE
+        value: 10mb
