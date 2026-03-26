@@ -5,7 +5,7 @@ const bcrypt = require('bcrypt');
 class Database {
   constructor() {
     this.initialized = false;
-    this.init();
+    this.connectionPromise = this.init();
   }
 
   async init() {
@@ -15,13 +15,25 @@ class Database {
         useNewUrlParser: true,
         useUnifiedTopology: true
       });
-      console.log('Connected to MongoDB successfully');
+      console.log('✅ Connected to MongoDB successfully');
       this.createSchemas();
       this.initialized = true;
+      console.log('✅ Database schemas created and ready');
+      return true;
     } catch (error) {
-      console.error('Error connecting to MongoDB:', error.message);
+      console.error('❌ Error connecting to MongoDB:', error.message);
       // Retry connection after 5 seconds
-      setTimeout(() => this.init(), 5000);
+      console.log('🔄 Retrying connection in 5 seconds...');
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      return this.init();
+    }
+  }
+
+  // Wait for database to be initialized before operations
+  async ensureInitialized() {
+    if (!this.initialized) {
+      console.log('⏳ Waiting for database to initialize...');
+      await this.connectionPromise;
     }
   }
 
@@ -94,6 +106,7 @@ class Database {
   // User operations
   async createUser(username, password, phone) {
     try {
+      await this.ensureInitialized();
       const hashedPassword = await this.hashPassword(password);
       const user = new this.User({ username, password: hashedPassword, phone });
       const savedUser = await user.save();
@@ -104,12 +117,14 @@ class Database {
       
       return { id: savedUser._id, username: savedUser.username, phone: savedUser.phone };
     } catch (error) {
+      console.error('Error creating user:', error);
       throw error;
     }
   }
 
   async getUserByCredentials(username, password) {
     try {
+      await this.ensureInitialized();
       const user = await this.User.findOne({ username });
       if (!user) return null;
       
@@ -119,15 +134,18 @@ class Database {
       
       return { id: user._id, username: user.username, phone: user.phone };
     } catch (error) {
+      console.error('Error getting user by credentials:', error);
       throw error;
     }
   }
 
   async getUserByUsername(username) {
     try {
+      await this.ensureInitialized();
       const user = await this.User.findOne({ username });
       return user ? { id: user._id, username: user.username, phone: user.phone } : null;
     } catch (error) {
+      console.error('Error getting user by username:', error);
       throw error;
     }
   }
@@ -135,25 +153,30 @@ class Database {
   // Task operations
   async createTask(title, price, imageData) {
     try {
+      await this.ensureInitialized();
       const task = new this.Task({ title, price, image_data: imageData });
       const savedTask = await task.save();
       return { id: savedTask._id, title: savedTask.title, price: savedTask.price, image_data: savedTask.image_data };
     } catch (error) {
+      console.error('Error creating task:', error);
       throw error;
     }
   }
 
   async getAllTasks() {
     try {
+      await this.ensureInitialized();
       const tasks = await this.Task.find().sort({ created_at: -1 });
       return tasks;
     } catch (error) {
+      console.error('Error getting all tasks:', error);
       throw error;
     }
   }
 
   async getTasksByDate(date) {
     try {
+      await this.ensureInitialized();
       const startOfDay = new Date(date);
       startOfDay.setHours(0, 0, 0, 0);
       const endOfDay = new Date(date);
@@ -164,26 +187,31 @@ class Database {
       }).sort({ created_at: -1 });
       return tasks;
     } catch (error) {
+      console.error('Error getting tasks by date:', error);
       throw error;
     }
   }
 
   async deleteTask(taskId) {
     try {
+      await this.ensureInitialized();
       const result = await this.Task.deleteOne({ _id: taskId });
       // Also remove completed task records
       await this.CompletedTask.deleteMany({ task_id: taskId });
       return { deleted: result.deletedCount > 0, taskId };
     } catch (error) {
+      console.error('Error deleting task:', error);
       throw error;
     }
   }
 
   async deleteAllTasks() {
     try {
+      await this.ensureInitialized();
       await this.Task.deleteMany({});
       await this.CompletedTask.deleteMany({});
     } catch (error) {
+      console.error('Error deleting all tasks:', error);
       throw error;
     }
   }
@@ -191,6 +219,7 @@ class Database {
   // Completed task operations
   async markTaskCompleted(userId, taskId) {
     try {
+      await this.ensureInitialized();
       const existingRecord = await this.CompletedTask.findOne({ user_id: userId, task_id: taskId });
       if (existingRecord) {
         return { userId, taskId, completed: false, message: 'Task already completed' };
@@ -199,24 +228,29 @@ class Database {
       await completed.save();
       return { userId, taskId, completed: true };
     } catch (error) {
+      console.error('Error marking task completed:', error);
       throw error;
     }
   }
 
   async getCompletedTasks(userId) {
     try {
+      await this.ensureInitialized();
       const completedRecords = await this.CompletedTask.find({ user_id: userId });
       return completedRecords.map(record => record.task_id.toString());
     } catch (error) {
+      console.error('Error getting completed tasks:', error);
       throw error;
     }
   }
 
   async removeCompletedTask(userId, taskId) {
     try {
+      await this.ensureInitialized();
       const result = await this.CompletedTask.deleteOne({ user_id: userId, task_id: taskId });
       return { removed: result.deletedCount > 0 };
     } catch (error) {
+      console.error('Error removing completed task:', error);
       throw error;
     }
   }
@@ -224,6 +258,7 @@ class Database {
   // User data operations
   async getUserData(userId) {
     try {
+      await this.ensureInitialized();
       let userData = await this.UserData.findOne({ user_id: userId });
       if (!userData) {
         userData = new this.UserData({ user_id: userId });
@@ -238,12 +273,14 @@ class Database {
         job_level: userData.job_level
       };
     } catch (error) {
+      console.error('Error getting user data:', error);
       throw error;
     }
   }
 
   async updateUserWallet(userId, incomeWallet, personalWallet, totalEarnings) {
     try {
+      await this.ensureInitialized();
       const result = await this.UserData.findOneAndUpdate(
         { user_id: userId },
         {
@@ -256,12 +293,14 @@ class Database {
       );
       return { updated: !!result };
     } catch (error) {
+      console.error('Error updating user wallet:', error);
       throw error;
     }
   }
 
   async updateUserJobLevel(userId, jobLevel) {
     try {
+      await this.ensureInitialized();
       const result = await this.UserData.findOneAndUpdate(
         { user_id: userId },
         {
@@ -272,6 +311,7 @@ class Database {
       );
       return { updated: !!result };
     } catch (error) {
+      console.error('Error updating user job level:', error);
       throw error;
     }
   }
@@ -279,9 +319,9 @@ class Database {
   async close() {
     try {
       await mongoose.disconnect();
-      console.log('Database connection closed');
+      console.log('✅ Database connection closed');
     } catch (error) {
-      console.error('Error closing database:', error.message);
+      console.error('❌ Error closing database:', error.message);
     }
   }
 }

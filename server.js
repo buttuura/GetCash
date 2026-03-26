@@ -100,11 +100,23 @@ app.post('/api/register', async (req, res) => {
     }
     
     // Create new user
-    await db.createUser(username, password, phone);
-    res.json({ message: 'Registration successful.' });
+    const newUser = await db.createUser(username, password, phone);
+    console.log('✅ User registered successfully:', newUser.username);
+    res.status(201).json({ 
+      message: 'Registration successful.',
+      username: newUser.username 
+    });
   } catch (error) {
-    console.error('Registration error:', error);
-    res.status(500).json({ message: 'Registration failed. Please try again.' });
+    console.error('❌ Registration error:', error.message);
+    
+    // Handle specific errors
+    if (error.message && error.message.includes('duplicate key')) {
+      return res.status(409).json({ message: 'Username already exists.' });
+    }
+    
+    res.status(500).json({ 
+      message: 'Registration failed. ' + error.message 
+    });
   }
 });
 
@@ -119,10 +131,18 @@ app.post('/api/login', async (req, res) => {
     
     // Create JWT token
     const token = jwt.sign({ username, userId: user.id }, JWT_SECRET, { expiresIn: '1h' });
-    res.json({ message: 'Login successful.', token, userId: user.id });
+    console.log('✅ User logged in successfully:', username);
+    res.json({ 
+      message: 'Login successful.', 
+      token, 
+      userId: user.id,
+      username: username 
+    });
   } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ message: 'Login failed. Please try again.' });
+    console.error('❌ Login error:', error.message);
+    res.status(500).json({ 
+      message: 'Login failed. ' + error.message 
+    });
   }
 });
 
