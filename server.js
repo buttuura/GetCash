@@ -22,18 +22,34 @@ if (NODE_ENV === 'production' && JWT_SECRET === 'your_jwt_secret_key_change_this
 // Initialize database
 const db = new Database();
 
-// CORS configuration
+// CORS configuration - Dynamic origin checker
 const corsOptions = {
-  origin: NODE_ENV === 'production' 
-    ? [
-        'https://buttuura.github.io',
-        'https://buttuura.github.io/GetCash',
-        'https://getcash.onrender.com',
-        process.env.CORS_ORIGIN
-      ].filter(Boolean)
-    : ['http://localhost:3300', 'http://127.0.0.1:3300'],
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      'https://buttuura.github.io',
+      'https://buttuura.github.io/GetCash',
+      'https://getcash.onrender.com',
+      'http://localhost:3300',
+      'http://127.0.0.1:3300'
+    ];
+    
+    // Allow if origin is in whitelist
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    }
+    // Allow all *.onrender.com domains (for development)
+    else if (origin && origin.includes('.onrender.com')) {
+      callback(null, true);
+    }
+    else {
+      console.warn(`CORS blocked origin: ${origin}`);
+      callback(new Error('CORS not allowed'));
+    }
+  },
   credentials: true,
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 };
 
 app.use(cors(corsOptions));
