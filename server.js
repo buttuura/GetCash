@@ -4,6 +4,8 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
+require('dotenv').config(); // Load environment variables from .env file
+
 const Database = require('./database');
 const createHealthRoutes = require('./health-routes');
 
@@ -158,7 +160,7 @@ app.delete('/api/tasks/:taskId', async (req, res) => {
   const { taskId } = req.params;
   
   try {
-    const result = await db.deleteTask(parseInt(taskId));
+    const result = await db.deleteTask(taskId);
     if (result.deleted) {
       res.json({ message: 'Task deleted successfully.' });
     } else {
@@ -195,7 +197,7 @@ app.post('/api/tasks/:taskId/complete', authenticateToken, async (req, res) => {
   const { userId } = req.user;
   
   try {
-    const result = await db.markTaskCompleted(userId, parseInt(taskId));
+    const result = await db.markTaskCompleted(userId, taskId);
     if (result.completed) {
       // Get user's current job level (default to trainee)
       const userData = await db.getUserData(userId);
@@ -240,7 +242,7 @@ app.delete('/api/tasks/:taskId/complete', authenticateToken, async (req, res) =>
   const { userId } = req.user;
   
   try {
-    await db.removeCompletedTask(userId, parseInt(taskId));
+    await db.removeCompletedTask(userId, taskId);
     res.json({ message: 'Task removed from completed list.' });
   } catch (error) {
     console.error('Remove completed task error:', error);

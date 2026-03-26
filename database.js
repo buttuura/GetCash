@@ -1,350 +1,262 @@
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
+const mongoose = require('mongoose');
+const crypto = require('crypto');
 
-// Database file path
-const DB_PATH = path.join(__dirname, 'app_data.db');
-
+// MongoDB connection
 class Database {
   constructor() {
-    this.db = null;
+    this.initialized = false;
     this.init();
   }
 
-  init() {
-    this.db = new sqlite3.Database(DB_PATH, (err) => {
-      if (err) {
-        console.error('Error opening database:', err.message);
-      } else {
-        console.log('Connected to SQLite database at:', DB_PATH);
-        this.createTables();
-      }
-    });
+  async init() {
+    try {
+      const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/getcash';
+      await mongoose.connect(mongoUri, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+      });
+      console.log('Connected to MongoDB successfully');
+      this.createSchemas();
+      this.initialized = true;
+    } catch (error) {
+      console.error('Error connecting to MongoDB:', error.message);
+      // Retry connection after 5 seconds
+      setTimeout(() => this.init(), 5000);
+    }
   }
 
-  createTables() {
-    // Users table
-    this.db.run(`
-      CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT UNIQUE NOT NULL,
-        password TEXT NOT NULL,
-        phone TEXT NOT NULL,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
+  createSchemas() {
+    // User Schema
+    const userSchema = new mongoose.Schema({
+      username: { type: String, required: true, unique: true },
+      password: { type: String, required: true },
+      phone: { type: String, required: true },
+      created_at: { type: Date, default: Date.now }
+    });
 
-    // Tasks table (for admin uploaded tasks)
-    this.db.run(`
-      CREATE TABLE IF NOT EXISTS tasks (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT NOT NULL,
-        price INTEGER NOT NULL,
-        image_data TEXT NOT NULL,
-        upload_date DATE DEFAULT (DATE('now')),
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
+    // Task Schema
+    const taskSchema = new mongoose.Schema({
+      title: { type: String, required: true },
+      price: { type: Number, required: true },
+      image_data: { type: String, required: true },
+      upload_date: { type: Date, default: Date.now },
+      created_at: { type: Date, default: Date.now }
+    });
 
-    // Completed tasks table (tracks which user completed which task)
-    this.db.run(`
-      CREATE TABLE IF NOT EXISTS completed_tasks (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER NOT NULL,
-        task_id INTEGER NOT NULL,
-        completed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES users (id),
-        FOREIGN KEY (task_id) REFERENCES tasks (id),
-        UNIQUE(user_id, task_id)
-      )
-    `);
+    // Completed Tasks Schema
+    const completedTaskSchema = new mongoose.Schema({
+      user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+      task_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Task', required: true },
+      completed_at: { type: Date, default: Date.now }
+    });
+    completedTaskSchema.index({ user_id: 1, task_id: 1 }, { unique: true });
 
-    // User data table (for storing wallet info, earnings, etc.)
-    this.db.run(`
-      CREATE TABLE IF NOT EXISTS user_data (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER NOT NULL,
-        income_wallet DECIMAL(10,2) DEFAULT 0.00,
-        personal_wallet DECIMAL(10,2) DEFAULT 0.00,
-        total_earnings DECIMAL(10,2) DEFAULT 0.00,
-        total_withdrawals DECIMAL(10,2) DEFAULT 0.00,
-        job_level VARCHAR(20) DEFAULT 'trainee',
-        tasks_completed_today INTEGER DEFAULT 0,
-        last_task_date DATE DEFAULT CURRENT_DATE,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES users (id),
-        UNIQUE(user_id)
-      )
-    `);
+    // User Data Schema (wallet info, earnings, etc.)
+    const userDataSchema = new mongoose.Schema({
+      user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
+      income_wallet: { type: Number, default: 0 },
+      personal_wallet: { type: Number, default: 0 },
+      total_earnings: { type: Number, default: 0 },
+      total_withdrawals: { type: Number, default: 0 },
+      job_level: { type: String, default: 'trainee' },
+      tasks_completed_today: { type: Number, default: 0 },
+      last_task_date: { type: Date, default: Date.now },
+      updated_at: { type: Date, default: Date.now }
+    });
 
-    console.log('Database tables created successfully');
+    // Get or create models
+    this.User = mongoose.model('User', userSchema);
+    this.Task = mongoose.model('Task', taskSchema);
+    this.CompletedTask = mongoose.model('CompletedTask', completedTaskSchema);
+    this.UserData = mongoose.model('UserData', userDataSchema);
+
+    console.log('Database schemas created successfully');
   }
 
   // User operations
-  createUser(username, password, phone) {
-    return new Promise((resolve, reject) => {
-      this.db.run(
-        'INSERT INTO users (username, password, phone) VALUES (?, ?, ?)',
-        [username, password, phone],
-        function(err) {
-          if (err) {
-            reject(err);
-          } else {
-            // Create initial user data entry
-            const userId = this.lastID;
-            resolve({ id: userId, username, phone });
-          }
-        }
-      );
-    });
+  async createUser(username, password, phone) {
+    try {
+      const user = new this.User({ username, password, phone });
+      const savedUser = await user.save();
+      
+      // Create initial user data entry
+      const userData = new this.UserData({ user_id: savedUser._id });
+      await userData.save();
+      
+      return { id: savedUser._id, username: savedUser.username, phone: savedUser.phone };
+    } catch (error) {
+      throw error;
+    }
   }
 
-  getUserByCredentials(username, password) {
-    return new Promise((resolve, reject) => {
-      this.db.get(
-        'SELECT * FROM users WHERE username = ? AND password = ?',
-        [username, password],
-        (err, row) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(row);
-          }
-        }
-      );
-    });
+  async getUserByCredentials(username, password) {
+    try {
+      const user = await this.User.findOne({ username, password });
+      return user ? { id: user._id, username: user.username, phone: user.phone, password: user.password } : null;
+    } catch (error) {
+      throw error;
+    }
   }
 
-  getUserByUsername(username) {
-    return new Promise((resolve, reject) => {
-      this.db.get(
-        'SELECT * FROM users WHERE username = ?',
-        [username],
-        (err, row) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(row);
-          }
-        }
-      );
-    });
+  async getUserByUsername(username) {
+    try {
+      const user = await this.User.findOne({ username });
+      return user ? { id: user._id, username: user.username, phone: user.phone } : null;
+    } catch (error) {
+      throw error;
+    }
   }
 
   // Task operations
-  createTask(title, price, imageData) {
-    return new Promise((resolve, reject) => {
-      this.db.run(
-        'INSERT INTO tasks (title, price, image_data) VALUES (?, ?, ?)',
-        [title, price, imageData],
-        function(err) {
-          if (err) {
-            reject(err);
-          } else {
-            resolve({ id: this.lastID, title, price, imageData });
-          }
-        }
-      );
-    });
+  async createTask(title, price, imageData) {
+    try {
+      const task = new this.Task({ title, price, image_data: imageData });
+      const savedTask = await task.save();
+      return { id: savedTask._id, title: savedTask.title, price: savedTask.price, image_data: savedTask.image_data };
+    } catch (error) {
+      throw error;
+    }
   }
 
-  getAllTasks() {
-    return new Promise((resolve, reject) => {
-      this.db.all('SELECT * FROM tasks ORDER BY created_at DESC', (err, rows) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(rows);
-        }
-      });
-    });
+  async getAllTasks() {
+    try {
+      const tasks = await this.Task.find().sort({ created_at: -1 });
+      return tasks;
+    } catch (error) {
+      throw error;
+    }
   }
 
-  getTasksByDate(date) {
-    return new Promise((resolve, reject) => {
-      this.db.all(
-        'SELECT * FROM tasks WHERE upload_date = ? ORDER BY created_at DESC',
-        [date],
-        (err, rows) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(rows);
-          }
-        }
-      );
-    });
+  async getTasksByDate(date) {
+    try {
+      const startOfDay = new Date(date);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(date);
+      endOfDay.setHours(23, 59, 59, 999);
+      
+      const tasks = await this.Task.find({
+        upload_date: { $gte: startOfDay, $lte: endOfDay }
+      }).sort({ created_at: -1 });
+      return tasks;
+    } catch (error) {
+      throw error;
+    }
   }
 
-  deleteTask(taskId) {
-    return new Promise((resolve, reject) => {
-      const db = this.db;
-      db.run('DELETE FROM tasks WHERE id = ?', [taskId], function(err) {
-        if (err) {
-          reject(err);
-        } else {
-          const deletedCount = this.changes;
-          // Also remove any completed task records for this task
-          db.run('DELETE FROM completed_tasks WHERE task_id = ?', [taskId], (err2) => {
-            if (err2) {
-              reject(err2);
-            } else {
-              resolve({ deleted: deletedCount > 0, taskId });
-            }
-          });
-        }
-      });
-    });
+  async deleteTask(taskId) {
+    try {
+      const result = await this.Task.deleteOne({ _id: taskId });
+      // Also remove completed task records
+      await this.CompletedTask.deleteMany({ task_id: taskId });
+      return { deleted: result.deletedCount > 0, taskId };
+    } catch (error) {
+      throw error;
+    }
   }
 
-  deleteAllTasks() {
-    return new Promise((resolve, reject) => {
-      this.db.run('DELETE FROM tasks', (err) => {
-        if (err) {
-          reject(err);
-        } else {
-          // Also clear completed tasks
-          this.db.run('DELETE FROM completed_tasks', (err2) => {
-            if (err2) {
-              reject(err2);
-            } else {
-              resolve();
-            }
-          });
-        }
-      });
-    });
+  async deleteAllTasks() {
+    try {
+      await this.Task.deleteMany({});
+      await this.CompletedTask.deleteMany({});
+    } catch (error) {
+      throw error;
+    }
   }
 
   // Completed task operations
-  markTaskCompleted(userId, taskId) {
-    return new Promise((resolve, reject) => {
-      this.db.run(
-        'INSERT OR IGNORE INTO completed_tasks (user_id, task_id) VALUES (?, ?)',
-        [userId, taskId],
-        function(err) {
-          if (err) {
-            reject(err);
-          } else {
-            resolve({ userId, taskId, completed: this.changes > 0 });
-          }
-        }
-      );
-    });
+  async markTaskCompleted(userId, taskId) {
+    try {
+      const existingRecord = await this.CompletedTask.findOne({ user_id: userId, task_id: taskId });
+      if (existingRecord) {
+        return { userId, taskId, completed: false, message: 'Task already completed' };
+      }
+      const completed = new this.CompletedTask({ user_id: userId, task_id: taskId });
+      await completed.save();
+      return { userId, taskId, completed: true };
+    } catch (error) {
+      throw error;
+    }
   }
 
-  getCompletedTasks(userId) {
-    return new Promise((resolve, reject) => {
-      this.db.all(
-        'SELECT task_id FROM completed_tasks WHERE user_id = ?',
-        [userId],
-        (err, rows) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(rows.map(row => row.task_id));
-          }
-        }
-      );
-    });
+  async getCompletedTasks(userId) {
+    try {
+      const completedRecords = await this.CompletedTask.find({ user_id: userId });
+      return completedRecords.map(record => record.task_id.toString());
+    } catch (error) {
+      throw error;
+    }
   }
 
-  removeCompletedTask(userId, taskId) {
-    return new Promise((resolve, reject) => {
-      this.db.run(
-        'DELETE FROM completed_tasks WHERE user_id = ? AND task_id = ?',
-        [userId, taskId],
-        function(err) {
-          if (err) {
-            reject(err);
-          } else {
-            resolve({ removed: this.changes > 0 });
-          }
-        }
-      );
-    });
+  async removeCompletedTask(userId, taskId) {
+    try {
+      const result = await this.CompletedTask.deleteOne({ user_id: userId, task_id: taskId });
+      return { removed: result.deletedCount > 0 };
+    } catch (error) {
+      throw error;
+    }
   }
 
   // User data operations
-  getUserData(userId) {
-    return new Promise((resolve, reject) => {
-      this.db.get(
-        'SELECT * FROM user_data WHERE user_id = ?',
-        [userId],
-        (err, row) => {
-          if (err) {
-            reject(err);
-          } else if (!row) {
-            // Create initial user data if doesn't exist
-            this.db.run(
-              'INSERT INTO user_data (user_id) VALUES (?)',
-              [userId],
-              function(err2) {
-                if (err2) {
-                  reject(err2);
-                } else {
-                  resolve({
-                    user_id: userId,
-                    income_wallet: 0.00,
-                    personal_wallet: 0.00,
-                    total_earnings: 0.00,
-                    total_withdrawals: 0.00
-                  });
-                }
-              }
-            );
-          } else {
-            resolve(row);
-          }
-        }
-      );
-    });
+  async getUserData(userId) {
+    try {
+      let userData = await this.UserData.findOne({ user_id: userId });
+      if (!userData) {
+        userData = new this.UserData({ user_id: userId });
+        await userData.save();
+      }
+      return {
+        user_id: userData.user_id,
+        income_wallet: userData.income_wallet,
+        personal_wallet: userData.personal_wallet,
+        total_earnings: userData.total_earnings,
+        total_withdrawals: userData.total_withdrawals,
+        job_level: userData.job_level
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 
-  updateUserWallet(userId, incomeWallet, personalWallet, totalEarnings) {
-    return new Promise((resolve, reject) => {
-      this.db.run(
-        `UPDATE user_data 
-         SET income_wallet = ?, personal_wallet = ?, total_earnings = ?, updated_at = CURRENT_TIMESTAMP 
-         WHERE user_id = ?`,
-        [incomeWallet, personalWallet, totalEarnings, userId],
-        function(err) {
-          if (err) {
-            reject(err);
-          } else {
-            resolve({ updated: this.changes > 0 });
-          }
-        }
+  async updateUserWallet(userId, incomeWallet, personalWallet, totalEarnings) {
+    try {
+      const result = await this.UserData.findOneAndUpdate(
+        { user_id: userId },
+        {
+          income_wallet: incomeWallet,
+          personal_wallet: personalWallet,
+          total_earnings: totalEarnings,
+          updated_at: new Date()
+        },
+        { new: true, upsert: true }
       );
-    });
+      return { updated: !!result };
+    } catch (error) {
+      throw error;
+    }
   }
 
-  updateUserJobLevel(userId, jobLevel) {
-    return new Promise((resolve, reject) => {
-      this.db.run(
-        `UPDATE user_data 
-         SET job_level = ?, updated_at = CURRENT_TIMESTAMP 
-         WHERE user_id = ?`,
-        [jobLevel, userId],
-        function(err) {
-          if (err) {
-            reject(err);
-          } else {
-            resolve({ updated: this.changes > 0 });
-          }
-        }
+  async updateUserJobLevel(userId, jobLevel) {
+    try {
+      const result = await this.UserData.findOneAndUpdate(
+        { user_id: userId },
+        {
+          job_level: jobLevel,
+          updated_at: new Date()
+        },
+        { new: true, upsert: true }
       );
-    });
+      return { updated: !!result };
+    } catch (error) {
+      throw error;
+    }
   }
 
-  close() {
-    if (this.db) {
-      this.db.close((err) => {
-        if (err) {
-          console.error('Error closing database:', err.message);
-        } else {
-          console.log('Database connection closed');
-        }
-      });
+  async close() {
+    try {
+      await mongoose.disconnect();
+      console.log('Database connection closed');
+    } catch (error) {
+      console.error('Error closing database:', error.message);
     }
   }
 }
