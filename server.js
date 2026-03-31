@@ -29,6 +29,8 @@ const corsOptions = {
       'https://buttuura.github.io',
       'https://buttuura.github.io/GetCash',
       'https://getcash.onrender.com',
+      'https://getcash-1.onrender.com',
+      'https://getcash-d3goijjipnbc7383itk0.onrender.com',
       'http://localhost:3300',
       'http://127.0.0.1:3300',
       'http://localhost:3000',
