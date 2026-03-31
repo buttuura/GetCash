@@ -101,37 +101,36 @@
         <div id="result" style="margin-top: 20px;"></div>
     </div>
 
-    <script src="client-storage.js"></script>
+    <script src="storage-manager.js"></script>
     <script>
-        const clientStorage = new ClientStorage();
+        const apiClient = new ApiClient();
         
-        function displayUsers() {
-            const users = clientStorage.getAllUsers();
-            const userList = document.getElementById('userList');
-            
-            if (users.length === 0) {
-                userList.innerHTML = '<p>No users found. Register some users first!</p>';
-                return;
-            }
-            
-            let html = '<table style="width:100%; color:white;">';
-            html += '<tr><th>Username</th><th>Phone</th><th>Balance</th><th>Admin</th><th>Join Date</th></tr>';
-            
-            users.forEach(user => {
-                const data = clientStorage.getData();
-                const fullUser = data.users.find(u => u.id === user.id);
-                const isAdmin = fullUser && (fullUser.isAdmin || fullUser.username === '0776944');
+        async function displayUsers() {
+            try {
+                const users = await apiClient.request('/admin/users');
+                const userList = document.getElementById('userList');
                 
-                html += `<tr style="border-bottom:1px solid rgba(255,255,255,0.3);">
-                    <td>${user.username}</td>
-                    <td>${user.phone}</td>
-                    <td>$${user.balance}</td>
-                    <td>${isAdmin ? '👑 Yes' : 'No'}</td>
-                    <td>${new Date(user.joinDate).toLocaleDateString()}</td>
-                </tr>`;
-            });
-            html += '</table>';
-            userList.innerHTML = html;
+                if (!users || users.length === 0) {
+                    userList.innerHTML = '<p>No users found. Register some users first!</p>';
+                    return;
+                }
+                
+                let html = '<table style="width:100%; color:white;">';
+                html += '<tr><th>Username</th><th>Phone</th><th>Created</th></tr>';
+                
+                users.forEach(user => {
+                    html += `<tr>
+                        <td>${user.username}</td>
+                        <td>${user.phone}</td>
+                        <td>${new Date(user.created_at).toLocaleDateString()}</td>
+                    </tr>`;
+                });
+                
+                html += '</table>';
+                userList.innerHTML = html;
+            } catch (error) {
+                document.getElementById('userList').innerHTML = '<p>Error loading users: ' + error.message + '</p>';
+            }
         }
         
         async function createAdmin() {
@@ -146,31 +145,7 @@
             }
             
             try {
-                const data = clientStorage.getData();
-                
-                // Check if user already exists
-                if (data.users.find(user => user.username === username)) {
-                    result.innerHTML = '<p class="error">❌ Username already exists!</p>';
-                    return;
-                }
-                
-                // Create admin user
-                const newAdmin = {
-                    id: Date.now(),
-                    username: username,
-                    phone: phone,
-                    password: password,
-                    balance: 1000,
-                    level: 999,
-                    isAdmin: true,
-                    joinDate: new Date().toISOString(),
-                    tasks: [],
-                    deposits: []
-                };
-                
-                data.users.push(newAdmin);
-                clientStorage.saveData(data);
-                
+                await apiClient.register(username, password, phone);
                 result.innerHTML = '<p class="success">✅ Admin created successfully!</p>';
                 displayUsers();
                 
@@ -188,32 +163,17 @@
             const result = document.getElementById('result');
             
             try {
-                const loginResult = await clientStorage.login({
-                    username: '0776944',
-                    password: 'admin123'
-                });
+                const loginResult = await apiClient.login('0776944', 'admin123');
                 
-                if (loginResult.success) {
-                    result.innerHTML = `<p class="success">✅ Admin login successful!<br>
-                        Username: ${loginResult.user.username}<br>
-                        Balance: $${loginResult.user.balance}<br>
-                        Admin Status: ${loginResult.user.isAdmin ? 'Yes' : 'No'}</p>`;
-                } else {
-                    result.innerHTML = '<p class="error">❌ Login failed: ' + loginResult.message + '</p>';
-                }
+                result.innerHTML = `<p class="success">✅ Admin login successful!<br>
+                    Username: ${loginResult.username}<br>
+                    User ID: ${loginResult.userId}</p>`;
             } catch (error) {
                 result.innerHTML = '<p class="error">❌ Login error: ' + error.message + '</p>';
             }
         }
         
-        function resetStorage() {
-            if (confirm('⚠️ This will delete ALL user data! Are you sure?')) {
-                localStorage.removeItem('getcash_data');
-                clientStorage.init(); // Reinitialize with default admin
-                result.innerHTML = '<p class="success">✅ Storage reset! Default admin account recreated.</p>';
-                displayUsers();
-            }
-        }
+        // Reset function removed - data is now in MongoDB
         
         // Load users on page load
         document.addEventListener('DOMContentLoaded', function() {

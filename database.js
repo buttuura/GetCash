@@ -151,6 +151,17 @@ class Database {
     }
   }
 
+  async getAllUsers() {
+    try {
+      await this.ensureInitialized();
+      const users = await this.User.find().select('-password');
+      return users.map(u => ({ id: u._id, username: u.username, phone: u.phone, created_at: u.created_at }));
+    } catch (error) {
+      console.error('Error getting all users:', error);
+      throw error;
+    }
+  }
+
   // Task operations
   async createTask(title, price, imageData) {
     try {

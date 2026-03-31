@@ -175,6 +175,21 @@ app.post('/api/test-login', async (req, res) => {
   }
 });
 
+// Admin endpoint to get all users
+app.get('/api/admin/users', authenticateToken, async (req, res) => {
+  if (req.user.username !== '0776944') {
+    return res.status(403).json({ message: 'Admin access required.' });
+  }
+  
+  try {
+    const users = await db.getAllUsers();
+    res.json(users);
+  } catch (error) {
+    console.error('Error getting users:', error);
+    res.status(500).json({ message: 'Failed to get users.' });
+  }
+});
+
 // Middleware to verify JWT token
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
