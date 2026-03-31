@@ -9,6 +9,7 @@ class ApiClient {
     } else {
       // Use your actual Render deployment URL
       this.possibleUrls = [
+        'https://getcash-1.onrender.com/api',
         'https://getcash-d3goijjipnbc7383itk0.onrender.com/api',
         'https://getcash-backend.onrender.com/api',
         'https://getcash.onrender.com/api'
