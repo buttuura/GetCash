@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Upload Task (No Token Required)</title>
+    <link rel="stylesheet" href="getcash.css">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding-bottom: 80px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 32px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .header h1 {
+            color: #333;
+            margin: 0 0 8px 0;
+            font-size: 2.2em;
+            font-weight: 700;
+        }
+
+        .storage-info {
+            background: linear-gradient(135deg, #FF9500, #FF6B35);
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e8ed;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .file-upload {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-upload input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-upload-label {
+            display: block;
+            padding: 20px;
+            border: 2px dashed #FF9500;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 149, 0, 0.05);
+        }
+
+        .file-upload-label:hover {
+            background: rgba(255, 149, 0, 0.1);
+            border-color: #FF6B35;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px 32px;
+            background: linear-gradient(135deg, #FF9500, #FF6B35);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 24px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 149, 0, 0.3);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: translateY(-2px);
+        }
+
+        .comparison {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .comparison h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+
+        .pro-con {
+            display: flex;
+            gap: 20px;
+            margin-top: 12px;
+        }
+
+        .pros, .cons {
+            flex: 1;
+        }
+
+        .pros h4 {
+            color: #28a745;
+        }
+
+        .cons h4 {
+            color: #dc3545;
+        }
+
+        .pros ul, .cons ul {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+
+        .pros li, .cons li {
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <button class="back-btn" onclick="window.location.href='getcash.html'">← Back to Dashboard</button>
+    
+    <div class="container">
+        <div class="header">
+            <h1>📤 Upload Task</h1>
+            <div class="storage-info">
+                <strong>🔓 No Token Required</strong><br>
+                Enhanced localStorage • Optimized storage • Easy setup
+            </div>
+        </div>
+
+        <div class="comparison">
+            <h3>🤔 Why No GitHub Token Here?</h3>
+            <div class="pro-con">
+                <div class="pros">
+                    <h4>✅ No Token Benefits:</h4>
+                    <ul>
+                        <li>No GitHub account needed</li>
+                        <li>No token setup required</li>
+                        <li>Works immediately</li>
+                        <li>No authentication hassle</li>
+                        <li>Private by default</li>
+                    </ul>
+                </div>
+                <div class="cons">
+                    <h4>⚠️ Limitations:</h4>
+                    <ul>
+                        <li>Limited to ~5MB storage</li>
+                        <li>Data only on this device</li>
+                        <li>Can be cleared by browser</li>
+                        <li>No cloud backup</li>
+                        <li>Image compression needed</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <form id="taskForm">
+            <div class="form-group">
+                <label for="title">📋 Task Title</label>
+                <input type="text" id="title" name="title" required>
+            </div>
+
+            <div class="form-group">
+                <label for="description">📝 Task Description</label>
+                <textarea id="description" name="description" rows="4" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="reward">💰 Reward Amount</label>
+                <input type="number" id="reward" name="reward" step="0.01" required>
+            </div>
+
+            <div class="form-group">
+                <label for="price">💎 Task Price (Optional)</label>
+                <input type="number" id="price" name="price" step="0.01">
+            </div>
+
+            <div class="form-group">
+                <label>🖼️ Task Image</label>
+                <div class="file-upload">
+                    <input type="file" id="taskImage" name="image" accept="image/*">
+                    <label for="taskImage" class="file-upload-label">
+                        📁 Click to upload image<br>
+                        <small>Will be compressed for efficient storage</small>
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn">📤 Upload Task (No Token)</button>
+        </form>
+
+        <div style="margin-top: 20px; padding: 12px; background: #e7f3ff; border: 1px solid #b3d9ff; border-radius: 8px;">
+            <strong>💡 Want Unlimited Storage?</strong><br>
+            <small><a href="task-upload-github.html" style="color: #0066cc;">Switch to GitHub Storage</a> for unlimited space, cloud sync, and global access!</small>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced localStorage task upload (no token required)
+        document.getElementById('taskForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = '⏳ Uploading...';
+            submitBtn.disabled = true;
+
+            try {
+                const formData = new FormData(this);
+                const task = {
+                    id: Date.now().toString(),
+                    title: formData.get('title'),
+                    description: formData.get('description'),
+                    reward: formData.get('reward'),
+                    price: formData.get('price') || formData.get('reward'),
+                    uploadDate: new Date().toISOString()
+                };
+
+                const fileInput = document.getElementById('taskImage');
+                if (fileInput.files[0]) {
+                    // Convert and compress image
+                    const imageBase64 = await new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            // Compress image for localStorage efficiency
+                            const img = new Image();
+                            img.onload = () => {
+                                const canvas = document.createElement('canvas');
+                                const ctx = canvas.getContext('2d');
+                                
+                                // Resize to reasonable dimensions
+                                const maxSize = 300;
+                                let { width, height } = img;
+                                
+                                if (width > height) {
+                                    if (width > maxSize) {
+                                        height = (height * maxSize) / width;
+                                        width = maxSize;
+                                    }
+                                } else {
+                                    if (height > maxSize) {
+                                        width = (width * maxSize) / height;
+                                        height = maxSize;
+                                    }
+                                }
+                                
+                                canvas.width = width;
+                                canvas.height = height;
+                                ctx.drawImage(img, 0, 0, width, height);
+                                
+                                resolve(canvas.toDataURL('image/jpeg', 0.7));
+                            };
+                            img.src = e.target.result;
+                        };
+                        reader.readAsDataURL(fileInput.files[0]);
+                    });
+                    
+                    task.img = imageBase64;
+                    console.log('📸 Image compressed for localStorage');
+                }
+
+                // Save to enhanced localStorage
+                let existingTasks = JSON.parse(localStorage.getItem('adminTasks') || '[]');
+                existingTasks.push(task);
+                
+                // Keep only recent tasks to manage space
+                if (existingTasks.length > 20) {
+                    existingTasks = existingTasks.slice(-15); // Keep last 15
+                }
+                
+                localStorage.setItem('adminTasks', JSON.stringify(existingTasks));
+                
+                console.log('✅ Task saved to localStorage:', task);
+                alert('🎉 Task uploaded successfully!\n\n• Saved to local device\n• Will appear in task list\n• No token required!');
+
+                // Reset form
+                this.reset();
+                document.querySelector('.file-upload-label').innerHTML = '📁 Click to upload image<br><small>Will be compressed for efficient storage</small>';
+                
+            } catch (error) {
+                console.error('Upload failed:', error);
+                alert('❌ Upload failed: ' + error.message);
+            } finally {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+
+        // File upload preview
+        document.getElementById('taskImage').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const label = document.querySelector('.file-upload-label');
+                label.innerHTML = `📸 ${file.name}<br><small>Will be compressed to ~${Math.min(300, Math.max(file.size/1024/1024*300, 50)).toFixed(0)}px</small>`;
+            }
+        });
+    </script>
+</body>
+</html>

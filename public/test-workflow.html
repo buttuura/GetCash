@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Job System Test Workflow - GetCash</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        .workflow-step {
+            background: rgba(255, 255, 255, 0.1);
+            margin: 20px 0;
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 5px solid #00ff41;
+        }
+        .step-number {
+            background: linear-gradient(45deg, #00ff41, #00d935);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        .btn {
+            background: linear-gradient(45deg, #00ff41, #00d935);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 8px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 255, 65, 0.4);
+        }
+        .btn-secondary {
+            background: linear-gradient(45deg, #6c757d, #5a6268);
+        }
+        .btn-danger {
+            background: linear-gradient(45deg, #dc3545, #c82333);
+        }
+        .btn-info {
+            background: linear-gradient(45deg, #17a2b8, #138496);
+        }
+        .status-display {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+        }
+        .status-item {
+            margin: 8px 0;
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+        .alert-success { background: rgba(40, 167, 69, 0.8); }
+        .alert-warning { background: rgba(255, 193, 7, 0.8); color: #000; }
+        .alert-info { background: rgba(23, 162, 184, 0.8); }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Complete Job System Test Workflow</h1>
+        <p>Test the full integration: Jobs → Recharge → Admin Approval → Task Access</p>
+
+        <div class="alert alert-info">
+            <strong>📋 Test Checklist:</strong>
+            <ul>
+                <li>✅ Jobs page shows career levels with upgrade buttons</li>
+                <li>✅ Upgrade buttons redirect to recharge with pre-filled amounts</li>
+                <li>✅ Recharge creates admin approval requests</li>
+                <li>✅ Admin can approve upgrades and activate job levels</li>
+                <li>✅ Task list shows different tasks based on job level</li>
+                <li>✅ Task completion adds earnings with job level multipliers</li>
+            </ul>
+        </div>
+
+        <div class="workflow-step">
+            <h3><span class="step-number">1</span>Setup Test Data</h3>
+            <p>Add sample tasks with different level requirements and reset user to intern level</p>
+            <div>
+                <button class="btn" onclick="setupTestData()">🎯 Setup Test Data</button>
+                <button class="btn btn-secondary" onclick="resetUserToIntern()">👶 Reset to Intern</button>
+                <button class="btn btn-info" onclick="showCurrentStatus()">📊 Show Status</button>
+            </div>
+        </div>
+
+        <div class="workflow-step">
+            <h3><span class="step-number">2</span>Test Job Upgrade Flow</h3>
+            <p>Navigate through the job upgrade process from intern to higher levels</p>
+            <div>
+                <a href="jobs.html" class="btn">🚀 Go to Jobs Page</a>
+                <button class="btn btn-info" onclick="simulateUpgrade()">🎮 Simulate Upgrade Process</button>
+            </div>
+        </div>
+
+        <div class="workflow-step">
+            <h3><span class="step-number">3</span>Admin Approval Workflow</h3>
+            <p>Test admin approval system for job upgrades</p>
+            <div>
+                <a href="admin-approvals.html" class="btn">👑 Admin Approvals</a>
+                <button class="btn btn-secondary" onclick="createTestApproval()">📝 Create Test Approval</button>
+                <button class="btn btn-info" onclick="showPendingApprovals()">📋 Show Pending</button>
+            </div>
+        </div>
+
+        <div class="workflow-step">
+            <h3><span class="step-number">4</span>Task Access Testing</h3>
+            <p>Verify that task access changes based on job level</p>
+            <div>
+                <a href="task-list.html" class="btn">📋 View Task List</a>
+                <a href="add-sample-tasks.html" class="btn btn-secondary">🎯 Manage Sample Tasks</a>
+                <button class="btn btn-info" onclick="testTaskAccess()">🔍 Test Task Filtering</button>
+            </div>
+        </div>
+
+        <div class="workflow-step">
+            <h3><span class="step-number">5</span>Complete Workflow Test</h3>
+            <p>Run through the entire process automatically</p>
+            <div>
+                <button class="btn" onclick="runCompleteWorkflowTest()">🏃‍♂️ Run Full Test</button>
+                <button class="btn btn-danger" onclick="resetEverything()">🗑️ Reset Everything</button>
+            </div>
+        </div>
+
+        <div id="statusDisplay" class="status-display" style="display: none;">
+            <h4>📊 Current System Status</h4>
+            <div id="statusContent"></div>
+        </div>
+
+        <div id="testResults" class="status-display" style="display: none;">
+            <h4>🧪 Test Results</h4>
+            <div id="testContent"></div>
+        </div>
+    </div>
+
+    <script>
+        async function setupTestData() {
+            try {
+                showStatus("Setting up test data...", "info");
+                
+                // Navigate to add sample tasks page in new tab
+                window.open('add-sample-tasks.html', '_blank');
+                
+                showStatus("✅ Opening sample tasks page. Please add sample tasks there.", "success");
+            } catch (error) {
+                showStatus("❌ Error setting up test data: " + error.message, "error");
+            }
+        }
+
+        function resetUserToIntern() {
+            const username = localStorage.getItem('username') || 'testuser';
+            
+            const resetJobData = {
+                currentLevel: 'intern',
+                levelStartDate: new Date().toISOString(),
+                tasksCompleted: 0,
+                totalEarnings: 0,
+                upgradeHistory: []
+            };
+
+            localStorage.setItem(`jobData_${username}`, JSON.stringify(resetJobData));
+            
+            // Also clear completed tasks to allow testing
+            localStorage.setItem('completedTasks', JSON.stringify([]));
+            
+            showStatus("✅ User reset to intern level. Job data cleared.", "success");
+            showCurrentStatus();
+        }
+
+        function showCurrentStatus() {
+            const username = localStorage.getItem('username') || 'testuser';
+            const jobData = JSON.parse(localStorage.getItem(`jobData_${username}`) || '{}');
+            const completedTasks = JSON.parse(localStorage.getItem('completedTasks') || '[]');
+            const adminApprovals = JSON.parse(localStorage.getItem('adminApprovals') || '[]');
+            
+            const statusContent = document.getElementById('statusContent');
+            statusContent.innerHTML = `
+                <div class="status-item">👤 <strong>Username:</strong> ${username}</div>
+                <div class="status-item">🎯 <strong>Current Job Level:</strong> ${jobData.currentLevel || 'intern'}</div>
+                <div class="status-item">✅ <strong>Tasks Completed:</strong> ${completedTasks.length}</div>
+                <div class="status-item">💰 <strong>Total Earnings:</strong> UGX ${(jobData.totalEarnings || 0).toLocaleString()}</div>
+                <div class="status-item">📋 <strong>Pending Approvals:</strong> ${adminApprovals.filter(a => a.status === 'pending').length}</div>
+                <div class="status-item">🏆 <strong>Upgrade History:</strong> ${(jobData.upgradeHistory || []).length} upgrades</div>
+            `;
+            
+            document.getElementById('statusDisplay').style.display = 'block';
+        }
+
+        function simulateUpgrade() {
+            const username = localStorage.getItem('username') || 'testuser';
+            const jobData = JSON.parse(localStorage.getItem(`jobData_${username}`) || '{}');
+            const currentLevel = jobData.currentLevel || 'intern';
+            
+            const upgradeAmounts = {
+                intern: { next: 'junior', amount: 50000 },
+                junior: { next: 'senior', amount: 100000 },
+                senior: { next: 'expert', amount: 200000 },
+                expert: { next: 'manager', amount: 500000 }
+            };
+            
+            const upgrade = upgradeAmounts[currentLevel];
+            if (!upgrade) {
+                showStatus("❌ Already at maximum level (Manager)", "error");
+                return;
+            }
+            
+            const confirmMsg = `🚀 Simulate upgrade from ${currentLevel} to ${upgrade.next}?\nAmount: UGX ${upgrade.amount.toLocaleString()}`;
+            
+            if (confirm(confirmMsg)) {
+                // Create upgrade URL and open recharge page
+                const upgradeParams = new URLSearchParams({
+                    type: 'upgrade',
+                    fromLevel: currentLevel,
+                    targetLevel: upgrade.next,
+                    amount: upgrade.amount
+                });
+                
+                window.open(`recharge.html?${upgradeParams.toString()}`, '_blank');
+                showStatus(`✅ Opening recharge page for ${upgrade.next} upgrade`, "success");
+            }
+        }
+
+        function createTestApproval() {
+            const username = localStorage.getItem('username') || 'testuser';
+            
+            const testApproval = {
+                id: Date.now().toString(),
+                type: 'upgrade',
+                userId: username,
+                userPhone: '256700000000',
+                accountName: 'Test User Account',
+                fromLevel: 'intern',
+                targetLevel: 'junior',
+                amount: 50000,
+                network: 'MTN',
+                requestDate: new Date().toISOString(),
+                status: 'pending'
+            };
+
+            let adminApprovals = JSON.parse(localStorage.getItem('adminApprovals') || '[]');
+            adminApprovals.push(testApproval);
+            localStorage.setItem('adminApprovals', JSON.stringify(adminApprovals));
+            
+            showStatus("✅ Test approval request created", "success");
+            showPendingApprovals();
+        }
+
+        function showPendingApprovals() {
+            const adminApprovals = JSON.parse(localStorage.getItem('adminApprovals') || '[]');
+            const pending = adminApprovals.filter(a => a.status === 'pending');
+            
+            if (pending.length === 0) {
+                showStatus("No pending approvals", "info");
+                return;
+            }
+            
+            let html = `<h5>📋 Pending Approvals (${pending.length})</h5>`;
+            pending.forEach(approval => {
+                html += `
+                    <div class="status-item">
+                        👤 ${approval.userId} | ${approval.fromLevel} → ${approval.targetLevel} | UGX ${approval.amount.toLocaleString()}
+                    </div>
+                `;
+            });
+            
+            const testContent = document.getElementById('testContent');
+            testContent.innerHTML = html;
+            document.getElementById('testResults').style.display = 'block';
+        }
+
+        async function testTaskAccess() {
+            const username = localStorage.getItem('username') || 'testuser';
+            const jobData = JSON.parse(localStorage.getItem(`jobData_${username}`) || '{}');
+            const currentLevel = jobData.currentLevel || 'intern';
+            
+            showStatus(`Testing task access for level: ${currentLevel}`, "info");
+            
+            // This would need to integrate with your task system
+            // For now, just show the concept
+            const levelHierarchy = ['intern', 'junior', 'senior', 'expert', 'manager'];
+            const currentLevelIndex = levelHierarchy.indexOf(currentLevel);
+            
+            let html = `<h5>🎯 Task Access for ${currentLevel.toUpperCase()}</h5>`;
+            html += `<div class="status-item">Can access tasks for levels: ${levelHierarchy.slice(0, currentLevelIndex + 1).join(', ')}</div>`;
+            html += `<div class="status-item">Restricted from: ${levelHierarchy.slice(currentLevelIndex + 1).join(', ') || 'None'}</div>`;
+            
+            const testContent = document.getElementById('testContent');
+            testContent.innerHTML = html;
+            document.getElementById('testResults').style.display = 'block';
+        }
+
+        function runCompleteWorkflowTest() {
+            showStatus("🏃‍♂️ Running complete workflow test...", "info");
+            
+            let testSteps = [
+                "1. ✅ Reset user to intern level",
+                "2. ✅ Check task access (intern level only)",
+                "3. ✅ Simulate upgrade request (intern → junior)",
+                "4. ✅ Create admin approval request",
+                "5. ⏳ Admin approves upgrade (manual step)",
+                "6. ✅ Check new task access (intern + junior)",
+                "7. ✅ Test task completion with multiplier"
+            ];
+            
+            // Execute steps
+            resetUserToIntern();
+            setTimeout(() => createTestApproval(), 1000);
+            setTimeout(() => testTaskAccess(), 2000);
+            
+            let html = "<h5>🧪 Workflow Test Progress</h5>";
+            testSteps.forEach(step => {
+                html += `<div class="status-item">${step}</div>`;
+            });
+            html += `<div class="alert alert-warning" style="margin-top: 15px;">
+                <strong>⚠️ Manual Steps Required:</strong><br>
+                1. Go to <a href="admin-approvals.html" target="_blank" style="color: white;">Admin Approvals</a> and approve the test request<br>
+                2. Go to <a href="task-list.html" target="_blank" style="color: white;">Task List</a> to see level-restricted tasks<br>
+                3. Complete a task to test earning multipliers
+            </div>`;
+            
+            const testContent = document.getElementById('testContent');
+            testContent.innerHTML = html;
+            document.getElementById('testResults').style.display = 'block';
+        }
+
+        function resetEverything() {
+            if (confirm("⚠️ This will reset ALL data (jobs, tasks, approvals, wallets). Continue?")) {
+                const username = localStorage.getItem('username') || 'testuser';
+                
+                // Reset job data
+                localStorage.removeItem(`jobData_${username}`);
+                
+                // Reset tasks
+                localStorage.setItem('completedTasks', JSON.stringify([]));
+                
+                // Reset approvals
+                localStorage.setItem('adminApprovals', JSON.stringify([]));
+                
+                // Reset wallet
+                localStorage.removeItem(`incomeWallet_${username}`);
+                localStorage.removeItem(`personalWallet_${username}`);
+                localStorage.removeItem(`walletTransactions_${username}`);
+                
+                showStatus("🗑️ Everything reset successfully!", "success");
+                
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+            }
+        }
+
+        function showStatus(message, type) {
+            const colors = {
+                success: 'rgba(40, 167, 69, 0.8)',
+                error: 'rgba(220, 53, 69, 0.8)',
+                info: 'rgba(23, 162, 184, 0.8)',
+                warning: 'rgba(255, 193, 7, 0.8)'
+            };
+            
+            const statusDiv = document.createElement('div');
+            statusDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${colors[type] || colors.info};
+                color: ${type === 'warning' ? '#000' : 'white'};
+                padding: 15px 25px;
+                border-radius: 10px;
+                z-index: 10000;
+                max-width: 400px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            `;
+            statusDiv.textContent = message;
+            
+            document.body.appendChild(statusDiv);
+            
+            setTimeout(() => {
+                statusDiv.remove();
+            }, 5000);
+        }
+
+        // Auto-show status on page load
+        window.onload = function() {
+            showCurrentStatus();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="    if (isAdmin) {
+      // Create admin controls container
+      const adminContainer = document.createElement('div');
+      adminContainer.style = 'text-align: center; margin: 20px auto; max-width: 400px;';
+      
+      // Main admin dashboard button
+      const adminBtn = document.createElement('button');
+      adminBtn.textContent = '👑 Admin Dashboard';
+      adminBtn.style = 'display:block;margin:10px auto;padding:12px 25px;width:100%;font-size:1.1em;background:linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);color:#fff;border:none;border-radius:25px;cursor:pointer;box-shadow:0 4px 15px rgba(255, 107, 107, 0.3);transition:all 0.3s ease;';
+      adminBtn.onmouseover = function() { 
+        this.style.transform = 'translateY(-2px)'; 
+        this.style.boxShadow = '0 6px 20px rgba(255, 107, 107, 0.4)';
+      };
+      adminBtn.onmouseout = function() { 
+        this.style.transform = 'translateY(0)'; 
+        this.style.boxShadow = '0 4px 15px rgba(255, 107, 107, 0.3)';
+      };
+      adminBtn.onclick = function() { window.location.href = 'admin-tasks.html'; };
+      
+      // GitHub storage upload button
+      const uploadBtn = document.createElement('button');
+      uploadBtn.textContent = '🚀 Upload Task (GitHub)';
+      uploadBtn.style = 'display:block;margin:5px auto;padding:10px 20px;width:100%;font-size:1em;background:linear-gradient(135deg, #4CAF50 0%, #45a049 100%);color:#fff;border:none;border-radius:20px;cursor:pointer;box-shadow:0 3px 12px rgba(76, 175, 80, 0.3);transition:all 0.3s ease;';
+      uploadBtn.onmouseover = function() { 
+        this.style.transform = 'translateY(-1px)'; 
+        this.style.boxShadow = '0 5px 15px rgba(76, 175, 80, 0.4)';
+      };
+      uploadBtn.onmouseout = function() { 
+        this.style.transform = 'translateY(0)'; 
+        this.style.boxShadow = '0 3px 12px rgba(76, 175, 80, 0.3)';
+      };
+      uploadBtn.onclick = function() { window.location.href = 'task-upload-github.html'; };
+      
+      // No-token upload button
+      const simpleUploadBtn = document.createElement('button');
+      simpleUploadBtn.textContent = '📤 Upload Task (No Token)';
+      simpleUploadBtn.style = 'display:block;margin:5px auto;padding:10px 20px;width:100%;font-size:1em;background:linear-gradient(135deg, #FF9500 0%, #FF6B35 100%);color:#fff;border:none;border-radius:20px;cursor:pointer;box-shadow:0 3px 12px rgba(255, 149, 0, 0.3);transition:all 0.3s ease;';
+      simpleUploadBtn.onmouseover = function() { 
+        this.style.transform = 'translateY(-1px)'; 
+        this.style.boxShadow = '0 5px 15px rgba(255, 149, 0, 0.4)';
+      };
+      simpleUploadBtn.onmouseout = function() { 
+        this.style.transform = 'translateY(0)'; 
+        this.style.boxShadow = '0 3px 12px rgba(255, 149, 0, 0.3)';
+      };
+      simpleUploadBtn.onclick = function() { window.location.href = 'task-upload-simple.html'; };
+      
+      // GitHub storage manage button
+      const manageBtn = document.createElement('button');
+      manageBtn.textContent = '🔗 Manage Tasks (GitHub)';
+      manageBtn.style = 'display:block;margin:5px auto;padding:10px 20px;width:100%;font-size:1em;background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);color:#fff;border:none;border-radius:20px;cursor:pointer;box-shadow:0 3px 12px rgba(102, 126, 234, 0.3);transition:all 0.3s ease;';
+      manageBtn.onmouseover = function() { 
+        this.style.transform = 'translateY(-1px)'; 
+        this.style.boxShadow = '0 5px 15px rgba(102, 126, 234, 0.4)';
+      };
+      manageBtn.onmouseout = function() { 
+        this.style.transform = 'translateY(0)'; 
+        this.style.boxShadow = '0 3px 12px rgba(102, 126, 234, 0.3)';
+      };
+      manageBtn.onclick = function() { window.location.href = 'admin-manage-tasks.html'; };
+      
+      // Storage info
+      const storageInfo = document.createElement('div');
+      storageInfo.innerHTML = '✨ <strong>GitHub Storage</strong><br><small>Unlimited • No quotas • Global access</small>';
+      storageInfo.style = 'margin:10px auto;padding:8px;background:rgba(76, 175, 80, 0.1);border:1px solid rgba(76, 175, 80, 0.3);border-radius:10px;color:#2e7d32;font-size:0.9em;';
+      
+      // localStorage management button
+      const clearStorageBtn = document.createElement('button');
+      clearStorageBtn.textContent = '🧹 Clear localStorage';
+      clearStorageBtn.style = 'display:block;margin:5px auto;padding:8px 16px;width:100%;font-size:0.9em;background:linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);color:#fff;border:none;border-radius:15px;cursor:pointer;box-shadow:0 2px 8px rgba(255, 107, 107, 0.3);transition:all 0.3s ease;';
+      clearStorageBtn.onmouseover = function() { 
+        this.style.transform = 'translateY(-1px)'; 
+        this.style.boxShadow = '0 4px 12px rgba(255, 107, 107, 0.4)';
+      };
+      clearStorageBtn.onmouseout = function() { 
+        this.style.transform = 'translateY(0)'; 
+        this.style.boxShadow = '0 2px 8px rgba(255, 107, 107, 0.3)';
+      };
+      clearStorageBtn.onclick = function() { 
+        if (confirm('🗑️ Clear all localStorage data?\\n\\nThis will delete all locally stored tasks, preferences, and cache.\\n\\n⚠️ This cannot be undone!')) {
+          const size = getCurrentLocalStorageSize();
+          localStorage.clear();
+          alert(`✅ localStorage cleared!\\n\\nFreed ${(size/1024).toFixed(2)}KB of space.`);
+          window.location.reload();
+        }
+      };
+      
+      // Create admin approvals button
+      const approvalsBtn = document.createElement('button');
+      approvalsBtn.style.cssText = 'background:#28a745; color:white; border:none; padding:8px 12px; margin:4px; border-radius:6px; cursor:pointer; font-size:12px; transition:all 0.2s;';
+      approvalsBtn.textContent = '👑 Admin Approvals';
+      approvalsBtn.onmouseover = function() { 
+        this.style.transform = 'translateY(-2px)'; 
+        this.style.boxShadow = '0 4px 12px rgba(40, 167, 69, 0.4)';
+      };
+      approvalsBtn.onmouseout = function() { 
+        this.style.transform = 'translateY(0)'; 
+        this.style.boxShadow = '0 2px 8px rgba(40, 167, 69, 0.3)';
+      };
+      approvalsBtn.onclick = function() { 
+        window.location.href = 'admin-approvals.html';
+      };
+
+      // Add all elements to container
+      adminContainer.appendChild(adminBtn);
+      adminContainer.appendChild(uploadBtn);
+      adminContainer.appendChild(simpleUploadBtn);
+      adminContainer.appendChild(manageBtn);
+      adminContainer.appendChild(approvalsBtn);
+      adminContainer.appendChild(clearStorageBtn);
+      adminContainer.appendChild(storageInfo);
+      
+      document.body.insertBefore(adminContainer, document.body.firstChild.nextSibling);
+    }dth, initial-scale=1.0, user-scalable=yes, maximum-scale=5.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#667eea">
+    <title>GetCash - Earn Money Online</title>
+     <link rel="stylesheet" href="getcash.css">
+</head>
+<body>
+    <main>
+        <section>
+          <div class="top_intro_wrapper">
+            <div class="top_introduction">
+              <img class="top-intro-image" src="image/Currency2.jpg">
+            </div>
+            <div class="top-intro-text">
+              <p>WE SHOULD NEVER SETTLE FOR LESS</p>
+            </div>
+          </div>
+        </section>
+        <section>
+          <div class="main-page-icons">
+            <div class="icon-img-cotainer" data-href="jobs.html" style="cursor: pointer;">
+              <img class="icon-img" src="image/icon/Job.png">
+              <span>
+                Job
+              </span>
+            </div>
+             <div class="icon-img-cotainer" data-href="task-list.html" style="cursor: pointer;">
+              <img class="icon-img" src="image/icon/Task.png">
+              <span>
+                Task
+              </span>
+            </div>
+             <div class="icon-img-cotainer" data-href="recharge.html" style="cursor: pointer;">
+              <img class="icon-img" src="image/icon/Recharge.png">
+              <span>
+                Recharge
+              </span>
+            </div>
+
+             <div class="icon-img-cotainer" data-href="wallet-interface.html" style="cursor: pointer;">
+              <img class="icon-img" src="image/icon/Wallet.png">
+              <span>
+                wallet
+              </span>
+            </div>
+             <div class="icon-img-cotainer" data-href="invite.html" style="cursor: pointer;">
+              <img class="icon-img" src="image/icon/Invite.png">
+              <span>
+                invite Friend
+              </span>
+            </div>
+            <div class="icon-img-cotainer" data-href="tutorial.html" style="cursor: pointer;">
+              <img class="icon-img" src="image/icon/selfTeach.png">
+              <span>
+                self teach
+              </span>
+            </div>
+          </div>
+        </section>
+        <section>
+          <div class="latest-news">
+            <h2>Latest News</h2>
+            <p style="text-align: center; font-size: clamp(14px,2.5vw,18px); color: #333;">New tasks and jobs are added daily. Check back often to find the latest opportunities to earn!</p>
+          <div class="new-members-joining">
+            <div class="member-activity-list" id="member-activity-list"></div>
+          </div>
+        </section>
+
+        <footer class="footer">
+          <div class="footer-icon footer-active" onclick="location.href='getcash.html'">
+            <img src="image/icon/index.png" alt="Home">
+            <span>Home</span>
+          </div>
+          <div class="footer-icon" onclick="location.href='task-list.html'">
+            <img src="image/icon/grab.png" alt="Task">
+            <span>Task</span>
+          </div>
+          <div class="footer-icon" onclick="location.href='withdraw.html'">
+            <img src="image/icon/profit.png" alt="Withdraw">
+            <span>Withdraw</span>
+          </div>
+          <div class="footer-icon" onclick="location.href='wallet-interface.html'">
+            <img src="image/icon/user.png" alt="Profile">
+            <span>Profile</span>
+          </div>
+        </footer>
+    </main>
+    <script src="mobile-compatibility.js"></script>
+    <script src="client-storage.js"></script>
+    <script src="notifications.js"></script>
+    <script src="storage-manager.js"></script>
+    <script src="getcash.js"></script>
+    <script>
+    // Show admin button only if logged in as admin
+    // Check multiple ways to detect admin status
+    const adminUsername = '0776944';
+    const loggedInUser = localStorage.getItem('username');
+    const isAdmin = localStorage.getItem('isAdmin') === 'true' || loggedInUser === adminUsername;
+    
+    if (isAdmin) {
+      // Create admin controls container
+      const adminContainer = document.createElement('div');
+      adminContainer.style.cssText = 'text-align: center; margin: 20px auto; max-width: 600px; background: rgba(255,255,255,0.9); padding: 15px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);';
+      
+      // Main admin dashboard button
+      const adminBtn = document.createElement('button');
+      adminBtn.textContent = '👑 Admin Dashboard';
+      adminBtn.style.cssText = 'background:linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); color:white; border:none; padding:10px 20px; margin:5px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600; transition:all 0.2s; box-shadow:0 2px 8px rgba(255,107,107,0.3);';
+      adminBtn.onmouseover = function() { 
+        this.style.transform = 'translateY(-2px)';
+        this.style.boxShadow = '0 4px 12px rgba(255,107,107,0.4)';
+      };
+      adminBtn.onmouseout = function() { 
+        this.style.transform = 'translateY(0)';
+        this.style.boxShadow = '0 2px 8px rgba(255,107,107,0.3)';
+      };
+      adminBtn.onclick = function() { window.location.href = 'admin-tasks.html'; };
+
+      // Admin approvals button
+      const approvalsBtn = document.createElement('button');
+      approvalsBtn.textContent = '👑 Admin Approvals';
+      approvalsBtn.style.cssText = 'background:#28a745; color:white; border:none; padding:10px 20px; margin:5px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600; transition:all 0.2s; box-shadow:0 2px 8px rgba(40,167,69,0.3);';
+      approvalsBtn.onmouseover = function() { 
+        this.style.transform = 'translateY(-2px)';
+        this.style.boxShadow = '0 4px 12px rgba(40,167,69,0.4)';
+      };
+      approvalsBtn.onmouseout = function() { 
+        this.style.transform = 'translateY(0)';
+        this.style.boxShadow = '0 2px 8px rgba(40,167,69,0.3)';
+      };
+      approvalsBtn.onclick = function() { window.location.href = 'admin-approvals.html'; };
+
+      // Manage tasks button
+      const manageBtn = document.createElement('button');
+      manageBtn.textContent = '🗑️ Manage Tasks';
+      manageBtn.style.cssText = 'background:#667eea; color:white; border:none; padding:10px 20px; margin:5px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600; transition:all 0.2s; box-shadow:0 2px 8px rgba(102,126,234,0.3);';
+      manageBtn.onmouseover = function() { 
+        this.style.transform = 'translateY(-2px)';
+        this.style.boxShadow = '0 4px 12px rgba(102,126,234,0.4)';
+      };
+      manageBtn.onmouseout = function() { 
+        this.style.transform = 'translateY(0)';
+        this.style.boxShadow = '0 2px 8px rgba(102,126,234,0.3)';
+      };
+      manageBtn.onclick = function() { window.location.href = 'admin-manage-tasks.html'; };
+
+      // Wallet management button
+      const walletBtn = document.createElement('button');
+      walletBtn.textContent = '💰 Wallet Management';
+      walletBtn.style.cssText = 'background:#17a2b8; color:white; border:none; padding:10px 20px; margin:5px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600; transition:all 0.2s; box-shadow:0 2px 8px rgba(23,162,184,0.3);';
+      walletBtn.onmouseover = function() { 
+        this.style.transform = 'translateY(-2px)';
+        this.style.boxShadow = '0 4px 12px rgba(23,162,184,0.4)';
+      };
+      walletBtn.onmouseout = function() { 
+        this.style.transform = 'translateY(0)';
+        this.style.boxShadow = '0 2px 8px rgba(23,162,184,0.3)';
+      };
+      walletBtn.onclick = function() { window.location.href = 'admin-wallet.html'; };
+
+      // Add buttons to container
+      adminContainer.appendChild(adminBtn);
+      adminContainer.appendChild(approvalsBtn);
+      adminContainer.appendChild(walletBtn);
+      adminContainer.appendChild(manageBtn);
+      
+      // Insert admin container at the top
+      document.body.insertBefore(adminContainer, document.body.firstChild.nextSibling);
+    }
+    
+    // Cross-device compatibility and welcome notification
+    document.addEventListener('DOMContentLoaded', function() {
+      // Check if user is properly logged in
+      const username = localStorage.getItem('username');
+      const userId = localStorage.getItem('userId');
+      
+      if (!username || !userId) {
+        // Redirect to login if not authenticated (works on all devices)
+        console.log('User not authenticated, redirecting to login');
+        setTimeout(() => {
+          try {
+            window.location.href = 'login-page.html';
+          } catch (e) {
+            document.location = 'login-page.html';
+          }
+        }, 1000);
+        return;
+      }
+      
+      // Welcome notification for logged in users
+      if (typeof showNotification === 'function') {
+        setTimeout(() => {
+          showNotification('🎉 Welcome to GetCash, ' + username + '!', 'success');
+          
+          // Show device info for debugging
+          const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+          console.log('Device type:', isMobile ? 'Mobile' : 'Desktop');
+          console.log('User agent:', navigator.userAgent);
+        }, 1000);
+      }
+      
+      // Universal click handlers for main page icons
+      const mainIcons = document.querySelectorAll('.icon-img-cotainer');
+      mainIcons.forEach(icon => {
+        const targetHref = icon.getAttribute('data-href');
+        if (targetHref) {
+          // Add click event for desktop
+          icon.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.location.href = targetHref;
+          });
+          
+          // Add touch event for mobile
+          icon.addEventListener('touchend', function(e) {
+            e.preventDefault();
+            window.location.href = targetHref;
+          });
+        }
+      });
+      
+      // Handle footer icons
+      const footerIcons = document.querySelectorAll('.footer-icon');
+      footerIcons.forEach(icon => {
+        // Add touch support for mobile devices
+        icon.addEventListener('touchstart', function(e) {
+          e.preventDefault();
+          this.click();
+        }, { passive: false });
+      });
+    });
+    
+    // Helper function to calculate localStorage size
+    function getCurrentLocalStorageSize() {
+      let total = 0;
+      for (let key in localStorage) {
+        if (localStorage.hasOwnProperty(key)) {
+          total += localStorage[key].length + key.length;
+        }
+      }
+      return total;
+    }
+    </script>
+</body>
+</html>

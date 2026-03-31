@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Server Test Page</h1>
+        <p>If you can see this, the server is working!</p>
+        <p>Current time: <span id="time"></span></p>
+        
+        <h2>Navigation Links:</h2>
+        <ul>
+            <li><a href="index.html">Home Page</a></li>
+            <li><a href="login-page.html">Login Page</a></li>
+            <li><a href="registration.html">Registration Page</a></li>
+            <li><a href="wallet-interface.html">Wallet Interface</a></li>
+        </ul>
+        
+        <h2>Test JavaScript:</h2>
+        <button onclick="testAlert()">Test Alert</button>
+        <button onclick="testNotification()">Test Notification</button>
+        
+        <div id="test-output"></div>
+    </div>
+    
+    <script src="notifications.js"></script>
+    <script>
+        // Update time
+        document.getElementById('time').textContent = new Date().toLocaleString();
+        
+        function testAlert() {
+            alert('JavaScript is working!');
+        }
+        
+        function testNotification() {
+            if (typeof showNotification === 'function') {
+                showNotification('Notification system is working!', 'success');
+            } else {
+                document.getElementById('test-output').innerHTML = '<p style="color: red;">Notification system not loaded!</p>';
+            }
+        }
+        
+        // Test if storage-manager loads
+        setTimeout(() => {
+            const output = document.getElementById('test-output');
+            if (typeof apiClient !== 'undefined') {
+                output.innerHTML += '<p style="color: green;">✅ API Client loaded successfully</p>';
+            } else {
+                output.innerHTML += '<p style="color: orange;">⚠️ API Client not loaded</p>';
+            }
+            
+            if (typeof storageManager !== 'undefined') {
+                output.innerHTML += '<p style="color: green;">✅ Storage Manager loaded successfully</p>';
+            } else {
+                output.innerHTML += '<p style="color: orange;">⚠️ Storage Manager not loaded</p>';
+            }
+        }, 1000);
+    </script>
+    <script src="storage-manager.js"></script>
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Admin Credentials - GetCash</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .reset-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            color: white;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-size: 28px;
+            color: #fff;
+        }
+
+        .info {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #00ff41;
+        }
+
+        .credentials {
+            background: rgba(0, 255, 65, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #00ff41, #00d935);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 255, 65, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 255, 65, 0.4);
+        }
+
+        .btn.secondary {
+            background: linear-gradient(45deg, #3742fa, #5352ed);
+            box-shadow: 0 4px 15px rgba(55, 66, 250, 0.3);
+        }
+
+        .btn.secondary:hover {
+            box-shadow: 0 6px 20px rgba(55, 66, 250, 0.4);
+        }
+
+        .status {
+            margin: 20px 0;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .status.success {
+            background: rgba(0, 255, 65, 0.2);
+            color: #00ff41;
+            border: 1px solid #00ff41;
+        }
+
+        .status.error {
+            background: rgba(255, 71, 87, 0.2);
+            color: #ff4757;
+            border: 1px solid #ff4757;
+        }
+    </style>
+</head>
+<body>
+    <div class="reset-container">
+        <h1>🔧 Reset Admin Credentials</h1>
+        
+        <div class="info">
+            <p><strong>Current Admin Credentials:</strong></p>
+            <div class="credentials">
+                👤 Username: <strong>0776944</strong><br>
+                🔑 Password: <strong>admin123</strong>
+            </div>
+        </div>
+
+        <div id="status" class="status"></div>
+
+        <button class="btn" onclick="resetAdmin()">🔄 Reset Admin User</button>
+        <button class="btn secondary" onclick="checkAdmin()">👀 Check Current Admin</button>
+        
+        <div style="margin-top: 30px;">
+            <a href="login-page.html" class="btn secondary">🚪 Go to Login</a>
+            <a href="admin-tasks.html" class="btn">👑 Admin Dashboard</a>
+        </div>
+    </div>
+
+    <script src="client-storage.js"></script>
+    <script>
+        const clientStorage = new ClientStorage();
+        const statusDiv = document.getElementById('status');
+
+        function showStatus(message, type = 'success') {
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+            statusDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function resetAdmin() {
+            try {
+                const admin = clientStorage.resetAdminCredentials();
+                showStatus('✅ Admin credentials reset successfully! You can now login with: 0776944 / admin123', 'success');
+                console.log('Admin reset result:', admin);
+            } catch (error) {
+                console.error('Reset error:', error);
+                showStatus('❌ Error resetting admin credentials: ' + error.message, 'error');
+            }
+        }
+
+        function checkAdmin() {
+            try {
+                const data = clientStorage.getData();
+                const admin = data.users?.find(u => u.username === '0776944');
+                
+                if (admin) {
+                    showStatus(`✅ Admin found! Username: ${admin.username}, Password: ${admin.password}, IsAdmin: ${admin.isAdmin}`, 'success');
+                    console.log('Current admin:', admin);
+                } else {
+                    showStatus('❌ No admin user found! Click "Reset Admin User" to create one.', 'error');
+                }
+            } catch (error) {
+                console.error('Check error:', error);
+                showStatus('❌ Error checking admin: ' + error.message, 'error');
+            }
+        }
+
+        // Auto-check admin on page load
+        window.onload = function() {
+            checkAdmin();
+        };
+    </script>
+</body>
+</html>

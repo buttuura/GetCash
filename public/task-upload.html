@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Task - GetCash Admin</title>
+    <link rel="stylesheet" href="getcash.css">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding-bottom: 80px;
+        }
+        .upload-container {
+            max-width: 600px;
+            margin: 15px auto;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 25px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+            width: calc(100% - 30px);
+        }
+
+        .upload-header {
+            text-align: center;
+            color: white;
+            margin-bottom: 25px;
+        }
+
+        .upload-header h1 {
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #00ff41, #00d935);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #000000;
+            margin-bottom: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+            max-width: 100%;
+        }
+
+        .form-group select option {
+            background: #333;
+            color: white;
+            padding: 10px;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #00ff41;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.4);
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-1px);
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 400;
+        }
+
+        .file-upload {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-upload input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-upload-btn {
+            display: block;
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: 3px dashed rgba(255, 255, 255, 0.5);
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 16px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .file-upload-btn:hover {
+            border-color: #00ff41;
+            background: linear-gradient(45deg, #00ff41, #00d935);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 255, 65, 0.3);
+        }
+
+        .file-upload-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 15px rgba(0, 255, 65, 0.2);
+        }
+
+        .image-preview {
+            margin-top: 15px;
+            text-align: center;
+            display: none;
+        }
+
+        .image-preview img {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 10px;
+            border: 2px solid #00ff41;
+            box-shadow: 0 4px 15px rgba(0, 255, 65, 0.3);
+        }
+
+        .upload-btn {
+            width: 100%;
+            background: linear-gradient(45deg, #00ff41, #00d935);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 30px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: 20px;
+            margin-bottom: 20px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 255, 65, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0, 255, 65, 0.4);
+        }
+
+        .upload-btn:hover::before {
+            left: 100%;
+        }
+
+        .upload-btn:active {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(0, 255, 65, 0.3);
+        }
+
+        .upload-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .task-preview {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 18px;
+            padding: 25px;
+            margin-top: 25px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            display: none;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .task-preview h3 {
+            color: #00ff41;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .preview-card {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            gap: 15px;
+        }
+
+        .preview-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .preview-info {
+            flex: 1;
+            color: white;
+        }
+
+        .preview-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .preview-price {
+            color: #00ff41;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .success-message {
+            background: linear-gradient(45deg, #00ff41, #00d935);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 14px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(5px);
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.35);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
+        }
+
+        .back-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1);
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            body {
+                padding-bottom: 100px;
+            }
+            .upload-container {
+                margin: 10px auto;
+                padding: 15px;
+                width: calc(100% - 20px);
+            }
+
+            .form-group input,
+            .form-group textarea {
+                padding: 16px;
+                font-size: 16px; /* Prevents zoom on iOS */
+                border-width: 2px;
+            }
+
+            .upload-btn {
+                padding: 22px;
+                font-size: 18px;
+                margin-top: 30px;
+            }
+
+            .file-upload-btn {
+                padding: 20px;
+                font-size: 16px;
+            }
+
+            .back-btn {
+                padding: 14px 28px;
+                font-size: 15px;
+            }
+
+            .preview-card {
+                flex-direction: column;
+                text-align: center;
+                padding: 20px;
+            }
+
+            .preview-img {
+                width: 120px;
+                height: 120px;
+            }
+
+            .form-group {
+                margin-bottom: 30px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding-bottom: 120px;
+            }
+            .upload-container {
+                margin: 5px auto;
+                padding: 12px;
+                width: calc(100% - 10px);
+            }
+            
+            .form-group {
+                margin-bottom: 18px;
+            }
+            
+            .form-group input,
+            .form-group textarea {
+                padding: 12px;
+                font-size: 16px;
+            }
+            
+            .file-upload-btn {
+                padding: 16px;
+                font-size: 15px;
+            }
+            
+            .upload-btn {
+                padding: 14px;
+                font-size: 16px;
+                margin-bottom: 25px;
+            }
+
+            .upload-header h1 {
+                font-size: 24px;
+            }
+
+            .upload-btn {
+                font-size: 16px;
+                padding: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="upload-container">
+        <button class="back-btn" onclick="goBack()">← Back</button>
+        
+        <div class="upload-header">
+            <h1>📤 Upload New Task</h1>
+            <p>Create tasks for users to complete and earn money</p>
+        </div>
+
+        <!-- GitHub Storage Upgrade Notice -->
+        <div style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; padding: 16px; border-radius: 12px; margin-bottom: 20px; text-align: center; box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);">
+            <strong>🚀 NEW: Unlimited GitHub Storage Available!</strong><br>
+            <p style="margin: 8px 0; font-size: 14px;">No more storage limits • Full image quality • Global access</p>
+            <a href="task-upload-github.html" style="display: inline-block; background: rgba(255,255,255,0.2); color: white; padding: 8px 16px; border-radius: 20px; text-decoration: none; font-weight: bold; margin-top: 8px; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                ✨ Switch to GitHub Storage →
+            </a>
+        </div>
+
+        <form id="taskUploadForm">
+            <div class="form-group">
+                <label for="taskTitle">📝 Task Title</label>
+                <input type="text" id="taskTitle" placeholder="Enter task title (e.g., Share on Facebook)" required>
+            </div>
+
+            <div class="form-group">
+                <label for="taskPrice">💰 Task Price (UGX)</label>
+                <input type="number" id="taskPrice" placeholder="Enter price (e.g., 5000)" min="100" required>
+            </div>
+
+            <div class="form-group">
+                <label for="taskDescription">📄 Task Description (Optional)</label>
+                <textarea id="taskDescription" placeholder="Describe what users need to do..." rows="3"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="targetPage">📄 Upload to Page</label>
+                <select id="targetPage" style="width: 100%; padding: 14px; border: 2px solid rgba(255, 255, 255, 0.4); border-radius: 12px; background: rgba(255, 255, 255, 0.2); color: white; font-size: 16px; font-weight: 500;">
+                    <option value="task-list">🏠 Main Task List (Default)</option>
+                    <option value="junior-tasks">👨‍💼 Junior Worker Tasks</option>
+                    <option value="senior-tasks">👨‍💻 Senior Worker Tasks</option>
+                    <option value="expert-tasks">🏆 Expert Worker Tasks</option>
+                    <option value="master-tasks">👑 Master Worker Tasks</option>
+                </select>
+                <small style="color: rgba(255,255,255,0.8); font-size: 12px; display: block; margin-top: 5px;">
+                    📋 Choose which page this task will appear on
+                </small>
+            </div>
+
+            <div class="form-group">
+                <label for="requiredLevel">🎯 Required Job Level</label>
+                <select id="requiredLevel" style="width: 100%; padding: 14px; border: 2px solid rgba(255, 255, 255, 0.4); border-radius: 12px; background: rgba(255, 255, 255, 0.2); color: white; font-size: 16px; font-weight: 500;">
+                    <option value="">All Levels (No Restriction)</option>
+                    <option value="intern">👶 Intern (Entry Level)</option>
+                    <option value="junior">📈 Junior Employee</option>
+                    <option value="senior">🏆 Senior Employee</option>
+                    <option value="expert">💎 Expert</option>
+                    <option value="manager">👑 Manager</option>
+                </select>
+                <small style="color: rgba(255,255,255,0.8); font-size: 12px; display: block; margin-top: 5px;">
+                    💡 Users at the selected level or higher can access this task
+                </small>
+            </div>
+
+            <div class="form-group">
+                <label for="taskImage">🖼️ Task Image</label>
+                <div class="file-upload">
+                    <input type="file" id="taskImage" accept="image/*" required style="position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer;">
+                    <label for="taskImage" class="file-upload-btn" style="display: block; cursor: pointer;">
+                        📷 Click to upload image or drag & drop
+                    </label>
+                </div>
+                <div class="image-preview" id="imagePreview">
+                    <img id="previewImg" alt="Preview">
+                </div>
+            </div>
+
+            <div class="task-preview" id="taskPreview">
+                <h3>👀 Task Preview</h3>
+                <div class="preview-card">
+                    <img class="preview-img" id="previewCardImg" alt="Task Image">
+                    <div class="preview-info">
+                        <div class="preview-title" id="previewTitle">Task Title</div>
+                        <div class="preview-price" id="previewPrice">UGX 0</div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="upload-btn" id="uploadBtn">
+                🚀 Upload Task
+            </button>
+        </form>
+
+        <div class="success-message" id="successMessage">
+            <h3>✅ Task Uploaded Successfully!</h3>
+            <p>Users can now see and complete this task in the task list.</p>
+            <button onclick="viewTaskList()" style="background: rgba(255,255,255,0.2); border: none; padding: 10px 20px; border-radius: 20px; color: white; margin-top: 10px; cursor: pointer;">
+                👀 View Task List
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let imageData = null;
+        
+        // Clear old localStorage data on page load
+        function cleanupStorage() {
+            try {
+                // Remove any large or unnecessary data
+                localStorage.removeItem('globalTasks'); // Remove duplicate storage
+                
+                // Check current storage usage
+                let totalSize = 0;
+                for (let key in localStorage) {
+                    if (localStorage.hasOwnProperty(key)) {
+                        totalSize += localStorage[key].length;
+                    }
+                }
+                console.log('📊 Current localStorage usage:', (totalSize / 1024).toFixed(2) + 'KB');
+                
+                // If storage is getting full, clean up
+                if (totalSize > 3000000) { // If > 3MB
+                    const tasks = JSON.parse(localStorage.getItem('adminTasks') || '[]');
+                    if (tasks.length > 20) {
+                        const recentTasks = tasks.slice(-20);
+                        localStorage.setItem('adminTasks', JSON.stringify(recentTasks));
+                        console.log('🧹 Cleaned up old tasks, kept', recentTasks.length);
+                    }
+                }
+            } catch (e) {
+                console.log('Storage cleanup error:', e);
+            }
+        }
+        
+        // Run cleanup on page load
+        cleanupStorage();
+        
+        // Get current localStorage usage
+        function getCurrentStorageSize() {
+            let total = 0;
+            for (let key in localStorage) {
+                if (localStorage.hasOwnProperty(key)) {
+                    total += localStorage[key].length + key.length;
+                }
+            }
+            return total;
+        }
+        
+        // Compress image data aggressively to fit localStorage
+        function compressImageData(base64String) {
+            try {
+                // Create a temporary canvas for compression
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
+                
+                // Synchronous approach using canvas
+                img.src = base64String;
+                
+                // Set small dimensions to reduce file size drastically
+                canvas.width = 200;  // Very small to save space
+                canvas.height = 200;
+                
+                // Draw and compress
+                ctx.drawImage(img, 0, 0, 200, 200);
+                
+                // Convert to JPEG with very low quality to minimize size
+                const compressed = canvas.toDataURL('image/jpeg', 0.3); // 30% quality
+                
+                console.log('🗜️ Compressed from', base64String.length, 'to', compressed.length, 'chars');
+                console.log('📉 Size reduction:', ((1 - compressed.length/base64String.length) * 100).toFixed(1) + '%');
+                
+                return compressed;
+            } catch (e) {
+                console.log('Compression failed:', e);
+                // Fallback: just truncate the image data severely
+                return base64String.substring(0, 30000) + '...truncated';
+            }
+        }
+
+        // Optimized task storage with quota management
+        function saveTaskGlobally(task) {
+            try {
+                console.log('🔄 Starting to save task:', task);
+                
+                // Get current storage usage and clear if too full
+                const currentUsage = getCurrentStorageSize();
+                console.log('📊 Current localStorage usage:', (currentUsage / 1024).toFixed(2) + 'KB');
+                
+                // If storage is already over 2MB, clear it immediately
+                if (currentUsage > 2000000) {
+                    console.log('🚨 Storage already over 2MB, clearing immediately...');
+                    localStorage.clear();
+                    console.log('🧹 Storage cleared, starting fresh');
+                }
+                
+                // Validate task object
+                if (!task || typeof task !== 'object') {
+                    throw new Error('Invalid task object');
+                }
+                if (!task.title || !task.price) {
+                    throw new Error('Task missing required fields (title/price)');
+                }
+                
+                // Ultra-aggressive image optimization to prevent quota issues
+                if (task.img && task.img.length > 20000) { // If image > 20KB
+                    console.log('🗜️ Image detected, compressing aggressively...');
+                    task.img = compressImageData(task.img);
+                    
+                    // If still too large after compression, truncate severely
+                    if (task.img && task.img.length > 30000) {
+                        console.log('🔪 Image still large after compression, truncating...');
+                        task.img = task.img.substring(0, 25000);
+                    }
+                }
+                
+                // Get existing tasks from localStorage
+                let existingTasks;
+                try {
+                    existingTasks = JSON.parse(localStorage.getItem('adminTasks') || '[]');
+                } catch (parseError) {
+                    console.warn('localStorage parse error, using empty array');
+                    existingTasks = [];
+                }
+                
+                if (!Array.isArray(existingTasks)) {
+                    existingTasks = [];
+                }
+                
+                // Limit to maximum 10 tasks to prevent quota issues
+                if (existingTasks.length >= 10) {
+                    console.log('🗑️ Removing old tasks to make space...');
+                    existingTasks = existingTasks.slice(-5); // Keep only last 5 tasks
+                }
+                
+                // Add new task
+                existingTasks.push(task);
+                console.log('📝 Adding task to array, new total:', existingTasks.length);
+                
+                // Try to save with quota management
+                try {
+                    const tasksJson = JSON.stringify(existingTasks);
+                    
+                    // Check estimated size
+                    const estimatedSize = new Blob([tasksJson]).size;
+                    console.log('📊 Estimated storage size:', (estimatedSize / 1024).toFixed(2) + 'KB');
+                    
+                    if (estimatedSize > 1000000) { // If approaching 1MB limit (very conservative)
+                        console.log('⚠️ Storage getting full, cleaning up...');
+                        existingTasks = existingTasks.slice(-3); // Keep only last 3 tasks
+                        existingTasks.push(task); // Add the new task
+                        const compactJson = JSON.stringify(existingTasks);
+                        localStorage.setItem('adminTasks', compactJson);
+                    } else {
+                        localStorage.setItem('adminTasks', tasksJson);
+                    }
+                    
+                    console.log('💾 Saved to localStorage successfully');
+                    
+                } catch (quotaError) {
+                    // Handle quota exceeded error with aggressive cleanup
+                    console.log('🚨 Storage quota exceeded, emergency cleanup...');
+                    
+                    // Clear ALL localStorage except essential
+                    localStorage.clear();
+                    
+                    // Save only the current task
+                    const emergencyTasks = [task];
+                    localStorage.setItem('adminTasks', JSON.stringify(emergencyTasks));
+                    console.log('🔧 Emergency save: cleared all storage, saved only current task');
+                    
+                    alert('⚠️ Storage was full. Cleared old tasks and saved your new task only.');
+                }
+                
+                console.log('✅ Task saved successfully:', task);
+                console.log('📊 Total tasks now:', existingTasks.length);
+                
+                // Show success message
+                try {
+                    if (typeof showNotification === 'function') {
+                        showNotification('✅ Task uploaded! It will appear in task list immediately.', 'success', 4000);
+                    } else {
+                        // Fallback success message
+                        alert('✅ Task uploaded successfully! Go to task list to see it.');
+                    }
+                } catch (notifyError) {
+                    console.log('Notification error (non-critical):', notifyError);
+                    alert('✅ Task uploaded successfully! Go to task list to see it.');
+                }
+                
+            } catch (error) {
+                console.error('❌ Failed to save task:', error);
+                console.error('Error details:', error.message, error.stack);
+                alert('Error saving task: ' + error.message + '. Please try again.');
+            }
+        }
+        
+        function showGitHubUpdateInstructions(tasksData) {
+            const instructions = `
+                📝 TO MAKE THIS TASK AVAILABLE TO ALL USERS:
+                
+                1. Copy this JSON data:
+                ${JSON.stringify(tasksData, null, 2)}
+                
+                2. Go to GitHub.com → Your GetCash repository
+                3. Edit the file: tasks-database.json
+                4. Replace content with the JSON above
+                5. Commit changes
+                
+                The task is saved locally for now but won't be visible to other users until you update GitHub.
+            `;
+            
+            console.log(instructions);
+            
+            // Create a modal with copy button
+            const modal = document.createElement('div');
+            modal.style = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:1000;display:flex;align-items:center;justify-content:center;';
+            
+            modal.innerHTML = `
+                <div style="background:white;padding:20px;border-radius:15px;max-width:500px;max-height:80vh;overflow-y:auto;">
+                    <h3>📡 Update Global Database</h3>
+                    <p>To make this task visible to all users, copy this data to GitHub:</p>
+                    <textarea id="jsonData" style="width:100%;height:200px;font-family:monospace;font-size:12px;">${JSON.stringify(tasksData, null, 2)}</textarea>
+                    <div style="margin-top:15px;">
+                        <button onclick="copyToClipboard()" style="background:#00ff41;color:white;border:none;padding:10px 20px;border-radius:20px;cursor:pointer;margin-right:10px;">📋 Copy JSON</button>
+                        <button onclick="document.body.removeChild(this.closest('div').parentElement)" style="background:#666;color:white;border:none;padding:10px 20px;border-radius:20px;cursor:pointer;">Close</button>
+                    </div>
+                    <p style="font-size:12px;color:#666;margin-top:10px;">
+                        Go to: GitHub.com → GetCash → tasks-database.json → Edit → Paste → Commit
+                    </p>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Add copy function
+            window.copyToClipboard = function() {
+                document.getElementById('jsonData').select();
+                document.execCommand('copy');
+                alert('JSON copied! Now paste it in GitHub tasks-database.json file');
+            };
+        }
+
+        // Handle image upload
+        document.getElementById('taskImage').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imageData = e.target.result;
+                    
+                    // Show image preview
+                    document.getElementById('previewImg').src = imageData;
+                    document.getElementById('imagePreview').style.display = 'block';
+                    
+                    // Update file upload button text
+                    document.querySelector('.file-upload-btn').innerHTML = `✅ ${file.name}`;
+                    
+                    // Update preview
+                    updatePreview();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Update preview as user types
+        document.getElementById('taskTitle').addEventListener('input', updatePreview);
+        document.getElementById('taskPrice').addEventListener('input', updatePreview);
+
+        function updatePreview() {
+            const title = document.getElementById('taskTitle').value || 'Task Title';
+            const price = document.getElementById('taskPrice').value || '0';
+            
+            document.getElementById('previewTitle').textContent = title;
+            document.getElementById('previewPrice').textContent = `UGX ${parseInt(price || 0).toLocaleString()}`;
+            
+            if (imageData) {
+                document.getElementById('previewCardImg').src = imageData;
+                document.getElementById('taskPreview').style.display = 'block';
+            }
+        }
+
+        // Handle form submission
+        document.getElementById('taskUploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const title = document.getElementById('taskTitle').value;
+            const price = parseInt(document.getElementById('taskPrice').value);
+            const description = document.getElementById('taskDescription').value;
+            const requiredLevel = document.getElementById('requiredLevel').value;
+            const targetPage = document.getElementById('targetPage').value;
+            
+            if (!imageData) {
+                alert('Please select an image for the task');
+                return;
+            }
+
+            // Create task object that matches your task-list.html format
+            const task = {
+                id: Date.now(), // Unique ID
+                title: title,
+                price: price,
+                img: imageData, // Base64 image data
+                description: description,
+                requiredLevel: requiredLevel || null, // Job level requirement
+                targetPage: targetPage || 'task-list', // Which page to upload to
+                createdAt: new Date().toISOString(),
+                status: 'active'
+            };
+
+            // Save to global storage for all users
+            saveTaskGlobally(task);
+
+            // Show success message
+            document.getElementById('taskUploadForm').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'block';
+            
+            console.log('✅ Task upload process completed:', task);
+        });
+
+        function viewTaskList() {
+            window.location.href = 'task-list.html';
+        }
+
+        function goBack() {
+            // Check if there's a previous page, otherwise go to admin dashboard
+            if (document.referrer) {
+                history.back();
+            } else {
+                window.location.href = 'admin-tasks.html';
+            }
+        }
+
+        // Drag and drop functionality
+        const fileUpload = document.querySelector('.file-upload');
+        const fileInput = document.getElementById('taskImage');
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            fileUpload.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            fileUpload.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            fileUpload.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            fileUpload.querySelector('.file-upload-btn').style.borderColor = '#00ff41';
+        }
+
+        function unhighlight(e) {
+            fileUpload.querySelector('.file-upload-btn').style.borderColor = 'rgba(255, 255, 255, 0.3)';
+        }
+
+        fileUpload.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            
+            if (files.length > 0) {
+                fileInput.files = files;
+                fileInput.dispatchEvent(new Event('change'));
+            }
+        }
+    </script>
+
+    <!-- Footer Navigation -->
+    <footer class="footer">
+        <div class="footer-icon" onclick="location.href='getcash.html'">
+            <img src="image/icon/index.png" alt="Home">
+            <span>Home</span>
+        </div>
+        <div class="footer-icon footer-active">
+            <img src="image/icon/user.png" alt="Admin">
+            <span>Admin</span>
+        </div>
+        <div class="footer-icon" onclick="location.href='task-list.html'">
+            <img src="image/icon/Task.png" alt="Tasks">
+            <span>Tasks</span>
+        </div>
+        <div class="footer-icon" onclick="location.href='admin-tasks.html'">
+            <img src="image/icon/grab.png" alt="Dashboard">
+            <span>Dashboard</span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Upload Task (GitHub Storage)</title>
+    <link rel="stylesheet" href="getcash.css">
+    <script src="github-storage.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding-bottom: 80px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 32px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .header h1 {
+            color: #333;
+            margin: 0 0 8px 0;
+            font-size: 2.2em;
+            font-weight: 700;
+        }
+
+        .storage-info {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e8ed;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .file-upload {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-upload input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-upload-label {
+            display: block;
+            padding: 20px;
+            border: 2px dashed #667eea;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .file-upload-label:hover {
+            background: rgba(102, 126, 234, 0.1);
+            border-color: #5a67d8;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px 32px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 24px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .token-setup {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <button class="back-btn" onclick="window.location.href='getcash.html'">← Back to Dashboard</button>
+    
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Upload Task</h1>
+            <div class="storage-info">
+                <strong>🔗 GitHub Storage Enabled</strong><br>
+                Unlimited storage • No more quota errors • Global access
+            </div>
+        </div>
+
+        <div id="tokenSetup" class="token-setup" style="display: none;">
+            <h3>🔑 GitHub Token Setup Required</h3>
+            <p>To enable unlimited storage, we need your GitHub Personal Access Token:</p>
+            <ol>
+                <li>Go to <a href="https://github.com/settings/tokens" target="_blank">GitHub Settings → Tokens</a></li>
+                <li>Click "Generate new token (classic)"</li>
+                <li>Give it "repo" permissions</li>
+                <li>Copy and paste the token below</li>
+            </ol>
+            <input type="password" id="tokenInput" placeholder="Paste your GitHub token here">
+            <button onclick="setupToken()" style="margin-top: 10px; padding: 8px 16px;">Save Token</button>
+        </div>
+
+        <form id="taskForm">
+            <div class="form-group">
+                <label for="title">📋 Task Title</label>
+                <input type="text" id="title" name="title" required>
+            </div>
+
+            <div class="form-group">
+                <label for="description">📝 Task Description</label>
+                <textarea id="description" name="description" rows="4" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="reward">💰 Reward Amount</label>
+                <input type="number" id="reward" name="reward" step="0.01" required>
+            </div>
+
+            <div class="form-group">
+                <label for="price">💎 Task Price (Optional)</label>
+                <input type="number" id="price" name="price" step="0.01">
+            </div>
+
+            <div class="form-group">
+                <label>🖼️ Task Image</label>
+                <div class="file-upload">
+                    <input type="file" id="taskImage" name="image" accept="image/*">
+                    <label for="taskImage" class="file-upload-label">
+                        📁 Click to upload image<br>
+                        <small>Full resolution supported with GitHub storage!</small>
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn">🚀 Upload to GitHub</button>
+        </form>
+    </div>
+
+    <script>
+        let isTokenSet = false;
+
+        // Check if token is already saved
+        window.addEventListener('load', function() {
+            const savedToken = localStorage.getItem('github_token');
+            if (!savedToken) {
+                document.getElementById('tokenSetup').style.display = 'block';
+            } else {
+                isTokenSet = true;
+                githubStorage.setToken(savedToken);
+            }
+        });
+
+        function setupToken() {
+            const token = document.getElementById('tokenInput').value.trim();
+            if (!token) {
+                alert('Please enter a valid GitHub token');
+                return;
+            }
+
+            githubStorage.setToken(token);
+            document.getElementById('tokenSetup').style.display = 'none';
+            isTokenSet = true;
+            alert('✅ GitHub token saved! You can now upload tasks with unlimited storage.');
+        }
+
+        // GitHub-based task upload
+        document.getElementById('taskForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!isTokenSet && !localStorage.getItem('github_token')) {
+                alert('Please set up your GitHub token first!');
+                return;
+            }
+
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = '🔄 Uploading to GitHub...';
+            submitBtn.disabled = true;
+
+            try {
+                const formData = new FormData(this);
+                const task = {
+                    id: Date.now().toString(),
+                    title: formData.get('title'),
+                    description: formData.get('description'),
+                    reward: formData.get('reward'),
+                    price: formData.get('price') || formData.get('reward'),
+                    uploadDate: new Date().toISOString()
+                };
+
+                const fileInput = document.getElementById('taskImage');
+                let imageBase64 = null;
+
+                if (fileInput.files[0]) {
+                    // Convert image to base64 for GitHub upload
+                    imageBase64 = await new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => resolve(e.target.result);
+                        reader.readAsDataURL(fileInput.files[0]);
+                    });
+                    console.log('📸 Image prepared for GitHub upload');
+                }
+
+                // Upload to GitHub
+                const uploadedTask = await githubStorage.addTask(task, imageBase64);
+                
+                console.log('✅ Task uploaded to GitHub:', uploadedTask);
+                alert('🎉 Task uploaded to GitHub successfully!\n\n✨ Benefits:\n• Unlimited storage\n• Global access\n• No quota limits\n• Full image quality preserved');
+
+                // Reset form
+                this.reset();
+                
+            } catch (error) {
+                console.error('Upload failed:', error);
+                alert('❌ Upload failed: ' + error.message + '\n\nPlease check your GitHub token and try again.');
+            } finally {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+
+        // File upload preview
+        document.getElementById('taskImage').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const label = document.querySelector('.file-upload-label');
+                label.innerHTML = `📸 ${file.name}<br><small>Ready for GitHub upload (${(file.size/1024/1024).toFixed(2)}MB)</small>`;
+            }
+        });
+    </script>
+</body>
+</html>

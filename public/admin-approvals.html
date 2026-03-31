@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Approve Upgrades</title>
+    <link rel="stylesheet" href="getcash.css">
+    <style>
+        .admin-container {
+            max-width: 1000px;
+            margin: 40px auto 100px auto;
+            padding: 24px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+        }
+
+        .admin-header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border-left: 4px solid #007bff;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .requests-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .requests-table th {
+            background: #f8f9fa;
+            padding: 15px 10px;
+            text-align: left;
+            font-weight: bold;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .requests-table td {
+            padding: 15px 10px;
+            border-bottom: 1px solid #f0f0f0;
+            vertical-align: top;
+        }
+
+        .requests-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-approved {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .btn-approve {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-reject {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-view {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.8;
+            transform: translateY(-1px);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .user-info {
+            background: #e7f3ff;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+
+        .amount-highlight {
+            color: #28a745;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .phone-number {
+            font-family: monospace;
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .back-btn {
+            background: #6c757d;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .refresh-btn {
+            background: #17a2b8;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1>👑 Admin - Upgrade Approvals</h1>
+            <p>Review and approve user job level upgrade requests</p>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <button class="back-btn" onclick="window.location.href='getcash.html'">← Back to Dashboard</button>
+            <button class="refresh-btn" onclick="loadApprovalRequests()">🔄 Refresh</button>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="pendingCount">0</div>
+                <div class="stat-label">Pending Requests</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="approvedCount">0</div>
+                <div class="stat-label">Approved Today</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalAmount">UGX 0</div>
+                <div class="stat-label">Total Pending Amount</div>
+            </div>
+        </div>
+
+        <div id="requestsContainer">
+            <table class="requests-table" id="requestsTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>User Details</th>
+                        <th>Upgrade Info</th>
+                        <th>Amount & Phone</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="requestsTableBody">
+                </tbody>
+            </table>
+
+            <div id="emptyState" class="empty-state">
+                <h3>📝 No Upgrade Requests</h3>
+                <p>When users request job level upgrades, they'll appear here for your approval.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load and display approval requests
+        function loadApprovalRequests() {
+            const adminApprovals = JSON.parse(localStorage.getItem('adminApprovals') || '[]');
+            const requestsTable = document.getElementById('requestsTable');
+            const requestsTableBody = document.getElementById('requestsTableBody');
+            const emptyState = document.getElementById('emptyState');
+
+            // Update stats
+            const pending = adminApprovals.filter(req => req.status === 'pending');
+            const approvedToday = adminApprovals.filter(req => 
+                req.status === 'approved' && 
+                new Date(req.approvedDate || 0).toDateString() === new Date().toDateString()
+            );
+            const totalPendingAmount = pending.reduce((sum, req) => sum + (req.amount || 0), 0);
+
+            document.getElementById('pendingCount').textContent = pending.length;
+            document.getElementById('approvedCount').textContent = approvedToday.length;
+            document.getElementById('totalAmount').textContent = 'UGX ' + totalPendingAmount.toLocaleString();
+
+            if (adminApprovals.length === 0) {
+                requestsTable.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            requestsTable.style.display = 'table';
+            emptyState.style.display = 'none';
+
+            // Sort by date (newest first)
+            adminApprovals.sort((a, b) => new Date(b.requestDate) - new Date(a.requestDate));
+
+            requestsTableBody.innerHTML = adminApprovals.map(request => `
+                <tr>
+                    <td>
+                        <div class="user-info">
+                            <strong>👤 ${request.userId}</strong><br>
+                            <small>📅 ${new Date(request.requestDate).toLocaleDateString()}</small><br>
+                            <small>🕒 ${new Date(request.requestDate).toLocaleTimeString()}</small>
+                        </div>
+                    </td>
+                    <td>
+                        <strong>📈 ${request.fromLevel || 'intern'} → ${request.targetLevel}</strong><br>
+                        <small>Type: Job Level Upgrade</small><br>
+                        ${request.approvedDate ? `<small>✅ Approved: ${new Date(request.approvedDate).toLocaleDateString()}</small>` : ''}
+                        ${request.rejectedDate ? `<small>❌ Rejected: ${new Date(request.rejectedDate).toLocaleDateString()}</small>` : ''}
+                    </td>
+                    <td>
+                        <div class="amount-highlight">UGX ${request.amount.toLocaleString()}</div>
+                        <div style="margin-top: 5px;">
+                            📱 <span class="phone-number">${request.userPhone}</span>
+                        </div>
+                        <div style="margin-top: 5px;">
+                            👤 <strong>${request.accountName || 'N/A'}</strong>
+                        </div>
+                        <small>Network: ${request.network || 'N/A'}</small>
+                    </td>
+                    <td>
+                        <span class="status-badge status-${request.status}">${request.status}</span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            ${request.status === 'pending' ? `
+                                <button class="btn btn-approve" onclick="approveRequest('${request.id}')">
+                                    ✅ Approve
+                                </button>
+                                <button class="btn btn-reject" onclick="rejectRequest('${request.id}')">
+                                    ❌ Reject
+                                </button>
+                            ` : ''}
+                            <button class="btn btn-view" onclick="viewRequestDetails('${request.id}')">
+                                👁️ View
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Approve upgrade request
+        function approveRequest(requestId) {
+            const confirmed = confirm('✅ Approve this upgrade request?\n\nThis will upgrade the user\'s job level and they\'ll be able to access higher-paying tasks.');
+            
+            if (!confirmed) return;
+
+            let adminApprovals = JSON.parse(localStorage.getItem('adminApprovals') || '[]');
+            const requestIndex = adminApprovals.findIndex(req => req.id === requestId);
+            
+            if (requestIndex === -1) {
+                alert('❌ Request not found!');
+                return;
+            }
+
+            const request = adminApprovals[requestIndex];
+            request.status = 'approved';
+            request.approvedDate = new Date().toISOString();
+            request.approvedBy = 'admin';
+
+            // Update user's job level
+            const userId = request.userId;
+            const userJobData = JSON.parse(localStorage.getItem(`jobData_${userId}`) || '{}');
+            userJobData.currentLevel = request.targetLevel;
+            userJobData.levelStartDate = new Date().toISOString();
+            userJobData.upgradeHistory = userJobData.upgradeHistory || [];
+            userJobData.upgradeHistory.push({
+                fromLevel: request.fromLevel,
+                toLevel: request.targetLevel,
+                date: new Date().toISOString(),
+                amount: request.amount
+            });
+
+            localStorage.setItem(`jobData_${userId}`, JSON.stringify(userJobData));
+            
+            // Also update the direct currentLevel storage for consistency
+            if (userId === localStorage.getItem('currentUser')) {
+                localStorage.setItem('currentLevel', request.targetLevel);
+            }
+            
+            localStorage.setItem('adminApprovals', JSON.stringify(adminApprovals));
+
+            alert(`✅ Upgrade Approved!\n\nUser: ${request.userId}\nNew Level: ${request.targetLevel}\nAmount: UGX ${request.amount.toLocaleString()}\n\nThe user can now access their new job level!`);
+            
+            loadApprovalRequests();
+        }
+
+        // Reject upgrade request
+        function rejectRequest(requestId) {
+            const reason = prompt('❌ Reject this upgrade request?\n\nPlease provide a reason (optional):');
+            
+            if (reason === null) return; // User cancelled
+
+            let adminApprovals = JSON.parse(localStorage.getItem('adminApprovals') || '[]');
+            const requestIndex = adminApprovals.findIndex(req => req.id === requestId);
+            
+            if (requestIndex === -1) {
+                alert('❌ Request not found!');
+                return;
+            }
+
+            adminApprovals[requestIndex].status = 'rejected';
+            adminApprovals[requestIndex].rejectedDate = new Date().toISOString();
+            adminApprovals[requestIndex].rejectionReason = reason || 'No reason provided';
+            adminApprovals[requestIndex].rejectedBy = 'admin';
+
+            localStorage.setItem('adminApprovals', JSON.stringify(adminApprovals));
+
+            alert('❌ Upgrade request rejected.');
+            loadApprovalRequests();
+        }
+
+        // View request details
+        function viewRequestDetails(requestId) {
+            const adminApprovals = JSON.parse(localStorage.getItem('adminApprovals') || '[]');
+            const request = adminApprovals.find(req => req.id === requestId);
+            
+            if (!request) {
+                alert('❌ Request not found!');
+                return;
+            }
+
+            const details = `
+📋 UPGRADE REQUEST DETAILS
+
+👤 User: ${request.userId}
+📱 Phone: ${request.userPhone}
+� Account Name: ${request.accountName || 'N/A'}
+�🏢 From Level: ${request.fromLevel || 'intern'}
+🎯 Target Level: ${request.targetLevel}
+💰 Amount: UGX ${request.amount.toLocaleString()}
+📡 Network: ${request.network || 'N/A'}
+📅 Request Date: ${new Date(request.requestDate).toLocaleString()}
+📊 Status: ${request.status.toUpperCase()}
+
+${request.approvedDate ? `✅ Approved: ${new Date(request.approvedDate).toLocaleString()}` : ''}
+${request.rejectedDate ? `❌ Rejected: ${new Date(request.rejectedDate).toLocaleString()}` : ''}
+${request.rejectionReason ? `💬 Reason: ${request.rejectionReason}` : ''}
+            `.trim();
+
+            alert(details);
+        }
+
+        // Initialize page
+        window.addEventListener('load', function() {
+            loadApprovalRequests();
+            
+            // Auto-refresh every 30 seconds
+            setInterval(loadApprovalRequests, 30000);
+        });
+    </script>
+</body>
+</html>

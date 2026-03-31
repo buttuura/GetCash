@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task List (GitHub Storage)</title>
+  <link rel="stylesheet" href="getcash.css">
+  <script src="github-storage.js"></script>
+  <!-- Removed internal <style> for consistency -->
+</head>
+<body>
+  <div class="task-list-container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h2 style="margin: 0;">Task List</h2>
+      <button onclick="refreshTasks()" style="background: linear-gradient(45deg, #00ff41, #00d935); color: white; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: bold;">
+        🔄 Refresh
+      </button>
+      <button onclick="debugTasks()" style="background: linear-gradient(45deg, #ff6b6b, #ee5a24); color: white; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 12px; margin-left: 10px;">
+        🔍 Debug
+      </button>
+    </div>
+    <div id="task-list" class="task-list-grid">
+      <!-- Tasks will be loaded here -->
+    </div>
+  </div>
+  <script>
+    // Load tasks from GitHub storage (unlimited, persistent)
+    let tasks = [];
+    let completedTasks = [];
+    
+    // Helper function to get week number
+    function getWeekNumber(date) {
+      const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
+      const pastDaysOfYear = (date - firstDayOfYear) / 86400000;
+      return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+    }
+    
+    // Initialize data from GitHub
+    async function loadTaskData() {
+      try {
+        console.log('🔄 Loading tasks from GitHub storage...');
+        
+        // Load tasks from GitHub repository
+        const githubTasks = await githubStorage.getTasks();
+        
+        if (githubTasks && Array.isArray(githubTasks) && githubTasks.length > 0) {
+          tasks = githubTasks;
+          console.log('✅ Loaded', githubTasks.length, 'tasks from GitHub storage');
+        } else {
+          // Show message when no tasks available
+          tasks = [];
+          console.log('📋 No tasks found in GitHub storage');
+        }
+        
+        // Load completed tasks
+        completedTasks = JSON.parse(localStorage.getItem('completedTasks') || '[]');
+        
+        // Render tasks
+        renderTasks();
+        
+        console.log('Loaded tasks:', tasks);
+        console.log('Completed tasks:', completedTasks);
+      } catch (error) {
+        console.error('Failed to load task data:', error);
+        // Show default tasks on error
+        tasks = [
+          { id: 1, title: 'Upload Product Image', price: 5000, img: 'image/Currency.jpg' },
+          { id: 2, title: 'Share Promo Banner', price: 3000, img: 'image/Currency2.jpg' },
+          { id: 3, title: 'Post Offer Screenshot', price: 7000, img: 'image/icon/profit.png' }
+        ];
+        completedTasks = [];
+        renderTasks();
+      }
+    }
+    
+    // Load data when page loads
+    loadTaskData();
+    
+    // Refresh tasks every 30 seconds to show new uploaded tasks
+    setInterval(function() {
+      const currentTaskCount = tasks.length;
+      loadTaskData();
+      if (tasks.length > currentTaskCount) {
+        if (typeof showNotification === 'function') {
+          showNotification('🆕 New tasks available! Refresh to see them.', 'info', 3000);
+        }
+      }
+    }, 30000);
+    
+    // Manual refresh function with GitHub storage
+    async function refreshTasks() {
+      const refreshBtn = document.querySelector('button[onclick="refreshTasks()"]');
+      const originalText = refreshBtn.textContent;
+      refreshBtn.textContent = '🔄 Loading...';
+      refreshBtn.disabled = true;
+      
+      try {
+        const oldTaskCount = tasks.length;
+        await loadTaskData();
+        renderTasks();
+        
+        if (typeof showNotification === 'function') {
+          if (tasks.length > oldTaskCount) {
+            showNotification(`🆕 Found ${tasks.length - oldTaskCount} new tasks from GitHub!`, 'success', 3000);
+          } else {
+            showNotification('✅ Task list refreshed from GitHub!', 'info', 2000);
+          }
+        }
+        console.log('✨ Task list refreshed from GitHub storage!');
+      } catch (error) {
+        console.error('❌ Failed to refresh tasks:', error);
+        if (typeof showNotification === 'function') {
+          showNotification('❌ Failed to load tasks from GitHub', 'error', 3000);
+        }
+      } finally {
+        refreshBtn.textContent = originalText;
+        refreshBtn.disabled = false;
+      }
+    }
+    
+    // Debug function to check localStorage
+    function debugTasks() {
+      const adminTasks = localStorage.getItem('adminTasks');
+      const completedTasks = localStorage.getItem('completedTasks');
+      
+      console.log('=== DEBUG TASKS ===');
+      console.log('Raw adminTasks:', adminTasks);
+      console.log('Raw completedTasks:', completedTasks);
+      
+      if (adminTasks) {
+        const parsed = JSON.parse(adminTasks);
+        console.log('Parsed adminTasks:', parsed);
+        console.log('adminTasks count:', parsed.length);
+      } else {
+        console.log('No adminTasks found in localStorage');
+      }
+      
+      alert(`Admin Tasks: ${adminTasks ? JSON.parse(adminTasks).length : 0} found.\nCheck console for details.`);
+    }
+    
+    function renderTasks() {
+      const list = document.getElementById('task-list');
+      list.innerHTML = '';
+      
+      // Get user's current job level - check multiple storage methods
+      let currentLevel = 'intern';
+      
+      // Method 1: Check direct currentLevel storage (used by some systems)
+      const directLevel = localStorage.getItem('currentLevel');
+      if (directLevel) {
+        currentLevel = directLevel;
+      } else {
+        // Method 2: Check currentUser job data (used by jobs system)
+        const currentUser = localStorage.getItem('currentUser');
+        if (currentUser) {
+          const jobData = JSON.parse(localStorage.getItem(`jobData_${currentUser}`) || '{}');
+          if (jobData.currentLevel) {
+            currentLevel = jobData.currentLevel;
+          }
+        } else {
+          // Method 3: Fallback to username-based storage
+          const username = localStorage.getItem('username') || 'user';
+          const jobData = JSON.parse(localStorage.getItem(`jobData_${username}`) || '{}');
+          if (jobData.currentLevel) {
+            currentLevel = jobData.currentLevel;
+          }
+        }
+      }
+      
+      // Define level hierarchy for task access
+      const levelHierarchy = ['intern', 'junior', 'senior', 'expert', 'manager'];
+      const currentLevelIndex = levelHierarchy.indexOf(currentLevel);
+      
+      // Filter tasks based on user's job level
+      const availableTasks = tasks.filter(task => {
+        if (!task.requiredLevel) return true; // Tasks without level requirement are available to all
+        const taskLevelIndex = levelHierarchy.indexOf(task.requiredLevel);
+        return currentLevelIndex >= taskLevelIndex; // User can access their level and below
+      });
+      
+      // If exactly 5 tasks are completed, show message and hide grid
+      if (completedTasks.length === 5) {
+        list.style.display = 'none';
+        if (!document.getElementById('all-complete-msg')) {
+          const msg = document.createElement('div');
+          msg.id = 'all-complete-msg';
+          msg.style = 'text-align:center;margin:40px auto;font-size:1.2em;color:#007bff;font-weight:bold;';
+          msg.innerText = "Thank you for your participation. Please wait for tomorrow's tasks.";
+          list.parentNode.appendChild(msg);
+        }
+        return;
+      } else {
+        list.style.display = 'grid';
+        const oldMsg = document.getElementById('all-complete-msg');
+        if (oldMsg) oldMsg.remove();
+      }
+      
+      // Show current job level info
+      const levelInfo = document.getElementById('level-info') || document.createElement('div');
+      levelInfo.id = 'level-info';
+      levelInfo.style.cssText = `
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        text-align: center;
+        font-weight: bold;
+      `;
+      levelInfo.innerHTML = `
+        🎯 Current Job Level: ${currentLevel.charAt(0).toUpperCase() + currentLevel.slice(1)} | 
+        📋 Available Tasks: ${availableTasks.length} | 
+        🏆 Total Tasks: ${tasks.length}
+      `;
+      
+      if (!document.getElementById('level-info')) {
+        list.parentNode.insertBefore(levelInfo, list);
+      }
+      
+      availableTasks.forEach(task => {
+        const div = document.createElement('div');
+        div.className = 'task-item';
+        
+        // Handle both old format (img) and new format (img with base64)
+        const taskImage = task.img || 'image/Currency.jpg';
+        const taskDescription = task.description ? `<div class="task-description" style="font-size: 12px; color: #666; margin-top: 5px;">${task.description}</div>` : '';
+        
+        div.innerHTML = `
+          <img class="task-img" src="${taskImage}" alt="Task Image" onerror="this.src='image/Currency.jpg'" style="width: 100%; height: 120px; object-fit: cover; border-radius: 8px;">
+          <div class="task-info">
+            <div class="task-title">${task.title}</div>
+            <div class="task-price">UGX ${task.price.toLocaleString()}</div>
+            ${taskDescription}
+          </div>
+          <button class="task-complete-btn" data-id="${task.id}">Complete</button>
+          <span class="task-complete-msg" style="display:none;">Task Complete!</span>
+          <button class="task-delete-btn" style="display:none;margin-top:8px;background:#dc3545;" data-id="${task.id}">Delete</button>
+        `;
+        list.appendChild(div);
+        const completeBtn = div.querySelector('.task-complete-btn');
+        const completeMsg = div.querySelector('.task-complete-msg');
+        const deleteBtn = div.querySelector('.task-delete-btn');
+        // If already completed, show message and delete button
+        if (completedTasks.includes(task.id)) {
+          completeBtn.style.display = 'none';
+          completeMsg.style.display = 'inline';
+          deleteBtn.style.display = 'inline-block';
+        }
+        // Complete button click
+        completeBtn.onclick = function() {
+          if (!completedTasks.includes(task.id)) {
+            // Get user information
+            const username = localStorage.getItem('username') || 'user';
+            const jobData = JSON.parse(localStorage.getItem(`jobData_${username}`) || '{}');
+            const currentLevel = jobData.currentLevel || 'intern';
+            
+            // Job level earnings (task price is base, job level adds multiplier)
+            const jobLevels = {
+              intern: { multiplier: 1.0, name: 'Intern' },
+              junior: { multiplier: 1.5, name: 'Junior Employee' },
+              senior: { multiplier: 2.0, name: 'Senior Employee' },
+              expert: { multiplier: 2.5, name: 'Expert' },
+              manager: { multiplier: 3.0, name: 'Manager' }
+            };
+            
+            const levelInfo = jobLevels[currentLevel] || jobLevels.intern;
+            const baseEarning = parseInt(task.price) || 1000;
+            const finalEarning = Math.floor(baseEarning * levelInfo.multiplier);
+            
+            // Add to Income Wallet (earnings go here first)
+            let incomeWallet = parseInt(localStorage.getItem(`incomeWallet_${username}`) || '0');
+            incomeWallet += finalEarning;
+            localStorage.setItem(`incomeWallet_${username}`, incomeWallet.toString());
+            
+            // Update earnings tracking
+            const today = new Date().toDateString();
+            const currentWeek = getWeekNumber(new Date());
+            const currentMonth = new Date().getMonth();
+            
+            // Today's earnings
+            let todaysEarnings = parseInt(localStorage.getItem(`todaysEarnings_${username}_${today}`) || '0');
+            todaysEarnings += finalEarning;
+            localStorage.setItem(`todaysEarnings_${username}_${today}`, todaysEarnings.toString());
+            
+            // Weekly earnings
+            let weeklyEarnings = parseInt(localStorage.getItem(`weeklyEarnings_${username}_${currentWeek}`) || '0');
+            weeklyEarnings += finalEarning;
+            localStorage.setItem(`weeklyEarnings_${username}_${currentWeek}`, weeklyEarnings.toString());
+            
+            // Monthly earnings
+            let monthlyEarnings = parseInt(localStorage.getItem(`monthlyEarnings_${username}_${currentMonth}`) || '0');
+            monthlyEarnings += finalEarning;
+            localStorage.setItem(`monthlyEarnings_${username}_${currentMonth}`, monthlyEarnings.toString());
+            
+            // Total revenue
+            let totalRevenue = parseInt(localStorage.getItem(`totalRevenue_${username}`) || '0');
+            totalRevenue += finalEarning;
+            localStorage.setItem(`totalRevenue_${username}`, totalRevenue.toString());
+            
+            // Add transaction record
+            let transactions = JSON.parse(localStorage.getItem(`transactions_${username}`) || '[]');
+            transactions.push({
+              type: 'credit',
+              amount: finalEarning,
+              description: `Task Completed: ${task.title}`,
+              date: new Date().toISOString(),
+              source: 'task_completion',
+              jobLevel: currentLevel,
+              baseAmount: baseEarning,
+              multiplier: levelInfo.multiplier
+            });
+            localStorage.setItem(`transactions_${username}`, JSON.stringify(transactions));
+            
+            // Mark task as completed
+            completedTasks.push(task.id);
+            localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
+            
+            // Update job data task count
+            jobData.tasksCompleted = (jobData.tasksCompleted || 0) + 1;
+            jobData.totalEarnings = (jobData.totalEarnings || 0) + finalEarning;
+            localStorage.setItem(`jobData_${username}`, JSON.stringify(jobData));
+            
+            // Update UI
+            completeBtn.style.display = 'none';
+            completeMsg.style.display = 'inline';
+            deleteBtn.style.display = 'inline-block';
+            
+            // Show enhanced success notification
+            if (typeof showNotification === 'function') {
+              showNotification(
+                `🎉 Task Completed Successfully!\n\n💰 Earned: UGX ${finalEarning.toLocaleString()}\n📊 Job Level: ${levelInfo.name}\n🎯 Task: ${task.title}\n💵 Added to Income Wallet`,
+                'success',
+                5000
+              );
+            } else {
+              alert(`🎉 Task Completed!\n\nEarned: UGX ${finalEarning.toLocaleString()}\nJob Level: ${levelInfo.name}\nAdded to Income Wallet`);
+            }
+            
+            // Check if daily limit reached (5 tasks)
+            if (completedTasks.length >= 5) {
+              setTimeout(() => {
+                if (typeof showNotification === 'function') {
+                  showNotification('🎯 Daily task limit reached! Come back tomorrow for more tasks.', 'info', 5000);
+                }
+                setTimeout(renderTasks, 1000);
+              }, 2000);
+            }
+          }
+        };
+        // Delete button click (remove from completed tasks)
+        deleteBtn.onclick = function() {
+          if (confirm('Remove this completed task? You can complete it again.')) {
+            const idx = completedTasks.indexOf(task.id);
+            if (idx !== -1) {
+              completedTasks.splice(idx, 1);
+              localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
+              renderTasks();
+              
+              if (typeof showNotification === 'function') {
+                showNotification('✅ Task reset! You can complete it again.', 'info', 3000);
+              }
+            }
+          }
+        };
+      });
+    }
+  </script>
+
+  <footer class="footer">
+    <div class="footer-icon" onclick="location.href='getcash.html'">
+      <img src="image/icon/index.png" alt="Home">
+      <span>Home</span>
+    </div>
+    <div class="footer-icon footer-active" onclick="location.href='task-list.html'">
+      <img src="image/icon/grab.png" alt="Task">
+      <span>Task</span>
+    </div>
+    <div class="footer-icon" onclick="location.href='withdraw.html'">
+      <img src="image/icon/profit.png" alt="Withdraw">
+      <span>Withdraw</span>
+    </div>
+    <div class="footer-icon" onclick="location.href='wallet-interface.html'">
+      <img src="image/icon/user.png" alt="Profile">
+      <span>Profile</span>
+    </div>
+  </footer>
+    </main>
+    <script src="notifications.js"></script>
+    <script src="getcash.js"></script>
+    <script>
+      // Initialize GitHub storage task list
+      window.addEventListener('load', async function() {
+        console.log('🚀 Initializing GitHub storage task list...');
+        try {
+          await loadTaskData();
+          renderTasks();
+          console.log('✅ Task list initialized with GitHub storage');
+        } catch (error) {
+          console.error('❌ Failed to initialize with GitHub storage:', error);
+          // Show a user-friendly message
+          document.getElementById('task-list').innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #666;">
+              <h3>🔗 GitHub Storage Loading...</h3>
+              <p>Tasks are loading from unlimited GitHub storage.<br>
+              This may take a moment on first load.</p>
+              <button onclick="refreshTasks()" style="padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                🔄 Retry Loading
+              </button>
+            </div>
+          `;
+        }
+      });
+    </script>
+    <script>
+      // Footer icon active state
+      const footerIcons = document.querySelectorAll('.footer-icon');
+      footerIcons.forEach(icon => {
+        icon.addEventListener('click', function() {
+          footerIcons.forEach(i => i.classList.remove('footer-active'));
+          this.classList.add('footer-active');
+        });
+      });
+      // Set first as active by default
+      if (footerIcons.length) footerIcons[0].classList.add('footer-active');
+    </script>
+</body>
+</html>
