@@ -155,6 +155,26 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
+// Test login endpoint (temporary for debugging)
+app.post('/api/test-login', async (req, res) => {
+  const { username, password } = req.body;
+  console.log('🔍 Test login attempt:', { username, password: password ? '***' : 'empty' });
+  
+  try {
+    const user = await db.getUserByCredentials(username, password);
+    if (!user) {
+      console.log('❌ Test login: user not found or password wrong');
+      return res.status(401).json({ message: 'Invalid credentials.' });
+    }
+    
+    console.log('✅ Test login: success for user:', username);
+    res.json({ message: 'Login successful.', userId: user.id, username: user.username });
+  } catch (error) {
+    console.error('❌ Test login error:', error.message);
+    res.status(500).json({ message: 'Login failed. ' + error.message });
+  }
+});
+
 // Middleware to verify JWT token
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
