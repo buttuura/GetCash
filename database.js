@@ -10,7 +10,8 @@ class Database {
 
   async init() {
     try {
-      const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/getcash';
+      // Use environment variable when available (recommended), otherwise fallback to provided credentials.
+      const mongoUri = process.env.MONGODB_URI || 'mongodb://GetCash:AUYgPTSPW6rsFdpo@localhost:27017/GetCash?authSource=admin';
       await mongoose.connect(mongoUri, {
         useNewUrlParser: true,
         useUnifiedTopology: true
