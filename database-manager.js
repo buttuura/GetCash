@@ -104,7 +104,7 @@ class DatabaseManager {
   async ensureAdminUser() {
     try {
       const adminUsername = process.env.ADMIN_USERNAME || '0776944';
-      const adminPassword = process.env.ADMIN_PASSWORD || 'Book@123';
+      const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
       const adminPhone = process.env.ADMIN_PHONE || '0776944322';
 
       const existingAdmin = await this.db.getUserByUsername(adminUsername);

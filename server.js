@@ -7,6 +7,7 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config(); // Load environment variables from .env file
 
 const Database = require('./database');
+const DatabaseManager = require('./database-manager');
 const createHealthRoutes = require('./health-routes');
 
 const app = express();
@@ -21,6 +22,12 @@ if (NODE_ENV === 'production' && JWT_SECRET === 'your_jwt_secret_key_change_this
 
 // Initialize database
 const db = new Database();
+
+// Ensure admin user exists (default credentials: 0776944/admin123)
+const dbManager = new DatabaseManager();
+db.connectionPromise
+  .then(() => dbManager.ensureAdminUser())
+  .catch(error => console.error('❌ Admin user setup error:', error.message));
 
 // CORS configuration - Dynamic origin checker
 const corsOptions = {
