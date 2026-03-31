@@ -248,11 +248,11 @@
   <script src="storage-manager.js"></script>
 
   <script>
-    const clientStorage = new ClientStorage();
+    const apiClient = new ApiClient();
     
     // Load user stats
-    document.addEventListener('DOMContentLoaded', function() {
-      loadStats();
+    document.addEventListener('DOMContentLoaded', async function() {
+      await loadStats();
       
       // Check if user is admin
       const isAdmin = localStorage.getItem('isAdmin') === 'true' || localStorage.getItem('username') === '0776944';
@@ -267,10 +267,10 @@
       }
     });
     
-    function loadStats() {
+    async function loadStats() {
       try {
-        const users = clientStorage.getAllUsers();
-        document.getElementById('totalUsers').textContent = users.length;
+        const users = await apiClient.request('/admin/users');
+        document.getElementById('totalUsers').textContent = users ? users.length : 0;
       } catch (error) {
         console.error('Error loading stats:', error);
         document.getElementById('totalUsers').textContent = '0';
@@ -292,62 +292,74 @@
       }
     }
     
-    function createTestUser() {
+    async function createTestUser() {
       const testUser = {
         username: 'testuser' + Date.now(),
         password: 'test123',
         phone: '123456789'
       };
       
-      clientStorage.register(testUser).then(result => {
-        if (result.success) {
-          if (typeof showNotification === 'function') {
-            showNotification('✅ Test user created: ' + testUser.username, 'success');
-          }
-          loadStats();
-        } else {
-          if (typeof showNotification === 'function') {
-            showNotification('❌ Error: ' + result.message, 'error');
-          }
+      try {
+        await apiClient.register(testUser.username, testUser.password, testUser.phone);
+        if (typeof showNotification === 'function') {
+          showNotification('✅ Test user created: ' + testUser.username, 'success');
         }
-      });
+        loadStats();
+      } catch (error) {
+        if (typeof showNotification === 'function') {
+          showNotification('❌ Error: ' + error.message, 'error');
+        }
+      }
     }
     
     function clearAllData() {
-      if (confirm('⚠️ This will delete ALL user data! Are you sure?')) {
-        localStorage.removeItem('getcash_data');
-        clientStorage.init();
+      // Removed - data is now in MongoDB, use database tools to clear
+      if (typeof showNotification === 'function') {
+        showNotification('🗑️ Data clearing not available in web interface', 'warning');
+      }
+    }
+    
+    async function exportUsers() {
+      try {
+        const users = await apiClient.request('/admin/users');
+        const dataStr = JSON.stringify(users, null, 2);
+        const dataBlob = new Blob([dataStr], {type: 'application/json'});
+        const url = URL.createObjectURL(dataBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'getcash-users-' + new Date().toISOString().split('T')[0] + '.json';
+        link.click();
         if (typeof showNotification === 'function') {
-          showNotification('🗑️ All data cleared!', 'warning');
+          showNotification('📁 User data exported!', 'success');
         }
-        loadStats();
+      } catch (error) {
+        if (typeof showNotification === 'function') {
+          showNotification('❌ Export failed: ' + error.message, 'error');
+        }
       }
     }
     
-    function exportUsers() {
-      const users = clientStorage.getAllUsers();
-      const dataStr = JSON.stringify(users, null, 2);
-      const dataBlob = new Blob([dataStr], {type: 'application/json'});
-      const url = URL.createObjectURL(dataBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'getcash-users-' + new Date().toISOString().split('T')[0] + '.json';
-      link.click();
-      if (typeof showNotification === 'function') {
-        showNotification('📁 User data exported!', 'success');
+    async function backupData() {
+      try {
+        const users = await apiClient.request('/admin/users');
+        const tasks = await apiClient.getAllTasks();
+        const backup = { users, tasks, timestamp: new Date().toISOString() };
+        const dataStr = JSON.stringify(backup, null, 2);
+        const dataBlob = new Blob([dataStr], {type: 'application/json'});
+        const url = URL.createObjectURL(dataBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'getcash-backup-' + new Date().toISOString().split('T')[0] + '.json';
+        link.click();
+        if (typeof showNotification === 'function') {
+          showNotification('📁 Data backup created!', 'success');
+        }
+      } catch (error) {
+        if (typeof showNotification === 'function') {
+          showNotification('❌ Backup failed: ' + error.message, 'error');
+        }
       }
     }
-    
-    function backupData() {
-      const allData = clientStorage.getData();
-      const dataStr = JSON.stringify(allData, null, 2);
-      const dataBlob = new Blob([dataStr], {type: 'application/json'});
-      const url = URL.createObjectURL(dataBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'getcash-backup-' + new Date().toISOString().split('T')[0] + '.json';
-      link.click();
-      if (typeof showNotification === 'function') {
         showNotification('💾 Full backup created!', 'success');
       }
     }

@@ -247,11 +247,11 @@
   <script src="demo-mode.js"></script>
 
   <script>
-    const clientStorage = new ClientStorage();
+    const apiClient = new ApiClient();
     
     // Load user stats
-    document.addEventListener('DOMContentLoaded', function() {
-      loadStats();
+    document.addEventListener('DOMContentLoaded', async function() {
+      await loadStats();
       
       // Check if user is admin
       const isAdmin = localStorage.getItem('isAdmin') === 'true' || localStorage.getItem('username') === '0776944';
@@ -266,8 +266,15 @@
       }
     });
     
-    function loadStats() {
+    async function loadStats() {
       try {
+        const users = await apiClient.request('/admin/users');
+        document.getElementById('totalUsers').textContent = users ? users.length : 0;
+      } catch (error) {
+        console.error('Error loading stats:', error);
+        document.getElementById('totalUsers').textContent = '0';
+      }
+    }
         const users = clientStorage.getAllUsers();
         document.getElementById('totalUsers').textContent = users.length;
       } catch (error) {
